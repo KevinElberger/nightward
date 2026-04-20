@@ -29,6 +29,8 @@ export const registerModeIpcHandlers = ({
   modeService,
   onModesChanged
 }: RegisterModeIpcHandlersOptions) => {
+  ipcMain.handle(MODE_IPC_CHANNELS.getState, () => modeService.getModeState());
+
   ipcMain.handle(MODE_IPC_CHANNELS.list, () => modeService.getSavedModes());
 
   ipcMain.handle(MODE_IPC_CHANNELS.create, async (_event, request: unknown) => {
@@ -59,8 +61,8 @@ export const registerModeIpcHandlers = ({
     return deleted;
   });
 
-  ipcMain.handle(MODE_IPC_CHANNELS.activate, (_event, request: unknown) => {
-    const activated = modeService.activateSavedMode(parseActivateModeRequest(request).id);
+  ipcMain.handle(MODE_IPC_CHANNELS.activate, async (_event, request: unknown) => {
+    const activated = await modeService.activateSavedMode(parseActivateModeRequest(request).id);
 
     if (activated) {
       onModesChanged();

@@ -9,11 +9,13 @@ export type PersistedMode = {
 };
 
 export type AppData = {
+  activeModeId: string | null;
   schemaVersion: typeof CURRENT_APP_DATA_SCHEMA_VERSION;
   modes: PersistedMode[];
 };
 
 export const createDefaultAppData = (): AppData => ({
+  activeModeId: null,
   schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
   modes: []
 });

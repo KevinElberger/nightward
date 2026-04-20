@@ -3,6 +3,7 @@ import type { SavedMode } from '../../shared/modes';
 
 type ModesState = {
   activateMode: (id: string) => Promise<boolean>;
+  activeModeId: string | null;
   createMode: (name: string) => Promise<SavedMode | null>;
   deleteMode: (id: string) => Promise<boolean>;
   error: string | null;
@@ -16,18 +17,23 @@ const getErrorMessage = (error: unknown, fallbackMessage: string) =>
   error instanceof Error ? error.message : fallbackMessage;
 
 export const useModes = (): ModesState => {
+  const [activeModeId, setActiveModeId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [modes, setModes] = useState<SavedMode[]>([]);
 
-  const loadModes = useCallback(async () => {
+  const loadModeState = useCallback(async () => {
     setError(null);
     setIsLoading(true);
 
     try {
-      setModes(await window.nightward.modes.list());
+      const modeState = await window.nightward.modes.getState();
+
+      setActiveModeId(modeState.activeModeId);
+      setModes(modeState.modes);
     } catch (loadError) {
       setError(getErrorMessage(loadError, 'Unable to load modes.'));
+      setActiveModeId(null);
       setModes([]);
     } finally {
       setIsLoading(false);
@@ -41,7 +47,10 @@ export const useModes = (): ModesState => {
 
       try {
         const result = await mutation();
-        setModes(await window.nightward.modes.list());
+        const modeState = await window.nightward.modes.getState();
+
+        setActiveModeId(modeState.activeModeId);
+        setModes(modeState.modes);
 
         return result;
       } catch (mutationError) {
@@ -78,20 +87,21 @@ export const useModes = (): ModesState => {
 
   useEffect(() => {
     const loadInitialModes = async () => {
-      await loadModes();
+      await loadModeState();
     };
 
     void loadInitialModes();
-  }, [loadModes]);
+  }, [loadModeState]);
 
   return {
     activateMode,
+    activeModeId,
     createMode,
     deleteMode,
     error,
     isLoading,
     modes,
     renameMode,
-    refreshModes: loadModes
+    refreshModes: loadModeState
   };
 };

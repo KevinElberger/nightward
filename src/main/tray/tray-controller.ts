@@ -74,8 +74,8 @@ export class TrayController {
   private getSavedModeMenuItems(): MenuItemConstructorOptions[] {
     return this.modeService.getSavedModes(SAVED_MODE_MENU_LIMIT).map((mode) => ({
       label: mode.name,
-      click: () => {
-        this.modeService.activateSavedMode(mode.id);
+      click: async () => {
+        await this.modeService.activateSavedMode(mode.id);
         this.rebuildMenu();
       }
     }));

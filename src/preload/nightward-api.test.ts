@@ -3,6 +3,24 @@ import { MODE_IPC_CHANNELS } from '../shared/mode-ipc';
 import { createNightwardApi } from './nightward-api';
 
 describe('createNightwardApi', () => {
+  it('invokes the get mode state channel', async () => {
+    const modeState = {
+      activeModeId: 'mode-1',
+      modes: [
+        {
+          id: 'mode-1',
+          name: 'Focus'
+        }
+      ]
+    };
+    const invoke = vi.fn().mockResolvedValue(modeState);
+    const api = createNightwardApi({ invoke });
+
+    await expect(api.modes.getState()).resolves.toEqual(modeState);
+
+    expect(invoke).toHaveBeenCalledWith(MODE_IPC_CHANNELS.getState);
+  });
+
   it('invokes the list modes channel', async () => {
     const invoke = vi.fn().mockResolvedValue([]);
     const api = createNightwardApi({ invoke });

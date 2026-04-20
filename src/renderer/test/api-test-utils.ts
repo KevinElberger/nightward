@@ -9,6 +9,10 @@ type ApiOverrides = {
 
 export const createApiMock = (overrides: ApiOverrides = {}): NightwardApi => ({
   modes: {
+    getState: vi.fn().mockResolvedValue({
+      activeModeId: null,
+      modes: []
+    }),
     list: vi.fn().mockResolvedValue([]),
     create: vi.fn(),
     rename: vi.fn(),

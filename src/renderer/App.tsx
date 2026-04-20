@@ -8,13 +8,13 @@ import { cn } from '@/lib/utils';
 import { useModes } from './hooks/use-modes';
 
 export function App() {
-  const { error, isLoading, modes, refreshModes } = useModes();
+  const { activeModeId, error, isLoading, modes, refreshModes } = useModes();
   const [selectedModeId, setSelectedModeId] = useState<string | null>(null);
 
   const effectiveSelectedModeId =
     selectedModeId !== null && modes.some((mode) => mode.id === selectedModeId)
       ? selectedModeId
-      : (modes[0]?.id ?? null);
+      : (activeModeId ?? modes[0]?.id ?? null);
 
   const selectedMode = useMemo(
     () => modes.find((mode) => mode.id === effectiveSelectedModeId) ?? null,
@@ -152,7 +152,7 @@ export function App() {
                 <div className="flex items-start justify-between gap-6">
                   <div>
                     <Badge variant="secondary" className="rounded-md">
-                      Saved mode
+                      {selectedMode.id === activeModeId ? 'Active mode' : 'Saved mode'}
                     </Badge>
                     <h3 className="mt-4 font-heading text-3xl font-semibold tracking-normal">
                       {selectedMode.name}
