@@ -1,6 +1,6 @@
 import type { App } from 'electron';
 import { ModeService } from './modes/mode-service';
-import { PlaceholderModeRepository } from './modes/placeholder-mode-repository';
+import { createAppDataStore } from './persistence/app-data-store';
 import { TrayController } from './tray/tray-controller';
 import { SettingsWindowController, type RendererConfig } from './windows/settings-window';
 
@@ -13,25 +13,29 @@ type AppControllerOptions = {
 export class AppController {
   private readonly app: App;
   private readonly platform: NodeJS.Platform;
-  private readonly modeService = new ModeService(new PlaceholderModeRepository());
   private readonly settingsWindow: SettingsWindowController;
-  private readonly tray: TrayController;
+  private modeService: ModeService | null = null;
+  private tray: TrayController | null = null;
 
   constructor({ app, platform, renderer }: AppControllerOptions) {
     this.app = app;
     this.platform = platform;
     this.settingsWindow = new SettingsWindowController(renderer);
-    this.tray = new TrayController({
-      app,
-      modeService: this.modeService,
-      onOpenSettings: () => {
-        this.settingsWindow.show();
-      }
-    });
   }
 
   start() {
-    void this.app.whenReady().then(() => {
+    void this.app.whenReady().then(async () => {
+      this.modeService = new ModeService(createAppDataStore(this.app));
+      await this.modeService.initialize();
+
+      this.tray = new TrayController({
+        app: this.app,
+        modeService: this.modeService,
+        onOpenSettings: () => {
+          this.settingsWindow.show();
+        }
+      });
+
       this.settingsWindow.create();
       this.tray.create();
 
