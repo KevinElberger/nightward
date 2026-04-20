@@ -6,6 +6,7 @@ import {
   type CreateModeResponse,
   type DeleteModeRequest,
   type DeleteModeResponse,
+  type GetModeStateResponse,
   type ListModesResponse,
   type RenameModeRequest,
   type RenameModeResponse
@@ -18,6 +19,7 @@ type IpcInvoker = {
 
 export const createNightwardApi = (ipcRenderer: IpcInvoker): NightwardApi => ({
   modes: {
+    getState: () => ipcRenderer.invoke(MODE_IPC_CHANNELS.getState) as Promise<GetModeStateResponse>,
     list: () => ipcRenderer.invoke(MODE_IPC_CHANNELS.list) as Promise<ListModesResponse>,
     create: (name) =>
       ipcRenderer.invoke(MODE_IPC_CHANNELS.create, {

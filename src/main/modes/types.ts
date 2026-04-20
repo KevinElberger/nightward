@@ -1,1 +1,1 @@
-export type { SavedMode } from '../../shared/modes';
+export type { ModeState, SavedMode } from '../../shared/modes';

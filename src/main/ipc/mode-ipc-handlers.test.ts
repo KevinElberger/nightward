@@ -93,6 +93,18 @@ describe('registerModeIpcHandlers', () => {
     await expect(invoke(MODE_IPC_CHANNELS.list)).resolves.toEqual([createdMode]);
   });
 
+  it('gets mode state', async () => {
+    const { ipcMain, invoke } = createFakeIpcMain();
+    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged: vi.fn() });
+    const createdMode = await modeService.createMode('Focus');
+    await modeService.activateSavedMode(createdMode.id);
+
+    await expect(invoke(MODE_IPC_CHANNELS.getState)).resolves.toEqual({
+      activeModeId: createdMode.id,
+      modes: [createdMode]
+    });
+  });
+
   it('renames modes and refreshes mode consumers', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
     const onModesChanged = vi.fn();

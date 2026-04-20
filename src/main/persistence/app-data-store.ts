@@ -105,9 +105,22 @@ const validateAppData = (value: unknown): AppData => {
   }
 
   return {
+    activeModeId: validateActiveModeId(value.activeModeId),
     schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
     modes: value.modes.map(validatePersistedMode)
   };
+};
+
+const validateActiveModeId = (value: unknown) => {
+  if (value === undefined || value === null) {
+    return null;
+  }
+
+  if (typeof value !== 'string' || value.trim() === '') {
+    throw new AppDataStoreError('App data active mode ID must be a non-empty string or null.');
+  }
+
+  return value;
 };
 
 const validatePersistedMode = (value: unknown, index: number): PersistedMode => {

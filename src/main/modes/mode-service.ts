@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { AppDataStore } from '../persistence/app-data-store';
 import { createDefaultAppData, type AppData, type PersistedMode } from '../persistence/types';
-import type { SavedMode } from './types';
+import type { ModeState, SavedMode } from './types';
 
 export const NO_ACTIVE_MODE_LABEL = 'No Active Mode';
 
@@ -14,7 +14,6 @@ export class ModeServiceError extends Error {
 
 export class ModeService {
   private appData: AppData = createDefaultAppData();
-  private activeModeId: string | null = null;
 
   constructor(private readonly appDataStore: AppDataStore) {}
 
@@ -23,9 +22,16 @@ export class ModeService {
   }
 
   getCurrentModeLabel() {
-    const activeMode = this.appData.modes.find((mode) => mode.id === this.activeModeId);
+    const activeMode = this.getActiveMode();
 
     return activeMode?.name ?? NO_ACTIVE_MODE_LABEL;
+  }
+
+  getModeState(): ModeState {
+    return {
+      activeModeId: this.getActiveMode()?.id ?? null,
+      modes: this.getSavedModes()
+    };
   }
 
   getSavedModes(limit?: number): SavedMode[] {
@@ -34,14 +40,18 @@ export class ModeService {
     return modes.map(toSavedMode);
   }
 
-  activateSavedMode(modeId: string) {
+  async activateSavedMode(modeId: string) {
     const mode = this.appData.modes.find((savedMode) => savedMode.id === modeId);
 
     if (mode === undefined) {
       return false;
     }
 
-    this.activeModeId = mode.id;
+    await this.persistAppData({
+      ...this.appData,
+      activeModeId: mode.id
+    });
+
     return true;
   }
 
@@ -90,14 +100,13 @@ export class ModeService {
       return false;
     }
 
+    const activeModeId = this.appData.activeModeId === modeId ? null : this.appData.activeModeId;
+
     await this.persistAppData({
       ...this.appData,
+      activeModeId,
       modes: this.appData.modes.filter((mode) => mode.id !== modeId)
     });
-
-    if (this.activeModeId === modeId) {
-      this.activeModeId = null;
-    }
 
     return true;
   }
@@ -105,6 +114,10 @@ export class ModeService {
   private async persistAppData(data: AppData) {
     await this.appDataStore.write(data);
     this.appData = data;
+  }
+
+  private getActiveMode() {
+    return this.appData.modes.find((mode) => mode.id === this.appData.activeModeId) ?? null;
   }
 }
 

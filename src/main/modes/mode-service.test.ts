@@ -7,6 +7,7 @@ import { CURRENT_APP_DATA_SCHEMA_VERSION, type AppData } from '../persistence/ty
 import { ModeService, ModeServiceError, NO_ACTIVE_MODE_LABEL } from './mode-service';
 
 const createAppData = (): AppData => ({
+  activeModeId: null,
   schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
   modes: [
     {
@@ -46,6 +47,26 @@ describe('ModeService', () => {
     ]);
   });
 
+  it('initializes active mode state from persisted app data', async () => {
+    await store.write({
+      ...createAppData(),
+      activeModeId: 'mode-1'
+    });
+
+    await service.initialize();
+
+    expect(service.getCurrentModeLabel()).toBe('Focus');
+    expect(service.getModeState()).toEqual({
+      activeModeId: 'mode-1',
+      modes: [
+        {
+          id: 'mode-1',
+          name: 'Focus'
+        }
+      ]
+    });
+  });
+
   it('creates a mode and persists it', async () => {
     await service.initialize();
 
@@ -68,6 +89,7 @@ describe('ModeService', () => {
 
     await expect(service.createMode('   ')).rejects.toBeInstanceOf(ModeServiceError);
     await expect(store.read()).resolves.toEqual({
+      activeModeId: null,
       schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
       modes: []
     });
@@ -101,13 +123,14 @@ describe('ModeService', () => {
   it('deletes a mode, persists the removal, and clears the active mode', async () => {
     await store.write(createAppData());
     await service.initialize();
-    expect(service.activateSavedMode('mode-1')).toBe(true);
+    await expect(service.activateSavedMode('mode-1')).resolves.toBe(true);
 
     expect(service.getCurrentModeLabel()).toBe('Focus');
     await expect(service.deleteMode('mode-1')).resolves.toBe(true);
 
     expect(service.getCurrentModeLabel()).toBe(NO_ACTIVE_MODE_LABEL);
     await expect(store.read()).resolves.toEqual({
+      activeModeId: null,
       schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
       modes: []
     });
@@ -122,7 +145,19 @@ describe('ModeService', () => {
   it('returns false when activating a missing mode', async () => {
     await service.initialize();
 
-    expect(service.activateSavedMode('missing-mode')).toBe(false);
+    await expect(service.activateSavedMode('missing-mode')).resolves.toBe(false);
     expect(service.getCurrentModeLabel()).toBe(NO_ACTIVE_MODE_LABEL);
+  });
+
+  it('activates a saved mode and persists it', async () => {
+    await store.write(createAppData());
+    await service.initialize();
+
+    await expect(service.activateSavedMode('mode-1')).resolves.toBe(true);
+
+    expect(service.getCurrentModeLabel()).toBe('Focus');
+    await expect(store.read()).resolves.toMatchObject({
+      activeModeId: 'mode-1'
+    });
   });
 });

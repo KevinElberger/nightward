@@ -31,6 +31,7 @@ describe('AppDataStore', () => {
 
   it('round-trips valid app data through disk', async () => {
     const appData: AppData = {
+      activeModeId: 'mode-1',
       schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
       modes: [createTestMode()]
     };
@@ -39,6 +40,23 @@ describe('AppDataStore', () => {
 
     await expect(store.read()).resolves.toEqual(appData);
     await expect(readFile(store.filePath, 'utf8')).resolves.toContain('"modes"');
+  });
+
+  it('defaults missing active mode IDs to null', async () => {
+    await writeFile(
+      store.filePath,
+      JSON.stringify({
+        schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
+        modes: [createTestMode()]
+      }),
+      'utf8'
+    );
+
+    await expect(store.read()).resolves.toEqual({
+      activeModeId: null,
+      schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
+      modes: [createTestMode()]
+    });
   });
 
   it('throws an app data store error for malformed JSON', async () => {
@@ -81,5 +99,22 @@ describe('AppDataStore', () => {
 
     await expect(store.read()).rejects.toBeInstanceOf(AppDataStoreError);
     await expect(store.read()).rejects.toThrow('modes[0].name must be a non-empty string.');
+  });
+
+  it('throws an app data store error for invalid active mode IDs', async () => {
+    await writeFile(
+      store.filePath,
+      JSON.stringify({
+        activeModeId: '',
+        schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
+        modes: []
+      }),
+      'utf8'
+    );
+
+    await expect(store.read()).rejects.toBeInstanceOf(AppDataStoreError);
+    await expect(store.read()).rejects.toThrow(
+      'App data active mode ID must be a non-empty string or null.'
+    );
   });
 });

@@ -1,6 +1,7 @@
-import type { SavedMode } from './modes';
+import type { ModeState, SavedMode } from './modes';
 
 export const MODE_IPC_CHANNELS = {
+  getState: 'modes:get-state',
   list: 'modes:list',
   create: 'modes:create',
   rename: 'modes:rename',
@@ -25,6 +26,7 @@ export type ActivateModeRequest = {
   id: string;
 };
 
+export type GetModeStateResponse = ModeState;
 export type ListModesResponse = SavedMode[];
 export type CreateModeResponse = SavedMode;
 export type RenameModeResponse = SavedMode | null;
