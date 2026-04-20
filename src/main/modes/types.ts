@@ -1,4 +1,1 @@
-export type SavedMode = {
-  id: string;
-  name: string;
-};
+export type { SavedMode } from '../../shared/modes';

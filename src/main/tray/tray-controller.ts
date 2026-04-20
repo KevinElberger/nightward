@@ -37,6 +37,10 @@ export class TrayController {
     return this.tray;
   }
 
+  refresh() {
+    this.rebuildMenu();
+  }
+
   private rebuildMenu() {
     this.tray?.setContextMenu(Menu.buildFromTemplate(this.getMenuTemplate()));
   }

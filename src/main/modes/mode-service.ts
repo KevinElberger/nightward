@@ -28,18 +28,21 @@ export class ModeService {
     return activeMode?.name ?? NO_ACTIVE_MODE_LABEL;
   }
 
-  getSavedModes(limit: number): SavedMode[] {
-    return this.appData.modes.slice(0, limit).map(toSavedMode);
+  getSavedModes(limit?: number): SavedMode[] {
+    const modes = limit === undefined ? this.appData.modes : this.appData.modes.slice(0, limit);
+
+    return modes.map(toSavedMode);
   }
 
   activateSavedMode(modeId: string) {
     const mode = this.appData.modes.find((savedMode) => savedMode.id === modeId);
 
     if (mode === undefined) {
-      return;
+      return false;
     }
 
     this.activeModeId = mode.id;
+    return true;
   }
 
   async createMode(name: string) {

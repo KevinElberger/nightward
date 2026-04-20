@@ -8,13 +8,12 @@ import {
   type AppData,
   type PersistedMode
 } from './types';
+import { getRequiredString, isRecord, type JsonRecord } from '../validation/json-record';
 
 type AppDataStoreOptions = {
   userDataPath: string;
   fileName?: string;
 };
-
-type JsonRecord = Record<string, unknown>;
 
 export class AppDataStoreError extends Error {
   constructor(message: string, options?: ErrorOptions) {
@@ -119,33 +118,31 @@ const validatePersistedMode = (value: unknown, index: number): PersistedMode => 
   }
 
   return {
-    id: getRequiredString(value, 'id', modePath),
-    name: getRequiredString(value, 'name', modePath),
+    id: getRequiredAppDataString(value, 'id', modePath),
+    name: getRequiredAppDataString(value, 'name', modePath),
     createdAt: getRequiredTimestamp(value, 'createdAt', modePath),
     updatedAt: getRequiredTimestamp(value, 'updatedAt', modePath)
   };
 };
 
-const getRequiredString = (
+const getRequiredAppDataString = (
   record: JsonRecord,
   property: keyof PersistedMode,
   recordPath: string
-) => {
-  const value = record[property];
-
-  if (typeof value !== 'string' || value.trim() === '') {
-    throw new AppDataStoreError(`${recordPath}.${property} must be a non-empty string.`);
-  }
-
-  return value;
-};
+) =>
+  getRequiredString({
+    createError: (message) => new AppDataStoreError(message),
+    label: recordPath,
+    record,
+    property
+  });
 
 const getRequiredTimestamp = (
   record: JsonRecord,
   property: keyof Pick<PersistedMode, 'createdAt' | 'updatedAt'>,
   recordPath: string
 ) => {
-  const value = getRequiredString(record, property, recordPath);
+  const value = getRequiredAppDataString(record, property, recordPath);
 
   if (Number.isNaN(Date.parse(value))) {
     throw new AppDataStoreError(`${recordPath}.${property} must be a valid timestamp.`);
@@ -153,9 +150,6 @@ const getRequiredTimestamp = (
 
   return value;
 };
-
-const isRecord = (value: unknown): value is JsonRecord =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const isNodeError = (error: unknown): error is NodeJS.ErrnoException =>
   error instanceof Error && 'code' in error;

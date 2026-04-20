@@ -101,7 +101,7 @@ describe('ModeService', () => {
   it('deletes a mode, persists the removal, and clears the active mode', async () => {
     await store.write(createAppData());
     await service.initialize();
-    service.activateSavedMode('mode-1');
+    expect(service.activateSavedMode('mode-1')).toBe(true);
 
     expect(service.getCurrentModeLabel()).toBe('Focus');
     await expect(service.deleteMode('mode-1')).resolves.toBe(true);
@@ -117,5 +117,12 @@ describe('ModeService', () => {
     await service.initialize();
 
     await expect(service.deleteMode('missing-mode')).resolves.toBe(false);
+  });
+
+  it('returns false when activating a missing mode', async () => {
+    await service.initialize();
+
+    expect(service.activateSavedMode('missing-mode')).toBe(false);
+    expect(service.getCurrentModeLabel()).toBe(NO_ACTIVE_MODE_LABEL);
   });
 });

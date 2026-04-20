@@ -1,4 +1,5 @@
-import type { App } from 'electron';
+import { ipcMain, type App } from 'electron';
+import { registerModeIpcHandlers } from './ipc/mode-ipc-handlers';
 import { ModeService } from './modes/mode-service';
 import { createAppDataStore } from './persistence/app-data-store';
 import { TrayController } from './tray/tray-controller';
@@ -33,6 +34,14 @@ export class AppController {
         modeService: this.modeService,
         onOpenSettings: () => {
           this.settingsWindow.show();
+        }
+      });
+
+      registerModeIpcHandlers({
+        ipcMain,
+        modeService: this.modeService,
+        onModesChanged: () => {
+          this.tray?.refresh();
         }
       });
 
