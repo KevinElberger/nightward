@@ -2,6 +2,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { MODE_NAME_MAX_LENGTH } from '../../shared/modes';
 import { AppDataStore } from '../persistence/app-data-store';
 import { CURRENT_APP_DATA_SCHEMA_VERSION, type AppData } from '../persistence/types';
 import { ModeService, ModeServiceError, NO_ACTIVE_MODE_LABEL } from './mode-service';
@@ -99,6 +100,30 @@ describe('ModeService', () => {
       schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
       modes: []
     });
+  });
+
+  it('rejects mode names longer than the maximum length', async () => {
+    await service.initialize();
+
+    await expect(service.createMode('a'.repeat(MODE_NAME_MAX_LENGTH + 1))).rejects.toThrow(
+      `Mode name must be ${MODE_NAME_MAX_LENGTH} characters or less.`
+    );
+    await expect(store.read()).resolves.toEqual({
+      activeModeId: null,
+      schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
+      modes: []
+    });
+  });
+
+  it('rejects renamed mode names longer than the maximum length', async () => {
+    await store.write(createAppData());
+    await service.initialize();
+
+    await expect(
+      service.renameMode('mode-1', 'a'.repeat(MODE_NAME_MAX_LENGTH + 1))
+    ).rejects.toThrow(`Mode name must be ${MODE_NAME_MAX_LENGTH} characters or less.`);
+
+    await expect(store.read()).resolves.toEqual(createAppData());
   });
 
   it('renames a mode and persists the updated timestamp', async () => {

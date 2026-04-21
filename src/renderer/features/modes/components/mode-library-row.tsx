@@ -25,7 +25,7 @@ export function ModeLibraryRow({
     <div
       className={cn(
         'group/row grid min-h-[3.75rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 transition-colors',
-        isSelected ? 'bg-white/[0.06]' : 'bg-white/[0.018] hover:bg-white/[0.035]'
+        isSelected ? 'bg-white/[0.075]' : 'bg-white/[0.03] hover:bg-white/[0.048]'
       )}
     >
       <button

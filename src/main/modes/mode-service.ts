@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { MODE_NAME_MAX_LENGTH } from '../../shared/modes';
 import type { AppDataStore } from '../persistence/app-data-store';
 import { createDefaultAppData, type AppData, type PersistedMode } from '../persistence/types';
 import type { ModeState, SavedMode } from './types';
@@ -139,6 +140,10 @@ const normalizeModeName = (name: string) => {
 
   if (normalizedName === '') {
     throw new ModeServiceError('Mode name must be a non-empty string.');
+  }
+
+  if (normalizedName.length > MODE_NAME_MAX_LENGTH) {
+    throw new ModeServiceError(`Mode name must be ${MODE_NAME_MAX_LENGTH} characters or less.`);
   }
 
   return normalizedName;

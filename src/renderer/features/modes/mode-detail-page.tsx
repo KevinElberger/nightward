@@ -1,21 +1,24 @@
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { ArrowLeft, Bolt, Check, Circle, Play, Power, Workflow } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAppSelection } from '../app-shell/use-app-selection';
+import { ModeDetailTitle, type ModeDetailTitleHandle } from './components/mode-detail-title';
 import { ModeRowOverflowMenu } from './components/mode-row-overflow-menu';
 import { useModes } from './use-modes-context';
 
 export function ModeDetailPage() {
   const { selectMode, selectedModeId } = useAppSelection();
-  const { activateMode, activeModeId, deactivateMode, modes } = useModes();
+  const { activateMode, activeModeId, deactivateMode, modes, renameMode } = useModes();
   const mode = modes.find((savedMode) => savedMode.id === selectedModeId) ?? null;
+  const titleRef = useRef<ModeDetailTitleHandle>(null);
 
   if (mode === null) {
     return null;
   }
 
   const isActive = mode.id === activeModeId;
+  const startRenaming = () => titleRef.current?.startRenaming();
 
   return (
     <section className="space-y-6">
@@ -50,9 +53,12 @@ export function ModeDetailPage() {
               )}
             </span>
             <div className="min-w-0">
-              <h2 className="truncate text-2xl font-semibold tracking-normal text-foreground">
-                {mode.name}
-              </h2>
+              <ModeDetailTitle
+                ref={titleRef}
+                modeId={mode.id}
+                name={mode.name}
+                onRenameMode={renameMode}
+              />
               <p
                 className={cn(
                   'text-sm',
@@ -82,7 +88,7 @@ export function ModeDetailPage() {
             )}
             {isActive ? 'Deactivate' : 'Activate'}
           </Button>
-          <ModeRowOverflowMenu modeName={mode.name} />
+          <ModeRowOverflowMenu modeName={mode.name} onRename={startRenaming} />
         </div>
       </div>
 
@@ -121,11 +127,11 @@ function ModeDetailSection({
   title: string;
 }) {
   return (
-    <section className="overflow-hidden rounded-[6px] border border-white/[0.065] bg-white/[0.018] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
-      <div className="flex items-center justify-between gap-3 border-b border-white/[0.055] px-4 py-3">
+    <section className="overflow-hidden rounded-[6px] border border-white/[0.075] bg-white/[0.042] shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
+      <div className="flex items-center justify-between gap-3 border-b border-white/[0.06] bg-white/[0.016] px-4 py-3">
         <div className="flex min-w-0 items-center gap-2.5">
           {icon ? (
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-[4px] border border-white/[0.055] bg-white/[0.025] text-primary">
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-[4px] border border-white/[0.065] bg-white/[0.04] text-primary">
               {icon}
             </span>
           ) : null}

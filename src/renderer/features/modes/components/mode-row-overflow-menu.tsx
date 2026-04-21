@@ -9,9 +9,10 @@ import {
 
 type ModeRowOverflowMenuProps = {
   modeName: string;
+  onRename?: () => void;
 };
 
-export function ModeRowOverflowMenu({ modeName }: ModeRowOverflowMenuProps) {
+export function ModeRowOverflowMenu({ modeName, onRename }: ModeRowOverflowMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -25,7 +26,12 @@ export function ModeRowOverflowMenu({ modeName }: ModeRowOverflowMenuProps) {
         align="end"
         className="min-w-40 rounded-[6px] border-white/[0.08] bg-[#09090a]/95 text-white/80 shadow-[0_14px_42px_rgba(0,0,0,0.45)] backdrop-blur-xl"
       >
-        <DropdownMenuItem disabled>
+        <DropdownMenuItem
+          disabled={onRename === undefined}
+          onSelect={() => {
+            onRename?.();
+          }}
+        >
           <Pencil className="size-3.5" aria-hidden="true" />
           Rename
         </DropdownMenuItem>
