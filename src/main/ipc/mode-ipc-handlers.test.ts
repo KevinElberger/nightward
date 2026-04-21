@@ -153,6 +153,29 @@ describe('registerModeIpcHandlers', () => {
     expect(onModesChanged).toHaveBeenCalledOnce();
   });
 
+  it('deactivates modes and refreshes mode consumers', async () => {
+    const { ipcMain, invoke } = createFakeIpcMain();
+    const onModesChanged = vi.fn();
+    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged });
+    const createdMode = await modeService.createMode('Focus');
+    await modeService.activateSavedMode(createdMode.id);
+
+    await expect(invoke(MODE_IPC_CHANNELS.deactivate)).resolves.toBe(true);
+
+    expect(modeService.getModeState().activeModeId).toBeNull();
+    expect(onModesChanged).toHaveBeenCalledOnce();
+  });
+
+  it('does not refresh mode consumers when there is no active mode to deactivate', async () => {
+    const { ipcMain, invoke } = createFakeIpcMain();
+    const onModesChanged = vi.fn();
+    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged });
+
+    await expect(invoke(MODE_IPC_CHANNELS.deactivate)).resolves.toBe(false);
+
+    expect(onModesChanged).not.toHaveBeenCalled();
+  });
+
   it('rejects malformed payloads before calling mode service methods', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
     const onModesChanged = vi.fn();

@@ -6,7 +6,6 @@ import { SidebarNavItem } from './sidebar-nav-item';
 import { SidebarSkeleton } from './sidebar-skeleton';
 
 type SidebarModeListProps = {
-  activeModeId: string | null;
   error: string | null;
   isLoading: boolean;
   modes: SavedMode[];
@@ -17,7 +16,6 @@ type SidebarModeListProps = {
 const PINNED_MODE_LIMIT = 5;
 
 export function SidebarModeList({
-  activeModeId,
   error,
   isLoading,
   modes,
@@ -55,7 +53,6 @@ export function SidebarModeList({
           {pinnedModes.map((mode) => (
             <SidebarNavItem
               key={mode.id}
-              isActive={mode.id === activeModeId}
               isSelected={mode.id === selectedModeId}
               label={mode.name}
               onClick={() => {

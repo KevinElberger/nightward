@@ -160,4 +160,27 @@ describe('ModeService', () => {
       activeModeId: 'mode-1'
     });
   });
+
+  it('deactivates the active mode and persists it', async () => {
+    await store.write(createAppData());
+    await service.initialize();
+    await service.activateSavedMode('mode-1');
+
+    await expect(service.deactivateActiveMode()).resolves.toBe(true);
+
+    expect(service.getCurrentModeLabel()).toBe(NO_ACTIVE_MODE_LABEL);
+    await expect(store.read()).resolves.toMatchObject({
+      activeModeId: null
+    });
+  });
+
+  it('returns false when deactivating with no active mode', async () => {
+    await store.write(createAppData());
+    await service.initialize();
+
+    await expect(service.deactivateActiveMode()).resolves.toBe(false);
+    await expect(store.read()).resolves.toMatchObject({
+      activeModeId: null
+    });
+  });
 });

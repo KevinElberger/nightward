@@ -82,4 +82,13 @@ describe('createNightwardApi', () => {
       id: 'mode-1'
     });
   });
+
+  it('invokes the deactivate mode channel', async () => {
+    const invoke = vi.fn().mockResolvedValue(true);
+    const api = createNightwardApi({ invoke });
+
+    await expect(api.modes.deactivate()).resolves.toBe(true);
+
+    expect(invoke).toHaveBeenCalledWith(MODE_IPC_CHANNELS.deactivate);
+  });
 });

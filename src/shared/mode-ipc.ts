@@ -6,7 +6,8 @@ export const MODE_IPC_CHANNELS = {
   create: 'modes:create',
   rename: 'modes:rename',
   delete: 'modes:delete',
-  activate: 'modes:activate'
+  activate: 'modes:activate',
+  deactivate: 'modes:deactivate'
 } as const;
 
 export type CreateModeRequest = {
@@ -32,3 +33,4 @@ export type CreateModeResponse = SavedMode;
 export type RenameModeResponse = SavedMode | null;
 export type DeleteModeResponse = boolean;
 export type ActivateModeResponse = boolean;
+export type DeactivateModeResponse = boolean;

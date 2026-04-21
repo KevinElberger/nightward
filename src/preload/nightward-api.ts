@@ -4,6 +4,7 @@ import {
   type ActivateModeResponse,
   type CreateModeRequest,
   type CreateModeResponse,
+  type DeactivateModeResponse,
   type DeleteModeRequest,
   type DeleteModeResponse,
   type GetModeStateResponse,
@@ -37,6 +38,8 @@ export const createNightwardApi = (ipcRenderer: IpcInvoker): NightwardApi => ({
     activate: (id) =>
       ipcRenderer.invoke(MODE_IPC_CHANNELS.activate, {
         id
-      } satisfies ActivateModeRequest) as Promise<ActivateModeResponse>
+      } satisfies ActivateModeRequest) as Promise<ActivateModeResponse>,
+    deactivate: () =>
+      ipcRenderer.invoke(MODE_IPC_CHANNELS.deactivate) as Promise<DeactivateModeResponse>
   }
 });

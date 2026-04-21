@@ -45,7 +45,6 @@ export function AppSidebar() {
         </nav>
 
         <SidebarModeList
-          activeModeId={activeModeId}
           error={error}
           isLoading={isLoading}
           modes={modes}

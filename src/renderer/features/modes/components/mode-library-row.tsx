@@ -1,4 +1,4 @@
-import { Check, Circle, Play } from 'lucide-react';
+import { Check, Circle, Play, Power } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { SavedMode } from '../../../../shared/modes';
 import { cn } from '@/lib/utils';
@@ -9,6 +9,7 @@ type ModeLibraryRowProps = {
   isSelected: boolean;
   mode: SavedMode;
   onActivateMode: (id: string) => Promise<boolean>;
+  onDeactivateMode: () => Promise<boolean>;
   onSelectMode: (modeId: string | null) => void;
 };
 
@@ -17,6 +18,7 @@ export function ModeLibraryRow({
   isSelected,
   mode,
   onActivateMode,
+  onDeactivateMode,
   onSelectMode
 }: ModeLibraryRowProps) {
   return (
@@ -36,7 +38,9 @@ export function ModeLibraryRow({
         <span
           className={cn(
             'flex size-7 shrink-0 items-center justify-center rounded-[4px] border border-white/[0.055] bg-white/[0.025]',
-            isActive ? 'text-primary' : 'text-white/32'
+            isActive
+              ? 'border-status-active/20 bg-status-active/8 text-status-active'
+              : 'text-status-neutral/50'
           )}
         >
           {isActive ? (
@@ -47,7 +51,12 @@ export function ModeLibraryRow({
         </span>
         <span className="min-w-0">
           <span className="block truncate text-sm font-medium text-foreground">{mode.name}</span>
-          <span className="mt-0.5 block text-xs text-white/34">
+          <span
+            className={cn(
+              'mt-0.5 block text-xs',
+              isActive ? 'text-status-active/80' : 'text-status-neutral/50'
+            )}
+          >
             {isActive ? 'Active' : 'Ready'}
           </span>
         </span>
@@ -58,14 +67,17 @@ export function ModeLibraryRow({
           type="button"
           variant="ghost"
           size="sm"
-          disabled={isActive}
           className="h-8 rounded-[4px] px-2.5 text-white/48 hover:bg-white/[0.05] hover:text-foreground disabled:opacity-35"
           onClick={() => {
-            void onActivateMode(mode.id);
+            void (isActive ? onDeactivateMode() : onActivateMode(mode.id));
           }}
         >
-          <Play className="size-3" aria-hidden="true" />
-          {isActive ? 'Active' : 'Activate'}
+          {isActive ? (
+            <Power className="size-3" aria-hidden="true" />
+          ) : (
+            <Play className="size-3" aria-hidden="true" />
+          )}
+          {isActive ? 'Deactivate' : 'Activate'}
         </Button>
         <ModeRowOverflowMenu modeName={mode.name} />
       </div>

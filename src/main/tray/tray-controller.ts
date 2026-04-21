@@ -51,6 +51,7 @@ export class TrayController {
         label: this.modeService.getCurrentModeLabel(),
         enabled: false
       },
+      ...this.getDeactivateModeMenuItems(),
       {
         type: 'separator'
       },
@@ -79,5 +80,21 @@ export class TrayController {
         this.rebuildMenu();
       }
     }));
+  }
+
+  private getDeactivateModeMenuItems(): MenuItemConstructorOptions[] {
+    if (this.modeService.getModeState().activeModeId === null) {
+      return [];
+    }
+
+    return [
+      {
+        label: 'Deactivate Mode',
+        click: async () => {
+          await this.modeService.deactivateActiveMode();
+          this.rebuildMenu();
+        }
+      }
+    ];
   }
 }

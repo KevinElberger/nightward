@@ -234,6 +234,39 @@ describe('useModesState', () => {
     expect(getState).toHaveBeenCalledTimes(2);
   });
 
+  it('deactivates a mode and refreshes mode state', async () => {
+    const modes = [
+      {
+        id: 'mode-1',
+        name: 'Focus'
+      }
+    ];
+    const getState = vi
+      .fn()
+      .mockResolvedValueOnce(createModeState(modes, 'mode-1'))
+      .mockResolvedValueOnce(createModeState(modes));
+    const deactivate = vi.fn().mockResolvedValue(true);
+    installApiMock({ modes: { deactivate, getState } });
+
+    const { result } = renderHook(() => useModesState());
+
+    await waitFor(() => expect(result.current.modes).toEqual(modes));
+
+    let response = false;
+
+    await act(async () => {
+      response = await result.current.deactivateMode();
+    });
+
+    expect(deactivate).toHaveBeenCalledOnce();
+    expect(response).toBe(true);
+    expect(result.current.activeModeId).toBeNull();
+    expect(result.current.error).toBeNull();
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.modes).toEqual(modes);
+    expect(getState).toHaveBeenCalledTimes(2);
+  });
+
   it('stores an error and keeps current mode state when a mutation fails', async () => {
     const modes = [
       {

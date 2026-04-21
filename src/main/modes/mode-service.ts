@@ -55,6 +55,19 @@ export class ModeService {
     return true;
   }
 
+  async deactivateActiveMode() {
+    if (this.appData.activeModeId === null) {
+      return false;
+    }
+
+    await this.persistAppData({
+      ...this.appData,
+      activeModeId: null
+    });
+
+    return true;
+  }
+
   async createMode(name: string) {
     const now = new Date().toISOString();
     const mode: PersistedMode = {

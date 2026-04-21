@@ -5,6 +5,7 @@ export type ModesState = {
   activateMode: (id: string) => Promise<boolean>;
   activeModeId: string | null;
   createMode: (name: string) => Promise<SavedMode | null>;
+  deactivateMode: () => Promise<boolean>;
   deleteMode: (id: string) => Promise<boolean>;
   error: string | null;
   isLoading: boolean;
@@ -85,6 +86,11 @@ export const useModesState = (): ModesState => {
     [runModeMutation]
   );
 
+  const deactivateMode = useCallback(
+    () => runModeMutation(() => window.nightward.modes.deactivate(), false),
+    [runModeMutation]
+  );
+
   useEffect(() => {
     const loadInitialModes = async () => {
       await loadModeState();
@@ -97,6 +103,7 @@ export const useModesState = (): ModesState => {
     activateMode,
     activeModeId,
     createMode,
+    deactivateMode,
     deleteMode,
     error,
     isLoading,

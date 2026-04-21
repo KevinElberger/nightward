@@ -71,6 +71,16 @@ export const registerModeIpcHandlers = ({
     return activated;
   });
 
+  ipcMain.handle(MODE_IPC_CHANNELS.deactivate, async () => {
+    const deactivated = await modeService.deactivateActiveMode();
+
+    if (deactivated) {
+      onModesChanged();
+    }
+
+    return deactivated;
+  });
+
   return () => {
     Object.values(MODE_IPC_CHANNELS).forEach((channel) => {
       ipcMain.removeHandler(channel);

@@ -1,6 +1,7 @@
 import type {
   ActivateModeResponse,
   CreateModeResponse,
+  DeactivateModeResponse,
   DeleteModeResponse,
   GetModeStateResponse,
   ListModesResponse,
@@ -15,5 +16,6 @@ export type NightwardApi = {
     rename(id: string, name: string): Promise<RenameModeResponse>;
     delete(id: string): Promise<DeleteModeResponse>;
     activate(id: string): Promise<ActivateModeResponse>;
+    deactivate(): Promise<DeactivateModeResponse>;
   };
 };
