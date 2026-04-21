@@ -1,4 +1,4 @@
-import { Bolt, Layers3, Settings2, Workflow } from 'lucide-react';
+import { Bolt, Settings2, SlidersHorizontal, Workflow } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useModes } from '../modes/use-modes-context';
 import { useAppSelection } from './use-app-selection';
@@ -35,9 +35,9 @@ export function AppSidebar() {
       <ScrollArea className="relative mt-3 min-h-0 flex-1 px-3 pb-3">
         <nav className="space-y-px">
           <SidebarNavItem
-            icon={<Layers3 className="size-3.5" aria-hidden="true" />}
+            icon={<SlidersHorizontal className="size-3.5" aria-hidden="true" />}
             isSelected={selectedModeId === null}
-            label="Overview"
+            label="Modes"
             onClick={() => {
               selectMode(null);
             }}
