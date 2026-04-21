@@ -24,8 +24,8 @@ export function ModeLibraryRow({
   return (
     <div
       className={cn(
-        'group/row grid min-h-14 grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 transition-colors',
-        isSelected ? 'bg-white/[0.04]' : 'hover:bg-white/[0.025]'
+        'group/row grid min-h-[3.75rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 transition-colors',
+        isSelected ? 'bg-white/[0.06]' : 'bg-white/[0.018] hover:bg-white/[0.035]'
       )}
     >
       <button
@@ -67,7 +67,7 @@ export function ModeLibraryRow({
           type="button"
           variant="ghost"
           size="sm"
-          className="h-8 rounded-[4px] px-2.5 text-white/48 hover:bg-white/[0.05] hover:text-foreground disabled:opacity-35"
+          className="h-8 rounded-[4px] px-2.5 text-white/48 hover:bg-white/[0.035] hover:text-foreground disabled:opacity-35"
           onClick={() => {
             void (isActive ? onDeactivateMode() : onActivateMode(mode.id));
           }}

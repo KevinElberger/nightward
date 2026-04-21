@@ -20,10 +20,10 @@ export function ModeLibraryToolbar({
   const modeCountLabel = `${modeCount} ${modeCount === 1 ? 'mode' : 'modes'}`;
 
   return (
-    <div className="mb-3 flex items-center justify-between gap-3">
+    <div className="mb-5 flex items-center justify-between gap-3">
       <div className="relative w-full max-w-sm">
         <Search
-          className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-white/34"
+          className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-white/34"
           aria-hidden="true"
         />
         <Input
@@ -33,7 +33,7 @@ export function ModeLibraryToolbar({
           }}
           aria-label="Search modes"
           placeholder="Search modes"
-          className="h-8 rounded-[4px] border-white/[0.075] bg-white/[0.025] pl-8 text-sm text-foreground placeholder:text-white/28 focus-visible:ring-primary/20"
+          className="h-9 rounded-[4px] border-white/[0.075] bg-white/[0.025] pl-9 text-sm text-foreground placeholder:text-white/28 focus-visible:ring-primary/20"
         />
       </div>
 
@@ -43,11 +43,11 @@ export function ModeLibraryToolbar({
           type="button"
           size="xs"
           disabled={isCreating}
-          className="h-8 rounded-[4px] bg-primary px-2.5 text-primary-foreground hover:bg-primary/90"
+          className="h-9 rounded-[4px] bg-primary px-3 text-primary-foreground hover:bg-primary/90"
           onClick={onCreateMode}
         >
           <Plus className="size-3.5" aria-hidden="true" />
-          Create
+          New mode
         </Button>
       </div>
     </div>

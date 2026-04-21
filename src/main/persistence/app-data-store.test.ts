@@ -59,6 +59,31 @@ describe('AppDataStore', () => {
     });
   });
 
+  it('hydrates missing mode timestamps for older app data files', async () => {
+    await writeFile(
+      store.filePath,
+      JSON.stringify({
+        schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
+        modes: [
+          {
+            id: 'mode-1',
+            name: 'Focus'
+          }
+        ]
+      }),
+      'utf8'
+    );
+
+    const appData = await store.read();
+
+    expect(appData.modes[0]).toMatchObject({
+      id: 'mode-1',
+      name: 'Focus'
+    });
+    expect(Date.parse(appData.modes[0].createdAt)).not.toBeNaN();
+    expect(appData.modes[0].updatedAt).toBe(appData.modes[0].createdAt);
+  });
+
   it('throws an app data store error for malformed JSON', async () => {
     await writeFile(store.filePath, '{', 'utf8');
 

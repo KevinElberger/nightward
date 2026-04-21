@@ -70,7 +70,7 @@ export function ModeDetailPage() {
             type="button"
             variant="ghost"
             size="sm"
-            className="h-8 rounded-[4px] px-2.5 text-white/58 hover:bg-white/[0.05] hover:text-foreground disabled:opacity-35"
+            className="h-8 rounded-[4px] px-2.5 text-white/58 hover:bg-white/[0.035] hover:text-foreground disabled:opacity-35"
             onClick={() => {
               void (isActive ? deactivateMode() : activateMode(mode.id));
             }}

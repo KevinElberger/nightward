@@ -111,15 +111,17 @@ describe('registerModeIpcHandlers', () => {
     registerModeIpcHandlers({ ipcMain, modeService, onModesChanged });
     const createdMode = await modeService.createMode('Focus');
 
-    await expect(
-      invoke(MODE_IPC_CHANNELS.rename, {
-        id: createdMode.id,
-        name: 'Deep Work'
-      })
-    ).resolves.toEqual({
+    const renamedMode = await invoke(MODE_IPC_CHANNELS.rename, {
       id: createdMode.id,
       name: 'Deep Work'
     });
+
+    expect(renamedMode).toMatchObject({
+      id: createdMode.id,
+      name: 'Deep Work'
+    });
+    expect((renamedMode as { createdAt: string }).createdAt).toBe(createdMode.createdAt);
+    expect(Date.parse((renamedMode as { updatedAt: string }).updatedAt)).not.toBeNaN();
     expect(onModesChanged).toHaveBeenCalledOnce();
   });
 

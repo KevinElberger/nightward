@@ -41,8 +41,10 @@ describe('ModeService', () => {
 
     expect(service.getSavedModes(5)).toEqual([
       {
+        createdAt: '2024-01-01T00:00:00.000Z',
         id: 'mode-1',
-        name: 'Focus'
+        name: 'Focus',
+        updatedAt: '2024-01-01T00:00:00.000Z'
       }
     ]);
   });
@@ -60,8 +62,10 @@ describe('ModeService', () => {
       activeModeId: 'mode-1',
       modes: [
         {
+          createdAt: '2024-01-01T00:00:00.000Z',
           id: 'mode-1',
-          name: 'Focus'
+          name: 'Focus',
+          updatedAt: '2024-01-01T00:00:00.000Z'
         }
       ]
     });
@@ -75,6 +79,8 @@ describe('ModeService', () => {
 
     expect(createdMode.id).toEqual(expect.any(String));
     expect(createdMode.name).toBe('Deep Work');
+    expect(Date.parse(createdMode.createdAt)).not.toBeNaN();
+    expect(createdMode.updatedAt).toBe(createdMode.createdAt);
     expect(persistedData.modes).toHaveLength(1);
     expect(persistedData.modes[0]).toMatchObject({
       id: createdMode.id,
@@ -103,8 +109,10 @@ describe('ModeService', () => {
     const persistedData = await store.read();
 
     expect(renamedMode).toEqual({
+      createdAt: '2024-01-01T00:00:00.000Z',
       id: 'mode-1',
-      name: 'Deep Work'
+      name: 'Deep Work',
+      updatedAt: persistedData.modes[0].updatedAt
     });
     expect(persistedData.modes[0]).toMatchObject({
       id: 'mode-1',

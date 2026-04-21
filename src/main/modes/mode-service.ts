@@ -144,7 +144,9 @@ const normalizeModeName = (name: string) => {
   return normalizedName;
 };
 
-const toSavedMode = ({ id, name }: PersistedMode): SavedMode => ({
+const toSavedMode = ({ createdAt, id, name, updatedAt }: PersistedMode): SavedMode => ({
+  createdAt,
   id,
-  name
+  name,
+  updatedAt
 });
