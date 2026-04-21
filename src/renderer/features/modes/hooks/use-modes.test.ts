@@ -2,8 +2,8 @@
 
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { ModeState, SavedMode } from '../../shared/modes';
-import { clearApiMock, installApiMock } from '../test/api-test-utils';
+import type { ModeState, SavedMode } from '../../../../shared/modes';
+import { clearApiMock, installApiMock } from '../../../test/api-test-utils';
 import { useModes } from './use-modes';
 
 const createModeState = (modes: SavedMode[], activeModeId: string | null = null): ModeState => ({

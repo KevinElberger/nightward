@@ -7,12 +7,21 @@ export type RendererConfig = {
   preloadPath: string;
 };
 
+type SettingsWindowControllerOptions = {
+  platform: NodeJS.Platform;
+  renderer: RendererConfig;
+};
+
+const SETTINGS_WINDOW_BACKGROUND_COLOR = '#08080b';
+
 export class SettingsWindowController {
+  private readonly platform: NodeJS.Platform;
   private readonly renderer: RendererConfig;
   private isQuitting = false;
   private window: BrowserWindow | null = null;
 
-  constructor(renderer: RendererConfig) {
+  constructor({ platform, renderer }: SettingsWindowControllerOptions) {
+    this.platform = platform;
     this.renderer = renderer;
   }
 
@@ -24,10 +33,20 @@ export class SettingsWindowController {
     const window = new BrowserWindow({
       width: 960,
       height: 640,
-      minWidth: 640,
+      minWidth: 960,
       minHeight: 420,
+      backgroundColor: SETTINGS_WINDOW_BACKGROUND_COLOR,
       show: false,
       title: 'Nightward Settings',
+      ...(this.platform === 'darwin'
+        ? {
+            titleBarStyle: 'hidden' as const,
+            trafficLightPosition: {
+              x: 18,
+              y: 20
+            }
+          }
+        : {}),
       webPreferences: {
         contextIsolation: true,
         nodeIntegration: false,
