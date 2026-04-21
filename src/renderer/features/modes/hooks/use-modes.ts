@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { SavedMode } from '../../../../shared/modes';
 
-type ModesState = {
+export type ModesState = {
   activateMode: (id: string) => Promise<boolean>;
   activeModeId: string | null;
   createMode: (name: string) => Promise<SavedMode | null>;
@@ -16,7 +16,7 @@ type ModesState = {
 const getErrorMessage = (error: unknown, fallbackMessage: string) =>
   error instanceof Error ? error.message : fallbackMessage;
 
-export const useModes = (): ModesState => {
+export const useModesState = (): ModesState => {
   const [activeModeId, setActiveModeId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);

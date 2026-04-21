@@ -35,7 +35,7 @@ export function SidebarNavItem({
     >
       {isActive ? (
         <span
-          className="absolute left-0 top-1/2 h-5 w-px -translate-y-1/2 rounded-full bg-primary shadow-[0_0_14px_rgba(143,92,255,0.7)]"
+          className="absolute left-0 top-1/2 h-5 w-px -translate-y-1/2 rounded-full bg-primary shadow-[0_0_14px_rgba(168,85,247,0.7)]"
           aria-hidden="true"
         />
       ) : null}
@@ -54,7 +54,7 @@ export function SidebarNavItem({
           <span
             className={cn(
               'size-1.5 shrink-0 rounded-full',
-              isActive ? 'bg-primary shadow-[0_0_14px_rgba(143,92,255,0.68)]' : 'bg-white/20'
+              isActive ? 'bg-primary shadow-[0_0_14px_rgba(168,85,247,0.68)]' : 'bg-white/20'
             )}
           />
         )}
