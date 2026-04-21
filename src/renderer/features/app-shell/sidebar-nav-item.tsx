@@ -3,14 +3,16 @@ import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type SidebarNavItemProps = {
+  disabled?: boolean;
   icon?: ReactNode;
   isActive?: boolean;
   isSelected: boolean;
   label: string;
-  onClick: () => void;
+  onClick?: () => void;
 };
 
 export function SidebarNavItem({
+  disabled = false,
   icon,
   isActive = false,
   isSelected,
@@ -22,10 +24,13 @@ export function SidebarNavItem({
       type="button"
       className={cn(
         'group relative flex h-10 w-full items-center justify-between rounded-[4px] px-2.5 text-left text-sm transition-colors',
-        isSelected
-          ? 'bg-white/[0.055] text-foreground shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]'
-          : 'text-white/48 hover:bg-white/[0.035] hover:text-white/82'
+        disabled
+          ? 'cursor-default text-white/24'
+          : isSelected
+            ? 'bg-white/[0.055] text-foreground shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]'
+            : 'text-white/48 hover:bg-white/[0.035] hover:text-white/82'
       )}
+      disabled={disabled}
       onClick={onClick}
     >
       {isActive ? (
@@ -37,7 +42,12 @@ export function SidebarNavItem({
 
       <span className="flex min-w-0 items-center gap-2.5">
         {icon ? (
-          <span className="flex size-6 shrink-0 items-center justify-center rounded-[3px] border border-white/[0.05] bg-white/[0.025] text-primary">
+          <span
+            className={cn(
+              'flex size-6 shrink-0 items-center justify-center rounded-[3px] border border-white/[0.05] bg-white/[0.025]',
+              disabled ? 'text-white/25' : 'text-primary'
+            )}
+          >
             {icon}
           </span>
         ) : (
@@ -54,7 +64,7 @@ export function SidebarNavItem({
       <ChevronRight
         className={cn(
           'size-3.5 shrink-0 transition-opacity',
-          isSelected ? 'opacity-55' : 'opacity-0 group-hover:opacity-35'
+          disabled ? 'opacity-0' : isSelected ? 'opacity-55' : 'opacity-0 group-hover:opacity-35'
         )}
         aria-hidden="true"
       />
