@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { SavedMode } from '../../shared/modes';
+import type { SavedMode } from '../../../../shared/modes';
 
 type ModesState = {
   activateMode: (id: string) => Promise<boolean>;

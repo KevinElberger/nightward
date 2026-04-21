@@ -21,7 +21,10 @@ export class AppController {
   constructor({ app, platform, renderer }: AppControllerOptions) {
     this.app = app;
     this.platform = platform;
-    this.settingsWindow = new SettingsWindowController(renderer);
+    this.settingsWindow = new SettingsWindowController({
+      platform,
+      renderer
+    });
   }
 
   start() {
