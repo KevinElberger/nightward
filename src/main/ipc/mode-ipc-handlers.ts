@@ -4,7 +4,8 @@ import {
   type ActivateModeRequest,
   type CreateModeRequest,
   type DeleteModeRequest,
-  type RenameModeRequest
+  type RenameModeRequest,
+  type SetModePinnedRequest
 } from '../../shared/mode-ipc';
 import type { ModeService } from '../modes/mode-service';
 import { getRequiredString, isRecord } from '../validation/json-record';
@@ -43,6 +44,17 @@ export const registerModeIpcHandlers = ({
   ipcMain.handle(MODE_IPC_CHANNELS.rename, async (_event, request: unknown) => {
     const { id, name } = parseRenameModeRequest(request);
     const mode = await modeService.renameMode(id, name);
+
+    if (mode !== null) {
+      onModesChanged();
+    }
+
+    return mode;
+  });
+
+  ipcMain.handle(MODE_IPC_CHANNELS.setPinned, async (_event, request: unknown) => {
+    const { id, isPinned } = parseSetModePinnedRequest(request);
+    const mode = await modeService.setModePinned(id, isPinned);
 
     if (mode !== null) {
       onModesChanged();
@@ -97,6 +109,11 @@ const parseRenameModeRequest = (request: unknown): RenameModeRequest => ({
   name: getStringProperty(request, 'name', MODE_IPC_CHANNELS.rename)
 });
 
+const parseSetModePinnedRequest = (request: unknown): SetModePinnedRequest => ({
+  id: getStringProperty(request, 'id', MODE_IPC_CHANNELS.setPinned),
+  isPinned: getBooleanProperty(request, 'isPinned', MODE_IPC_CHANNELS.setPinned)
+});
+
 const parseDeleteModeRequest = (request: unknown): DeleteModeRequest => ({
   id: getStringProperty(request, 'id', MODE_IPC_CHANNELS.delete)
 });
@@ -116,4 +133,18 @@ const getStringProperty = (request: unknown, property: string, channel: string) 
     record: request,
     property
   });
+};
+
+const getBooleanProperty = (request: unknown, property: string, channel: string) => {
+  if (!isRecord(request)) {
+    throw new ModeIpcHandlerError(`${channel} requires an object request.`);
+  }
+
+  const value = request[property];
+
+  if (typeof value !== 'boolean') {
+    throw new ModeIpcHandlerError(`${channel}.${property} must be a boolean.`);
+  }
+
+  return value;
 };

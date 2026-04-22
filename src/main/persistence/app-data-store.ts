@@ -141,6 +141,7 @@ const validatePersistedMode = (value: unknown, index: number): PersistedMode => 
     id: getRequiredAppDataString(value, 'id', modePath),
     name: getRequiredAppDataString(value, 'name', modePath),
     createdAt,
+    pinnedAt: getOptionalTimestamp(value, 'pinnedAt', modePath),
     updatedAt
   };
 };
@@ -159,7 +160,7 @@ const getRequiredAppDataString = (
 
 const getOptionalTimestamp = (
   record: JsonRecord,
-  property: keyof Pick<PersistedMode, 'createdAt' | 'updatedAt'>,
+  property: keyof Pick<PersistedMode, 'createdAt' | 'pinnedAt' | 'updatedAt'>,
   recordPath: string
 ) => {
   const value = record[property];

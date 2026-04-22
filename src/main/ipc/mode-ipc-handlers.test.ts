@@ -125,6 +125,40 @@ describe('registerModeIpcHandlers', () => {
     expect(onModesChanged).toHaveBeenCalledOnce();
   });
 
+  it('pins modes and refreshes mode consumers', async () => {
+    const { ipcMain, invoke } = createFakeIpcMain();
+    const onModesChanged = vi.fn();
+    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged });
+    const createdMode = await modeService.createMode('Focus');
+
+    const pinnedMode = await invoke(MODE_IPC_CHANNELS.setPinned, {
+      id: createdMode.id,
+      isPinned: true
+    });
+
+    expect(pinnedMode).toMatchObject({
+      id: createdMode.id,
+      name: 'Focus'
+    });
+    expect((pinnedMode as { pinnedAt: string | null }).pinnedAt).not.toBeNull();
+    expect(onModesChanged).toHaveBeenCalledOnce();
+  });
+
+  it('does not refresh mode consumers when pinning a missing mode', async () => {
+    const { ipcMain, invoke } = createFakeIpcMain();
+    const onModesChanged = vi.fn();
+    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged });
+
+    await expect(
+      invoke(MODE_IPC_CHANNELS.setPinned, {
+        id: 'missing-mode',
+        isPinned: true
+      })
+    ).resolves.toBeNull();
+
+    expect(onModesChanged).not.toHaveBeenCalled();
+  });
+
   it('deletes modes and refreshes mode consumers', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
     const onModesChanged = vi.fn();

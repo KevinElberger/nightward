@@ -5,6 +5,7 @@ export const MODE_IPC_CHANNELS = {
   list: 'modes:list',
   create: 'modes:create',
   rename: 'modes:rename',
+  setPinned: 'modes:set-pinned',
   delete: 'modes:delete',
   activate: 'modes:activate',
   deactivate: 'modes:deactivate'
@@ -19,6 +20,11 @@ export type RenameModeRequest = {
   name: string;
 };
 
+export type SetModePinnedRequest = {
+  id: string;
+  isPinned: boolean;
+};
+
 export type DeleteModeRequest = {
   id: string;
 };
@@ -31,6 +37,7 @@ export type GetModeStateResponse = ModeState;
 export type ListModesResponse = SavedMode[];
 export type CreateModeResponse = SavedMode;
 export type RenameModeResponse = SavedMode | null;
+export type SetModePinnedResponse = SavedMode | null;
 export type DeleteModeResponse = boolean;
 export type ActivateModeResponse = boolean;
 export type DeactivateModeResponse = boolean;

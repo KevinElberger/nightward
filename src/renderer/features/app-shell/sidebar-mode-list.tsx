@@ -22,7 +22,15 @@ export function SidebarModeList({
   onSelectMode,
   selectedModeId
 }: SidebarModeListProps) {
-  const pinnedModes = modes.slice(0, PINNED_MODE_LIMIT);
+  const pinnedModes = modes
+    .filter((mode) => mode.pinnedAt !== null)
+    .sort((firstMode, secondMode) => {
+      const firstPinnedAt = firstMode.pinnedAt ?? '';
+      const secondPinnedAt = secondMode.pinnedAt ?? '';
+
+      return secondPinnedAt.localeCompare(firstPinnedAt);
+    })
+    .slice(0, PINNED_MODE_LIMIT);
 
   return (
     <>
@@ -42,10 +50,10 @@ export function SidebarModeList({
         <SidebarSkeleton />
       ) : error !== null ? (
         <SidebarMessage title="Could not load modes" description={error} />
-      ) : modes.length === 0 ? (
+      ) : pinnedModes.length === 0 ? (
         <SidebarMessage
           title="No pinned modes"
-          description="Create a mode to pin it here."
+          description="Pin modes here for faster access."
           icon={<Pin className="size-3 text-white/48" aria-hidden="true" />}
         />
       ) : (

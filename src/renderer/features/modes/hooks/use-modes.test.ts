@@ -15,6 +15,7 @@ const createSavedMode = (id: string, name: string): SavedMode => ({
   createdAt: '2026-04-20T12:00:00.000Z',
   id,
   name,
+  pinnedAt: null,
   updatedAt: '2026-04-20T12:00:00.000Z'
 });
 
@@ -173,6 +174,36 @@ describe('useModesState', () => {
     expect(getState).toHaveBeenCalledTimes(2);
   });
 
+  it('pins a mode and refreshes mode state', async () => {
+    const modes = [createSavedMode('mode-1', 'Focus')];
+    const pinnedMode = {
+      ...modes[0],
+      pinnedAt: '2026-04-21T12:00:00.000Z',
+      updatedAt: '2026-04-21T12:00:00.000Z'
+    };
+    const getState = vi
+      .fn()
+      .mockResolvedValueOnce(createModeState(modes))
+      .mockResolvedValueOnce(createModeState([pinnedMode]));
+    const setPinned = vi.fn().mockResolvedValue(pinnedMode);
+    installApiMock({ modes: { getState, setPinned } });
+
+    const { result } = renderHook(() => useModesState());
+
+    await waitFor(() => expect(result.current.modes).toEqual(modes));
+
+    let response: SavedMode | null = null;
+
+    await act(async () => {
+      response = await result.current.setModePinned('mode-1', true);
+    });
+
+    expect(setPinned).toHaveBeenCalledWith('mode-1', true);
+    expect(response).toEqual(pinnedMode);
+    expect(result.current.modes).toEqual([pinnedMode]);
+    expect(getState).toHaveBeenCalledTimes(2);
+  });
+
   it('activates a mode and refreshes mode state', async () => {
     const modes = [createSavedMode('mode-1', 'Focus')];
     const getState = vi
@@ -243,6 +274,7 @@ describe('useModesState', () => {
       createdAt: '2026-04-20T12:00:00.000Z',
       id: 'stale',
       name: 'Stale',
+      pinnedAt: null,
       updatedAt: '2026-04-20T12:00:00.000Z'
     };
 

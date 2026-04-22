@@ -10,7 +10,9 @@ import {
   type GetModeStateResponse,
   type ListModesResponse,
   type RenameModeRequest,
-  type RenameModeResponse
+  type RenameModeResponse,
+  type SetModePinnedRequest,
+  type SetModePinnedResponse
 } from '../shared/mode-ipc';
 import type { NightwardApi } from '../shared/nightward-api';
 
@@ -31,6 +33,11 @@ export const createNightwardApi = (ipcRenderer: IpcInvoker): NightwardApi => ({
         id,
         name
       } satisfies RenameModeRequest) as Promise<RenameModeResponse>,
+    setPinned: (id, isPinned) =>
+      ipcRenderer.invoke(MODE_IPC_CHANNELS.setPinned, {
+        id,
+        isPinned
+      } satisfies SetModePinnedRequest) as Promise<SetModePinnedResponse>,
     delete: (id) =>
       ipcRenderer.invoke(MODE_IPC_CHANNELS.delete, {
         id

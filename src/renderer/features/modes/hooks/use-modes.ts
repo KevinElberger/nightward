@@ -12,6 +12,7 @@ export type ModesState = {
   modes: SavedMode[];
   renameMode: (id: string, name: string) => Promise<SavedMode | null>;
   refreshModes: () => Promise<void>;
+  setModePinned: (id: string, isPinned: boolean) => Promise<SavedMode | null>;
 };
 
 const getErrorMessage = (error: unknown, fallbackMessage: string) =>
@@ -76,6 +77,12 @@ export const useModesState = (): ModesState => {
     [runModeMutation]
   );
 
+  const setModePinned = useCallback(
+    (id: string, isPinned: boolean) =>
+      runModeMutation(() => window.nightward.modes.setPinned(id, isPinned), null),
+    [runModeMutation]
+  );
+
   const deleteMode = useCallback(
     (id: string) => runModeMutation(() => window.nightward.modes.delete(id), false),
     [runModeMutation]
@@ -109,6 +116,7 @@ export const useModesState = (): ModesState => {
     isLoading,
     modes,
     renameMode,
-    refreshModes: loadModeState
+    refreshModes: loadModeState,
+    setModePinned
   };
 };

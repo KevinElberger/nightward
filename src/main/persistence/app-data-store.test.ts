@@ -9,6 +9,7 @@ const createTestMode = () => ({
   id: 'mode-1',
   name: 'Focus',
   createdAt: '2026-04-20T12:00:00.000Z',
+  pinnedAt: null,
   updatedAt: '2026-04-20T12:00:00.000Z'
 });
 
@@ -81,6 +82,7 @@ describe('AppDataStore', () => {
       name: 'Focus'
     });
     expect(Date.parse(appData.modes[0].createdAt)).not.toBeNaN();
+    expect(appData.modes[0].pinnedAt).toBeNull();
     expect(appData.modes[0].updatedAt).toBe(appData.modes[0].createdAt);
   });
 

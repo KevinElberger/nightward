@@ -4,6 +4,7 @@ export type SavedMode = {
   createdAt: string;
   id: string;
   name: string;
+  pinnedAt: string | null;
   updatedAt: string;
 };
 

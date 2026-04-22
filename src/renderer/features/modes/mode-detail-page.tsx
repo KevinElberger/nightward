@@ -9,7 +9,15 @@ import { useModes } from './use-modes-context';
 
 export function ModeDetailPage() {
   const { selectMode, selectedModeId } = useAppSelection();
-  const { activateMode, activeModeId, deactivateMode, modes, renameMode } = useModes();
+  const {
+    activateMode,
+    activeModeId,
+    deactivateMode,
+    deleteMode,
+    modes,
+    renameMode,
+    setModePinned
+  } = useModes();
   const mode = modes.find((savedMode) => savedMode.id === selectedModeId) ?? null;
   const titleRef = useRef<ModeDetailTitleHandle>(null);
 
@@ -88,7 +96,21 @@ export function ModeDetailPage() {
             )}
             {isActive ? 'Deactivate' : 'Activate'}
           </Button>
-          <ModeRowOverflowMenu modeName={mode.name} onRename={startRenaming} />
+          <ModeRowOverflowMenu
+            isPinned={mode.pinnedAt !== null}
+            modeName={mode.name}
+            onDeleteMode={async () => {
+              const deleted = await deleteMode(mode.id);
+
+              if (deleted) {
+                selectMode(null);
+              }
+
+              return deleted;
+            }}
+            onRename={startRenaming}
+            onSetPinned={(isPinned) => setModePinned(mode.id, isPinned)}
+          />
         </div>
       </div>
 

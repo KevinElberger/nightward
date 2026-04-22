@@ -10,7 +10,9 @@ type ModeLibraryRowProps = {
   mode: SavedMode;
   onActivateMode: (id: string) => Promise<boolean>;
   onDeactivateMode: () => Promise<boolean>;
+  onDeleteMode: (id: string) => Promise<boolean>;
   onSelectMode: (modeId: string | null) => void;
+  onSetPinned: (id: string, isPinned: boolean) => Promise<SavedMode | null>;
 };
 
 export function ModeLibraryRow({
@@ -19,7 +21,9 @@ export function ModeLibraryRow({
   mode,
   onActivateMode,
   onDeactivateMode,
-  onSelectMode
+  onDeleteMode,
+  onSelectMode,
+  onSetPinned
 }: ModeLibraryRowProps) {
   return (
     <div
@@ -79,7 +83,12 @@ export function ModeLibraryRow({
           )}
           {isActive ? 'Deactivate' : 'Activate'}
         </Button>
-        <ModeRowOverflowMenu modeName={mode.name} />
+        <ModeRowOverflowMenu
+          isPinned={mode.pinnedAt !== null}
+          modeName={mode.name}
+          onDeleteMode={() => onDeleteMode(mode.id)}
+          onSetPinned={(isPinned) => onSetPinned(mode.id, isPinned)}
+        />
       </div>
     </div>
   );

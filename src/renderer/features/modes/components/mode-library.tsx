@@ -9,8 +9,17 @@ import { ModeLibrarySkeleton } from './mode-library-skeleton';
 import { ModeLibraryToolbar } from './mode-library-toolbar';
 
 export function ModeLibrary() {
-  const { activateMode, activeModeId, createMode, deactivateMode, error, isLoading, modes } =
-    useModes();
+  const {
+    activateMode,
+    activeModeId,
+    createMode,
+    deactivateMode,
+    deleteMode,
+    error,
+    isLoading,
+    modes,
+    setModePinned
+  } = useModes();
   const { selectMode, selectedModeId } = useAppSelection();
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreating, setIsCreating] = useState(false);
@@ -96,7 +105,9 @@ export function ModeLibrary() {
                   mode={mode}
                   onActivateMode={activateMode}
                   onDeactivateMode={deactivateMode}
+                  onDeleteMode={deleteMode}
                   onSelectMode={selectMode}
+                  onSetPinned={setModePinned}
                 />
               );
             })}

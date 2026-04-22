@@ -6,6 +6,7 @@ const createSavedMode = (id: string, name: string) => ({
   createdAt: '2026-04-20T12:00:00.000Z',
   id,
   name,
+  pinnedAt: null,
   updatedAt: '2026-04-20T12:00:00.000Z'
 });
 
@@ -54,6 +55,22 @@ describe('createNightwardApi', () => {
     expect(invoke).toHaveBeenCalledWith(MODE_IPC_CHANNELS.rename, {
       id: 'mode-1',
       name: 'Deep Work'
+    });
+  });
+
+  it('invokes the set pinned mode channel with a typed request payload', async () => {
+    const pinnedMode = {
+      ...createSavedMode('mode-1', 'Focus'),
+      pinnedAt: '2026-04-21T12:00:00.000Z'
+    };
+    const invoke = vi.fn().mockResolvedValue(pinnedMode);
+    const api = createNightwardApi({ invoke });
+
+    await expect(api.modes.setPinned('mode-1', true)).resolves.toEqual(pinnedMode);
+
+    expect(invoke).toHaveBeenCalledWith(MODE_IPC_CHANNELS.setPinned, {
+      id: 'mode-1',
+      isPinned: true
     });
   });
 

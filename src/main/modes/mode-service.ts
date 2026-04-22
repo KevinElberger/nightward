@@ -75,6 +75,7 @@ export class ModeService {
       id: randomUUID(),
       name: normalizeModeName(name),
       createdAt: now,
+      pinnedAt: null,
       updatedAt: now
     };
 
@@ -107,6 +108,30 @@ export class ModeService {
     });
 
     return toSavedMode(renamedMode);
+  }
+
+  async setModePinned(modeId: string, isPinned: boolean) {
+    const mode = this.appData.modes.find((savedMode) => savedMode.id === modeId);
+
+    if (mode === undefined) {
+      return null;
+    }
+
+    const now = new Date().toISOString();
+    const pinnedMode: PersistedMode = {
+      ...mode,
+      pinnedAt: isPinned ? (mode.pinnedAt ?? now) : null,
+      updatedAt: now
+    };
+
+    await this.persistAppData({
+      ...this.appData,
+      modes: this.appData.modes.map((savedMode) =>
+        savedMode.id === modeId ? pinnedMode : savedMode
+      )
+    });
+
+    return toSavedMode(pinnedMode);
   }
 
   async deleteMode(modeId: string) {
@@ -149,9 +174,10 @@ const normalizeModeName = (name: string) => {
   return normalizedName;
 };
 
-const toSavedMode = ({ createdAt, id, name, updatedAt }: PersistedMode): SavedMode => ({
+const toSavedMode = ({ createdAt, id, name, pinnedAt, updatedAt }: PersistedMode): SavedMode => ({
   createdAt,
   id,
   name,
+  pinnedAt,
   updatedAt
 });
