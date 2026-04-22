@@ -28,14 +28,14 @@ export function SidebarNavItem({
           ? 'cursor-default text-white/24'
           : isSelected
             ? 'bg-white/[0.055] text-foreground shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]'
-            : 'text-white/48 hover:bg-white/[0.035] hover:text-white/82'
+            : 'text-white/68 hover:bg-white/[0.045]'
       )}
       disabled={disabled}
       onClick={onClick}
     >
       {isActive ? (
         <span
-          className="absolute left-0 top-1/2 h-5 w-px -translate-y-1/2 rounded-full bg-primary shadow-[0_0_14px_rgba(143,92,255,0.7)]"
+          className="absolute left-0 top-1/2 h-5 w-px -translate-y-1/2 rounded-full bg-status-active shadow-[0_0_14px_rgba(74,222,128,0.7)]"
           aria-hidden="true"
         />
       ) : null}
@@ -54,7 +54,9 @@ export function SidebarNavItem({
           <span
             className={cn(
               'size-1.5 shrink-0 rounded-full',
-              isActive ? 'bg-primary shadow-[0_0_14px_rgba(143,92,255,0.68)]' : 'bg-white/20'
+              isActive
+                ? 'bg-status-active shadow-[0_0_14px_rgba(74,222,128,0.68)]'
+                : 'bg-status-neutral/28'
             )}
           />
         )}

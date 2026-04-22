@@ -11,7 +11,9 @@ export function SidebarCurrentMode({ activeMode }: SidebarCurrentModeProps) {
       <span
         className={cn(
           'size-1.5 shrink-0 rounded-full shadow-[0_0_14px_currentColor]',
-          activeMode === null ? 'bg-white/24 text-white/24' : 'bg-primary text-primary'
+          activeMode === null
+            ? 'bg-status-neutral/35 text-status-neutral/35'
+            : 'bg-status-active text-status-active'
         )}
       />
       <p className="min-w-0 truncate font-heading font-medium tracking-normal text-foreground">

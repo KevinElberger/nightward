@@ -2,16 +2,19 @@ import { describe, expect, it, vi } from 'vitest';
 import { MODE_IPC_CHANNELS } from '../shared/mode-ipc';
 import { createNightwardApi } from './nightward-api';
 
+const createSavedMode = (id: string, name: string) => ({
+  createdAt: '2026-04-20T12:00:00.000Z',
+  id,
+  name,
+  pinnedAt: null,
+  updatedAt: '2026-04-20T12:00:00.000Z'
+});
+
 describe('createNightwardApi', () => {
   it('invokes the get mode state channel', async () => {
     const modeState = {
       activeModeId: 'mode-1',
-      modes: [
-        {
-          id: 'mode-1',
-          name: 'Focus'
-        }
-      ]
+      modes: [createSavedMode('mode-1', 'Focus')]
     };
     const invoke = vi.fn().mockResolvedValue(modeState);
     const api = createNightwardApi({ invoke });
@@ -31,10 +34,7 @@ describe('createNightwardApi', () => {
   });
 
   it('invokes the create mode channel with a typed request payload', async () => {
-    const createdMode = {
-      id: 'mode-1',
-      name: 'Focus'
-    };
+    const createdMode = createSavedMode('mode-1', 'Focus');
     const invoke = vi.fn().mockResolvedValue(createdMode);
     const api = createNightwardApi({ invoke });
 
@@ -46,10 +46,7 @@ describe('createNightwardApi', () => {
   });
 
   it('invokes the rename mode channel with a typed request payload', async () => {
-    const renamedMode = {
-      id: 'mode-1',
-      name: 'Deep Work'
-    };
+    const renamedMode = createSavedMode('mode-1', 'Deep Work');
     const invoke = vi.fn().mockResolvedValue(renamedMode);
     const api = createNightwardApi({ invoke });
 
@@ -58,6 +55,22 @@ describe('createNightwardApi', () => {
     expect(invoke).toHaveBeenCalledWith(MODE_IPC_CHANNELS.rename, {
       id: 'mode-1',
       name: 'Deep Work'
+    });
+  });
+
+  it('invokes the set pinned mode channel with a typed request payload', async () => {
+    const pinnedMode = {
+      ...createSavedMode('mode-1', 'Focus'),
+      pinnedAt: '2026-04-21T12:00:00.000Z'
+    };
+    const invoke = vi.fn().mockResolvedValue(pinnedMode);
+    const api = createNightwardApi({ invoke });
+
+    await expect(api.modes.setPinned('mode-1', true)).resolves.toEqual(pinnedMode);
+
+    expect(invoke).toHaveBeenCalledWith(MODE_IPC_CHANNELS.setPinned, {
+      id: 'mode-1',
+      isPinned: true
     });
   });
 
@@ -81,5 +94,14 @@ describe('createNightwardApi', () => {
     expect(invoke).toHaveBeenCalledWith(MODE_IPC_CHANNELS.activate, {
       id: 'mode-1'
     });
+  });
+
+  it('invokes the deactivate mode channel', async () => {
+    const invoke = vi.fn().mockResolvedValue(true);
+    const api = createNightwardApi({ invoke });
+
+    await expect(api.modes.deactivate()).resolves.toBe(true);
+
+    expect(invoke).toHaveBeenCalledWith(MODE_IPC_CHANNELS.deactivate);
   });
 });

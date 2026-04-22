@@ -1,22 +1,24 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { SavedMode } from '../../../../shared/modes';
 
-type ModesState = {
+export type ModesState = {
   activateMode: (id: string) => Promise<boolean>;
   activeModeId: string | null;
   createMode: (name: string) => Promise<SavedMode | null>;
+  deactivateMode: () => Promise<boolean>;
   deleteMode: (id: string) => Promise<boolean>;
   error: string | null;
   isLoading: boolean;
   modes: SavedMode[];
   renameMode: (id: string, name: string) => Promise<SavedMode | null>;
   refreshModes: () => Promise<void>;
+  setModePinned: (id: string, isPinned: boolean) => Promise<SavedMode | null>;
 };
 
 const getErrorMessage = (error: unknown, fallbackMessage: string) =>
   error instanceof Error ? error.message : fallbackMessage;
 
-export const useModes = (): ModesState => {
+export const useModesState = (): ModesState => {
   const [activeModeId, setActiveModeId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -75,6 +77,12 @@ export const useModes = (): ModesState => {
     [runModeMutation]
   );
 
+  const setModePinned = useCallback(
+    (id: string, isPinned: boolean) =>
+      runModeMutation(() => window.nightward.modes.setPinned(id, isPinned), null),
+    [runModeMutation]
+  );
+
   const deleteMode = useCallback(
     (id: string) => runModeMutation(() => window.nightward.modes.delete(id), false),
     [runModeMutation]
@@ -82,6 +90,11 @@ export const useModes = (): ModesState => {
 
   const activateMode = useCallback(
     (id: string) => runModeMutation(() => window.nightward.modes.activate(id), false),
+    [runModeMutation]
+  );
+
+  const deactivateMode = useCallback(
+    () => runModeMutation(() => window.nightward.modes.deactivate(), false),
     [runModeMutation]
   );
 
@@ -97,11 +110,13 @@ export const useModes = (): ModesState => {
     activateMode,
     activeModeId,
     createMode,
+    deactivateMode,
     deleteMode,
     error,
     isLoading,
     modes,
     renameMode,
-    refreshModes: loadModeState
+    refreshModes: loadModeState,
+    setModePinned
   };
 };

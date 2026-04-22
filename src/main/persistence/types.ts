@@ -5,6 +5,7 @@ export type PersistedMode = {
   id: string;
   name: string;
   createdAt: string;
+  pinnedAt: string | null;
   updatedAt: string;
 };
 

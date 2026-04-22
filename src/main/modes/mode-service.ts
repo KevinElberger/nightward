@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { MODE_NAME_MAX_LENGTH } from '../../shared/modes';
 import type { AppDataStore } from '../persistence/app-data-store';
 import { createDefaultAppData, type AppData, type PersistedMode } from '../persistence/types';
 import type { ModeState, SavedMode } from './types';
@@ -55,12 +56,26 @@ export class ModeService {
     return true;
   }
 
+  async deactivateActiveMode() {
+    if (this.appData.activeModeId === null) {
+      return false;
+    }
+
+    await this.persistAppData({
+      ...this.appData,
+      activeModeId: null
+    });
+
+    return true;
+  }
+
   async createMode(name: string) {
     const now = new Date().toISOString();
     const mode: PersistedMode = {
       id: randomUUID(),
       name: normalizeModeName(name),
       createdAt: now,
+      pinnedAt: null,
       updatedAt: now
     };
 
@@ -93,6 +108,30 @@ export class ModeService {
     });
 
     return toSavedMode(renamedMode);
+  }
+
+  async setModePinned(modeId: string, isPinned: boolean) {
+    const mode = this.appData.modes.find((savedMode) => savedMode.id === modeId);
+
+    if (mode === undefined) {
+      return null;
+    }
+
+    const now = new Date().toISOString();
+    const pinnedMode: PersistedMode = {
+      ...mode,
+      pinnedAt: isPinned ? (mode.pinnedAt ?? now) : null,
+      updatedAt: now
+    };
+
+    await this.persistAppData({
+      ...this.appData,
+      modes: this.appData.modes.map((savedMode) =>
+        savedMode.id === modeId ? pinnedMode : savedMode
+      )
+    });
+
+    return toSavedMode(pinnedMode);
   }
 
   async deleteMode(modeId: string) {
@@ -128,10 +167,17 @@ const normalizeModeName = (name: string) => {
     throw new ModeServiceError('Mode name must be a non-empty string.');
   }
 
+  if (normalizedName.length > MODE_NAME_MAX_LENGTH) {
+    throw new ModeServiceError(`Mode name must be ${MODE_NAME_MAX_LENGTH} characters or less.`);
+  }
+
   return normalizedName;
 };
 
-const toSavedMode = ({ id, name }: PersistedMode): SavedMode => ({
+const toSavedMode = ({ createdAt, id, name, pinnedAt, updatedAt }: PersistedMode): SavedMode => ({
+  createdAt,
   id,
-  name
+  name,
+  pinnedAt,
+  updatedAt
 });

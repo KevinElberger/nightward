@@ -16,8 +16,10 @@ export const createApiMock = (overrides: ApiOverrides = {}): NightwardApi => ({
     list: vi.fn().mockResolvedValue([]),
     create: vi.fn(),
     rename: vi.fn(),
+    setPinned: vi.fn(),
     delete: vi.fn(),
     activate: vi.fn(),
+    deactivate: vi.fn(),
     ...overrides.modes
   }
 });

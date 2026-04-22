@@ -130,11 +130,19 @@ const validatePersistedMode = (value: unknown, index: number): PersistedMode => 
     throw new AppDataStoreError(`${modePath} must be a JSON object.`);
   }
 
+  const now = new Date().toISOString();
+  const createdAt =
+    getOptionalTimestamp(value, 'createdAt', modePath) ??
+    getOptionalTimestamp(value, 'updatedAt', modePath) ??
+    now;
+  const updatedAt = getOptionalTimestamp(value, 'updatedAt', modePath) ?? createdAt;
+
   return {
     id: getRequiredAppDataString(value, 'id', modePath),
     name: getRequiredAppDataString(value, 'name', modePath),
-    createdAt: getRequiredTimestamp(value, 'createdAt', modePath),
-    updatedAt: getRequiredTimestamp(value, 'updatedAt', modePath)
+    createdAt,
+    pinnedAt: getOptionalTimestamp(value, 'pinnedAt', modePath),
+    updatedAt
   };
 };
 
@@ -150,12 +158,20 @@ const getRequiredAppDataString = (
     property
   });
 
-const getRequiredTimestamp = (
+const getOptionalTimestamp = (
   record: JsonRecord,
-  property: keyof Pick<PersistedMode, 'createdAt' | 'updatedAt'>,
+  property: keyof Pick<PersistedMode, 'createdAt' | 'pinnedAt' | 'updatedAt'>,
   recordPath: string
 ) => {
-  const value = getRequiredAppDataString(record, property, recordPath);
+  const value = record[property];
+
+  if (value === undefined || value === null) {
+    return null;
+  }
+
+  if (typeof value !== 'string' || value.trim() === '') {
+    throw new AppDataStoreError(`${recordPath}.${property} must be a non-empty string.`);
+  }
 
   if (Number.isNaN(Date.parse(value))) {
     throw new AppDataStoreError(`${recordPath}.${property} must be a valid timestamp.`);

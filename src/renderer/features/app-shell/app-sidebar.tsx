@@ -1,6 +1,7 @@
-import { Bolt, Layers3, Settings2, Workflow } from 'lucide-react';
+import { Bolt, Settings2, SlidersHorizontal, Workflow } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { SavedMode } from '../../../shared/modes';
+import { useModes } from '../modes/use-modes-context';
+import { useAppSelection } from './use-app-selection';
 import { SidebarBrand } from './sidebar-brand';
 import { SidebarCurrentMode } from './sidebar-current-mode';
 import { SidebarFooter } from './sidebar-footer';
@@ -8,23 +9,9 @@ import { SidebarModeList } from './sidebar-mode-list';
 import { SidebarNavItem } from './sidebar-nav-item';
 import { SidebarNavSection } from './sidebar-nav-section';
 
-type AppSidebarProps = {
-  activeModeId: string | null;
-  error: string | null;
-  isLoading: boolean;
-  modes: SavedMode[];
-  onSelectMode: (modeId: string | null) => void;
-  selectedModeId: string | null;
-};
-
-export function AppSidebar({
-  activeModeId,
-  error,
-  isLoading,
-  modes,
-  onSelectMode,
-  selectedModeId
-}: AppSidebarProps) {
+export function AppSidebar() {
+  const { activeModeId, error, isLoading, modes } = useModes();
+  const { selectMode, selectedModeId } = useAppSelection();
   const activeMode = modes.find((mode) => mode.id === activeModeId) ?? null;
 
   return (
@@ -48,21 +35,20 @@ export function AppSidebar({
       <ScrollArea className="relative mt-3 min-h-0 flex-1 px-3 pb-3">
         <nav className="space-y-px">
           <SidebarNavItem
-            icon={<Layers3 className="size-3.5" aria-hidden="true" />}
+            icon={<SlidersHorizontal className="size-3.5" aria-hidden="true" />}
             isSelected={selectedModeId === null}
-            label="Overview"
+            label="Modes"
             onClick={() => {
-              onSelectMode(null);
+              selectMode(null);
             }}
           />
         </nav>
 
         <SidebarModeList
-          activeModeId={activeModeId}
           error={error}
           isLoading={isLoading}
           modes={modes}
-          onSelectMode={onSelectMode}
+          onSelectMode={selectMode}
           selectedModeId={selectedModeId}
         />
 

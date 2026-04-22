@@ -4,14 +4,22 @@ import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ModeState, SavedMode } from '../../../../shared/modes';
 import { clearApiMock, installApiMock } from '../../../test/api-test-utils';
-import { useModes } from './use-modes';
+import { useModesState } from './use-modes';
 
 const createModeState = (modes: SavedMode[], activeModeId: string | null = null): ModeState => ({
   activeModeId,
   modes
 });
 
-describe('useModes', () => {
+const createSavedMode = (id: string, name: string): SavedMode => ({
+  createdAt: '2026-04-20T12:00:00.000Z',
+  id,
+  name,
+  pinnedAt: null,
+  updatedAt: '2026-04-20T12:00:00.000Z'
+});
+
+describe('useModesState', () => {
   afterEach(() => {
     cleanup();
     clearApiMock();
@@ -19,16 +27,11 @@ describe('useModes', () => {
   });
 
   it('loads mode state from the preload bridge on mount', async () => {
-    const modes = [
-      {
-        id: 'mode-1',
-        name: 'Focus'
-      }
-    ];
+    const modes = [createSavedMode('mode-1', 'Focus')];
     const getState = vi.fn().mockResolvedValue(createModeState(modes, 'mode-1'));
     installApiMock({ modes: { getState } });
 
-    const { result } = renderHook(() => useModes());
+    const { result } = renderHook(() => useModesState());
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -42,7 +45,7 @@ describe('useModes', () => {
     const getState = vi.fn().mockRejectedValue(new Error('Bridge unavailable'));
     installApiMock({ modes: { getState } });
 
-    const { result } = renderHook(() => useModes());
+    const { result } = renderHook(() => useModesState());
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -55,32 +58,21 @@ describe('useModes', () => {
     const getState = vi.fn().mockRejectedValue('nope');
     installApiMock({ modes: { getState } });
 
-    const { result } = renderHook(() => useModes());
+    const { result } = renderHook(() => useModesState());
 
     await waitFor(() => expect(result.current.error).toBe('Unable to load modes.'));
   });
 
   it('refreshes mode state on demand', async () => {
-    const firstModes = [
-      {
-        id: 'mode-1',
-        name: 'Focus'
-      }
-    ];
-    const nextModes = [
-      ...firstModes,
-      {
-        id: 'mode-2',
-        name: 'Deep Work'
-      }
-    ];
+    const firstModes = [createSavedMode('mode-1', 'Focus')];
+    const nextModes = [...firstModes, createSavedMode('mode-2', 'Deep Work')];
     const getState = vi
       .fn()
       .mockResolvedValueOnce(createModeState(firstModes))
       .mockResolvedValueOnce(createModeState(nextModes, 'mode-2'));
     installApiMock({ modes: { getState } });
 
-    const { result } = renderHook(() => useModes());
+    const { result } = renderHook(() => useModesState());
 
     await waitFor(() => expect(result.current.modes).toEqual(firstModes));
 
@@ -96,16 +88,8 @@ describe('useModes', () => {
   });
 
   it('creates a mode and refreshes mode state', async () => {
-    const firstModes = [
-      {
-        id: 'mode-1',
-        name: 'Focus'
-      }
-    ];
-    const createdMode = {
-      id: 'mode-2',
-      name: 'Deep Work'
-    };
+    const firstModes = [createSavedMode('mode-1', 'Focus')];
+    const createdMode = createSavedMode('mode-2', 'Deep Work');
     const nextModes = [...firstModes, createdMode];
     const getState = vi
       .fn()
@@ -114,7 +98,7 @@ describe('useModes', () => {
     const create = vi.fn().mockResolvedValue(createdMode);
     installApiMock({ modes: { create, getState } });
 
-    const { result } = renderHook(() => useModes());
+    const { result } = renderHook(() => useModesState());
 
     await waitFor(() => expect(result.current.modes).toEqual(firstModes));
 
@@ -134,16 +118,8 @@ describe('useModes', () => {
   });
 
   it('renames a mode and refreshes mode state', async () => {
-    const firstModes = [
-      {
-        id: 'mode-1',
-        name: 'Focus'
-      }
-    ];
-    const renamedMode = {
-      id: 'mode-1',
-      name: 'Writing'
-    };
+    const firstModes = [createSavedMode('mode-1', 'Focus')];
+    const renamedMode = createSavedMode('mode-1', 'Writing');
     const getState = vi
       .fn()
       .mockResolvedValueOnce(createModeState(firstModes, 'mode-1'))
@@ -151,7 +127,7 @@ describe('useModes', () => {
     const rename = vi.fn().mockResolvedValue(renamedMode);
     installApiMock({ modes: { getState, rename } });
 
-    const { result } = renderHook(() => useModes());
+    const { result } = renderHook(() => useModesState());
 
     await waitFor(() => expect(result.current.modes).toEqual(firstModes));
 
@@ -171,10 +147,7 @@ describe('useModes', () => {
   });
 
   it('deletes a mode and refreshes mode state', async () => {
-    const deletedMode = {
-      id: 'mode-1',
-      name: 'Focus'
-    };
+    const deletedMode = createSavedMode('mode-1', 'Focus');
     const getState = vi
       .fn()
       .mockResolvedValueOnce(createModeState([deletedMode], 'mode-1'))
@@ -182,7 +155,7 @@ describe('useModes', () => {
     const deleteMode = vi.fn().mockResolvedValue(true);
     installApiMock({ modes: { delete: deleteMode, getState } });
 
-    const { result } = renderHook(() => useModes());
+    const { result } = renderHook(() => useModesState());
 
     await waitFor(() => expect(result.current.modes).toEqual([deletedMode]));
 
@@ -201,13 +174,38 @@ describe('useModes', () => {
     expect(getState).toHaveBeenCalledTimes(2);
   });
 
+  it('pins a mode and refreshes mode state', async () => {
+    const modes = [createSavedMode('mode-1', 'Focus')];
+    const pinnedMode = {
+      ...modes[0],
+      pinnedAt: '2026-04-21T12:00:00.000Z',
+      updatedAt: '2026-04-21T12:00:00.000Z'
+    };
+    const getState = vi
+      .fn()
+      .mockResolvedValueOnce(createModeState(modes))
+      .mockResolvedValueOnce(createModeState([pinnedMode]));
+    const setPinned = vi.fn().mockResolvedValue(pinnedMode);
+    installApiMock({ modes: { getState, setPinned } });
+
+    const { result } = renderHook(() => useModesState());
+
+    await waitFor(() => expect(result.current.modes).toEqual(modes));
+
+    let response: SavedMode | null = null;
+
+    await act(async () => {
+      response = await result.current.setModePinned('mode-1', true);
+    });
+
+    expect(setPinned).toHaveBeenCalledWith('mode-1', true);
+    expect(response).toEqual(pinnedMode);
+    expect(result.current.modes).toEqual([pinnedMode]);
+    expect(getState).toHaveBeenCalledTimes(2);
+  });
+
   it('activates a mode and refreshes mode state', async () => {
-    const modes = [
-      {
-        id: 'mode-1',
-        name: 'Focus'
-      }
-    ];
+    const modes = [createSavedMode('mode-1', 'Focus')];
     const getState = vi
       .fn()
       .mockResolvedValueOnce(createModeState(modes))
@@ -215,7 +213,7 @@ describe('useModes', () => {
     const activate = vi.fn().mockResolvedValue(true);
     installApiMock({ modes: { activate, getState } });
 
-    const { result } = renderHook(() => useModes());
+    const { result } = renderHook(() => useModesState());
 
     await waitFor(() => expect(result.current.modes).toEqual(modes));
 
@@ -234,24 +232,50 @@ describe('useModes', () => {
     expect(getState).toHaveBeenCalledTimes(2);
   });
 
+  it('deactivates a mode and refreshes mode state', async () => {
+    const modes = [createSavedMode('mode-1', 'Focus')];
+    const getState = vi
+      .fn()
+      .mockResolvedValueOnce(createModeState(modes, 'mode-1'))
+      .mockResolvedValueOnce(createModeState(modes));
+    const deactivate = vi.fn().mockResolvedValue(true);
+    installApiMock({ modes: { deactivate, getState } });
+
+    const { result } = renderHook(() => useModesState());
+
+    await waitFor(() => expect(result.current.modes).toEqual(modes));
+
+    let response = false;
+
+    await act(async () => {
+      response = await result.current.deactivateMode();
+    });
+
+    expect(deactivate).toHaveBeenCalledOnce();
+    expect(response).toBe(true);
+    expect(result.current.activeModeId).toBeNull();
+    expect(result.current.error).toBeNull();
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.modes).toEqual(modes);
+    expect(getState).toHaveBeenCalledTimes(2);
+  });
+
   it('stores an error and keeps current mode state when a mutation fails', async () => {
-    const modes = [
-      {
-        id: 'mode-1',
-        name: 'Focus'
-      }
-    ];
+    const modes = [createSavedMode('mode-1', 'Focus')];
     const getState = vi.fn().mockResolvedValue(createModeState(modes, 'mode-1'));
     const create = vi.fn().mockRejectedValue(new Error('Mode name already exists'));
     installApiMock({ modes: { create, getState } });
 
-    const { result } = renderHook(() => useModes());
+    const { result } = renderHook(() => useModesState());
 
     await waitFor(() => expect(result.current.modes).toEqual(modes));
 
     let response: SavedMode | null = {
+      createdAt: '2026-04-20T12:00:00.000Z',
       id: 'stale',
-      name: 'Stale'
+      name: 'Stale',
+      pinnedAt: null,
+      updatedAt: '2026-04-20T12:00:00.000Z'
     };
 
     await act(async () => {
