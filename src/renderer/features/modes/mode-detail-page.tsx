@@ -1,9 +1,9 @@
-import { useRef, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { ArrowLeft, Bolt, Check, Circle, Play, Power, Workflow } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAppSelection } from '../app-shell/use-app-selection';
-import { ModeDetailTitle, type ModeDetailTitleHandle } from './components/mode-detail-title';
+import { ModeDetailTitle } from './components/mode-detail-title';
 import { ModeRowOverflowMenu } from './components/mode-row-overflow-menu';
 import { useModes } from './use-modes-context';
 
@@ -19,14 +19,12 @@ export function ModeDetailPage() {
     setModePinned
   } = useModes();
   const mode = modes.find((savedMode) => savedMode.id === selectedModeId) ?? null;
-  const titleRef = useRef<ModeDetailTitleHandle>(null);
 
   if (mode === null) {
     return null;
   }
 
   const isActive = mode.id === activeModeId;
-  const startRenaming = () => titleRef.current?.startRenaming();
 
   return (
     <section className="space-y-6">
@@ -61,12 +59,7 @@ export function ModeDetailPage() {
               )}
             </span>
             <div className="min-w-0">
-              <ModeDetailTitle
-                ref={titleRef}
-                modeId={mode.id}
-                name={mode.name}
-                onRenameMode={renameMode}
-              />
+              <ModeDetailTitle modeId={mode.id} name={mode.name} onRenameMode={renameMode} />
               <p
                 className={cn(
                   'text-sm',
@@ -108,8 +101,8 @@ export function ModeDetailPage() {
 
               return deleted;
             }}
-            onRename={startRenaming}
             onSetPinned={(isPinned) => setModePinned(mode.id, isPinned)}
+            showRenameOption={false}
           />
         </div>
       </div>

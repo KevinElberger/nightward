@@ -45,7 +45,6 @@ export const useModesState = (): ModesState => {
   const runModeMutation = useCallback(
     async <Result>(mutation: () => Promise<Result>, failureResult: Result) => {
       setError(null);
-      setIsLoading(true);
 
       try {
         const result = await mutation();
@@ -59,8 +58,6 @@ export const useModesState = (): ModesState => {
         setError(getErrorMessage(mutationError, 'Unable to update modes.'));
 
         return failureResult;
-      } finally {
-        setIsLoading(false);
       }
     },
     []

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import type { SavedMode } from '../../../../shared/modes';
 import { cn } from '@/lib/utils';
 import { ModeRowOverflowMenu } from './mode-row-overflow-menu';
+import { ModeRenameControl } from './mode-rename-control';
 
 type ModeLibraryRowProps = {
   isActive: boolean;
@@ -11,6 +12,7 @@ type ModeLibraryRowProps = {
   onActivateMode: (id: string) => Promise<boolean>;
   onDeactivateMode: () => Promise<boolean>;
   onDeleteMode: (id: string) => Promise<boolean>;
+  onRenameMode: (id: string, name: string) => Promise<SavedMode | null>;
   onSelectMode: (modeId: string | null) => void;
   onSetPinned: (id: string, isPinned: boolean) => Promise<SavedMode | null>;
 };
@@ -22,9 +24,17 @@ export function ModeLibraryRow({
   onActivateMode,
   onDeactivateMode,
   onDeleteMode,
+  onRenameMode,
   onSelectMode,
   onSetPinned
 }: ModeLibraryRowProps) {
+  const statusIcon = isActive ? (
+    <Check className="size-3.5" aria-hidden="true" />
+  ) : (
+    <Circle className="size-3" aria-hidden="true" />
+  );
+  const statusLabel = isActive ? 'Active' : 'Ready';
+
   return (
     <div
       className={cn(
@@ -32,64 +42,86 @@ export function ModeLibraryRow({
         isSelected ? 'bg-white/[0.075]' : 'bg-white/[0.03] hover:bg-white/[0.048]'
       )}
     >
-      <button
-        type="button"
-        className="app-no-drag flex min-w-0 items-center gap-3 text-left"
-        onClick={() => {
-          onSelectMode(mode.id);
-        }}
-      >
-        <span
-          className={cn(
-            'flex size-7 shrink-0 items-center justify-center rounded-[4px] border border-white/[0.055] bg-white/[0.025]',
-            isActive
-              ? 'border-status-active/20 bg-status-active/8 text-status-active'
-              : 'text-status-neutral/50'
-          )}
-        >
-          {isActive ? (
-            <Check className="size-3.5" aria-hidden="true" />
-          ) : (
-            <Circle className="size-3" aria-hidden="true" />
-          )}
-        </span>
-        <span className="min-w-0">
-          <span className="block truncate text-sm font-medium text-foreground">{mode.name}</span>
+      <ModeRenameControl
+        modeId={mode.id}
+        name={mode.name}
+        onRenameMode={onRenameMode}
+        variant="row"
+        leadingContent={
           <span
             className={cn(
-              'mt-0.5 block text-xs',
-              isActive ? 'text-status-active/80' : 'text-status-neutral/50'
+              'flex size-7 shrink-0 items-center justify-center rounded-[4px] border border-white/[0.055] bg-white/[0.025]',
+              isActive
+                ? 'border-status-active/20 bg-status-active/8 text-status-active'
+                : 'text-status-neutral/50'
             )}
           >
-            {isActive ? 'Active' : 'Ready'}
+            {statusIcon}
           </span>
-        </span>
-      </button>
+        }
+      >
+        {({ startRenaming }) => (
+          <>
+            <button
+              type="button"
+              className="app-no-drag flex min-w-0 items-center gap-3 text-left"
+              onClick={() => {
+                onSelectMode(mode.id);
+              }}
+            >
+              <span
+                className={cn(
+                  'flex size-7 shrink-0 items-center justify-center rounded-[4px] border border-white/[0.055] bg-white/[0.025]',
+                  isActive
+                    ? 'border-status-active/20 bg-status-active/8 text-status-active'
+                    : 'text-status-neutral/50'
+                )}
+              >
+                {statusIcon}
+              </span>
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-medium text-foreground">
+                  {mode.name}
+                </span>
+                <span
+                  className={cn(
+                    'mt-0.5 block text-xs',
+                    isActive ? 'text-status-active/80' : 'text-status-neutral/50'
+                  )}
+                >
+                  {statusLabel}
+                </span>
+              </span>
+            </button>
 
-      <div className="app-no-drag flex items-center gap-1.5">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="h-8 rounded-[4px] px-2.5 text-white/48 hover:bg-white/[0.035] hover:text-foreground disabled:opacity-35"
-          onClick={() => {
-            void (isActive ? onDeactivateMode() : onActivateMode(mode.id));
-          }}
-        >
-          {isActive ? (
-            <Power className="size-3" aria-hidden="true" />
-          ) : (
-            <Play className="size-3" aria-hidden="true" />
-          )}
-          {isActive ? 'Deactivate' : 'Activate'}
-        </Button>
-        <ModeRowOverflowMenu
-          isPinned={mode.pinnedAt !== null}
-          modeName={mode.name}
-          onDeleteMode={() => onDeleteMode(mode.id)}
-          onSetPinned={(isPinned) => onSetPinned(mode.id, isPinned)}
-        />
-      </div>
+            <div className="app-no-drag flex items-center gap-1.5">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 rounded-[4px] px-2.5 text-white/48 hover:bg-white/[0.035] hover:text-foreground disabled:opacity-35"
+                onClick={() => {
+                  void (isActive ? onDeactivateMode() : onActivateMode(mode.id));
+                }}
+              >
+                {isActive ? (
+                  <Power className="size-3" aria-hidden="true" />
+                ) : (
+                  <Play className="size-3" aria-hidden="true" />
+                )}
+                {isActive ? 'Deactivate' : 'Activate'}
+              </Button>
+              <ModeRowOverflowMenu
+                isPinned={mode.pinnedAt !== null}
+                modeName={mode.name}
+                onDeleteMode={() => onDeleteMode(mode.id)}
+                onRename={startRenaming}
+                onSetPinned={(isPinned) => onSetPinned(mode.id, isPinned)}
+              />
+            </div>
+          </>
+        )}
+      </ModeRenameControl>
     </div>
   );
 }
