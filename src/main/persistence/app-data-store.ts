@@ -1,11 +1,7 @@
 import type { App } from 'electron';
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import {
-  APP_DATA_FILE_NAME,
-  createDefaultAppData,
-  type AppData
-} from './types';
+import { APP_DATA_FILE_NAME, createDefaultAppData, type AppData } from './types';
 import { parseAppData, validateAppData } from './app-data-validation';
 
 type AppDataStoreOptions = {

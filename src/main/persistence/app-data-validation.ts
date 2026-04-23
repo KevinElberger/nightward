@@ -6,11 +6,7 @@ import {
 } from '../../shared/modes';
 import { getRequiredString, isRecord, type JsonRecord } from '../validation/json-record';
 import { AppDataStoreError } from './app-data-store-error';
-import {
-  CURRENT_APP_DATA_SCHEMA_VERSION,
-  type AppData,
-  type PersistedMode
-} from './types';
+import { CURRENT_APP_DATA_SCHEMA_VERSION, type AppData, type PersistedMode } from './types';
 
 export const parseAppData = (fileContents: string) => {
   try {
@@ -134,10 +130,7 @@ const validateModeAction = (value: unknown, actionPath: string): ModeAction => {
   };
 };
 
-const validateRepeatPolicy = (
-  value: unknown,
-  actionPath: string
-): ModeActionRepeatPolicy => {
+const validateRepeatPolicy = (value: unknown, actionPath: string): ModeActionRepeatPolicy => {
   if (value === 'every-activation' || value === 'once-per-day') {
     return value;
   }
@@ -145,11 +138,7 @@ const validateRepeatPolicy = (
   throw new AppDataStoreError(`${actionPath}.repeatPolicy must be a supported repeat policy.`);
 };
 
-const getRequiredAppDataString = (
-  record: JsonRecord,
-  property: string,
-  recordPath: string
-) =>
+const getRequiredAppDataString = (record: JsonRecord, property: string, recordPath: string) =>
   getRequiredString({
     createError: (message) => new AppDataStoreError(message),
     label: recordPath,
