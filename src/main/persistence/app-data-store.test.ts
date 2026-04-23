@@ -6,6 +6,10 @@ import { AppDataStore, AppDataStoreError } from './app-data-store';
 import { CURRENT_APP_DATA_SCHEMA_VERSION, createDefaultAppData, type AppData } from './types';
 
 const createTestMode = () => ({
+  actions: {
+    enter: [],
+    exit: []
+  },
   id: 'mode-1',
   name: 'Focus',
   createdAt: '2026-04-20T12:00:00.000Z',
@@ -78,12 +82,76 @@ describe('AppDataStore', () => {
     const appData = await store.read();
 
     expect(appData.modes[0]).toMatchObject({
+      actions: {
+        enter: [],
+        exit: []
+      },
       id: 'mode-1',
       name: 'Focus'
     });
     expect(Date.parse(appData.modes[0].createdAt)).not.toBeNaN();
     expect(appData.modes[0].pinnedAt).toBeNull();
     expect(appData.modes[0].updatedAt).toBe(appData.modes[0].createdAt);
+  });
+
+  it('round-trips persisted mode actions through disk', async () => {
+    const appData: AppData = {
+      activeModeId: null,
+      schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
+      modes: [
+        {
+          ...createTestMode(),
+          actions: {
+            enter: [
+              {
+                appName: 'Calendar',
+                appPath: '/Applications/Calendar.app',
+                bundleId: 'com.apple.iCal',
+                enabled: true,
+                id: 'action-1',
+                onlyOpenIfNotRunning: true,
+                repeatPolicy: 'once-per-day',
+                type: 'open-app'
+              }
+            ],
+            exit: []
+          }
+        }
+      ]
+    };
+
+    await store.write(appData);
+
+    await expect(store.read()).resolves.toEqual(appData);
+  });
+
+  it('throws an app data store error for invalid mode actions', async () => {
+    await writeFile(
+      store.filePath,
+      JSON.stringify({
+        schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
+        modes: [
+          {
+            ...createTestMode(),
+            actions: {
+              enter: [
+                {
+                  id: 'action-1',
+                  type: 'open-url'
+                }
+              ],
+              exit: []
+            }
+          }
+        ]
+      }),
+      'utf8'
+    );
+
+    await expect(store.read()).rejects.toBeInstanceOf(AppDataStoreError);
+    await expect(store.read()).rejects.toThrow(
+      'modes[0].actions.enter[0].type must be a supported action type.'
+    );
   });
 
   it('throws an app data store error for malformed JSON', async () => {
