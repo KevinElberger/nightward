@@ -3,8 +3,15 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { AppDataStore, AppDataStoreError } from './app-data-store';
-import { createTestPersistedMode } from './persisted-mode-test-fixture';
 import { CURRENT_APP_DATA_SCHEMA_VERSION, createDefaultAppData, type AppData } from './types';
+
+const createTestPersistedMode = () => ({
+  createdAt: '2026-04-20T12:00:00.000Z',
+  id: 'mode-1',
+  name: 'Focus',
+  pinnedAt: null,
+  updatedAt: '2026-04-20T12:00:00.000Z'
+});
 
 describe('AppDataStore', () => {
   let userDataPath: string;

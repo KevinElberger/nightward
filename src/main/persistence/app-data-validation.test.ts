@@ -4,10 +4,6 @@ import { parseAppData, validateAppData } from './app-data-validation';
 import { CURRENT_APP_DATA_SCHEMA_VERSION, type AppData } from './types';
 
 const createMode = () => ({
-  actions: {
-    enter: [],
-    exit: []
-  },
   createdAt: '2026-04-20T12:00:00.000Z',
   id: 'mode-1',
   name: 'Focus',

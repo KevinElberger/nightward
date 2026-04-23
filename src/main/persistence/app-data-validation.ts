@@ -1,6 +1,5 @@
 import { getRequiredString, isRecord, type JsonRecord } from '../validation/json-record';
 import { AppDataStoreError } from './app-data-store-error';
-import { validatePersistedModeActions } from './persisted-mode-actions';
 import { CURRENT_APP_DATA_SCHEMA_VERSION, type AppData, type PersistedMode } from './types';
 
 export const parseAppData = (fileContents: string) => {
@@ -64,7 +63,6 @@ const validatePersistedMode = (value: unknown, index: number): PersistedMode => 
   const updatedAt = getOptionalTimestamp(value, 'updatedAt', modePath) ?? createdAt;
 
   return {
-    ...validatePersistedModeActions(value.actions, modePath),
     id: getRequiredAppDataString(value, 'id', modePath),
     name: getRequiredAppDataString(value, 'name', modePath),
     createdAt,
