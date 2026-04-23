@@ -5,10 +5,10 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { AppDataStore, AppDataStoreError } from './app-data-store';
 import { CURRENT_APP_DATA_SCHEMA_VERSION, createDefaultAppData, type AppData } from './types';
 
-const createTestMode = () => ({
+const createTestPersistedMode = () => ({
+  createdAt: '2026-04-20T12:00:00.000Z',
   id: 'mode-1',
   name: 'Focus',
-  createdAt: '2026-04-20T12:00:00.000Z',
   pinnedAt: null,
   updatedAt: '2026-04-20T12:00:00.000Z'
 });
@@ -34,7 +34,7 @@ describe('AppDataStore', () => {
     const appData: AppData = {
       activeModeId: 'mode-1',
       schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
-      modes: [createTestMode()]
+      modes: [createTestPersistedMode()]
     };
 
     await store.write(appData);
@@ -48,7 +48,7 @@ describe('AppDataStore', () => {
       store.filePath,
       JSON.stringify({
         schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
-        modes: [createTestMode()]
+        modes: [createTestPersistedMode()]
       }),
       'utf8'
     );
@@ -56,7 +56,7 @@ describe('AppDataStore', () => {
     await expect(store.read()).resolves.toEqual({
       activeModeId: null,
       schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
-      modes: [createTestMode()]
+      modes: [createTestPersistedMode()]
     });
   });
 
