@@ -35,6 +35,7 @@ export class AppController {
       this.tray = new TrayController({
         app: this.app,
         modeService: this.modeService,
+        onModesChanged: this.handleModesChanged,
         onOpenSettings: () => {
           this.settingsWindow.show();
         }
@@ -43,9 +44,7 @@ export class AppController {
       registerModeIpcHandlers({
         ipcMain,
         modeService: this.modeService,
-        onModesChanged: () => {
-          this.tray?.refresh();
-        }
+        onModesChanged: this.handleModesChanged
       });
 
       this.settingsWindow.create();
@@ -66,4 +65,13 @@ export class AppController {
       }
     });
   }
+
+  private readonly handleModesChanged = () => {
+    if (this.modeService === null) {
+      return;
+    }
+
+    this.tray?.refresh();
+    this.settingsWindow.sendModeStateChanged(this.modeService.getModeState());
+  };
 }

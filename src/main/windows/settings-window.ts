@@ -1,5 +1,7 @@
 import { BrowserWindow } from 'electron';
 import path from 'node:path';
+import { MODE_IPC_EVENTS } from '../../shared/mode-ipc';
+import type { ModeState } from '../../shared/modes';
 
 export type RendererConfig = {
   devServerUrl: string | undefined;
@@ -86,6 +88,14 @@ export class SettingsWindowController {
 
   prepareForQuit() {
     this.isQuitting = true;
+  }
+
+  sendModeStateChanged(modeState: ModeState) {
+    if (this.window === null || this.window.isDestroyed()) {
+      return;
+    }
+
+    this.window.webContents.send(MODE_IPC_EVENTS.stateChanged, modeState);
   }
 
   private loadRenderer(window: BrowserWindow) {

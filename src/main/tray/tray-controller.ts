@@ -7,18 +7,21 @@ const SAVED_MODE_MENU_LIMIT = 5;
 type TrayControllerOptions = {
   app: App;
   modeService: ModeService;
+  onModesChanged: () => void;
   onOpenSettings: () => void;
 };
 
 export class TrayController {
   private readonly app: App;
   private readonly modeService: ModeService;
+  private readonly onModesChanged: () => void;
   private readonly onOpenSettings: () => void;
   private tray: Tray | null = null;
 
-  constructor({ app, modeService, onOpenSettings }: TrayControllerOptions) {
+  constructor({ app, modeService, onModesChanged, onOpenSettings }: TrayControllerOptions) {
     this.app = app;
     this.modeService = modeService;
+    this.onModesChanged = onModesChanged;
     this.onOpenSettings = onOpenSettings;
   }
 
@@ -76,8 +79,11 @@ export class TrayController {
     return this.modeService.getSavedModes(SAVED_MODE_MENU_LIMIT).map((mode) => ({
       label: mode.name,
       click: async () => {
-        await this.modeService.activateSavedMode(mode.id);
-        this.rebuildMenu();
+        const activated = await this.modeService.activateSavedMode(mode.id);
+
+        if (activated) {
+          this.onModesChanged();
+        }
       }
     }));
   }
@@ -91,8 +97,11 @@ export class TrayController {
       {
         label: 'Deactivate Mode',
         click: async () => {
-          await this.modeService.deactivateActiveMode();
-          this.rebuildMenu();
+          const deactivated = await this.modeService.deactivateActiveMode();
+
+          if (deactivated) {
+            this.onModesChanged();
+          }
         }
       }
     ];

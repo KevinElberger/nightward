@@ -11,6 +11,10 @@ export const MODE_IPC_CHANNELS = {
   deactivate: 'modes:deactivate'
 } as const;
 
+export const MODE_IPC_EVENTS = {
+  stateChanged: 'modes:state-changed'
+} as const;
+
 export type CreateModeRequest = {
   name: string;
 };
@@ -41,3 +45,4 @@ export type SetModePinnedResponse = SavedMode | null;
 export type DeleteModeResponse = boolean;
 export type ActivateModeResponse = boolean;
 export type DeactivateModeResponse = boolean;
+export type ModeStateChangedPayload = ModeState;
