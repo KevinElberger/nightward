@@ -21,13 +21,7 @@ function RenameHarness({
   name = 'Focus',
   onRenameMode = vi.fn().mockResolvedValue({ id: 'mode-1' })
 }: RenameHarnessProps) {
-  const {
-    draftName,
-    isRenaming,
-    renameInputRef,
-    setDraftName,
-    startRenaming
-  } = useModeRename({
+  const { draftName, isRenaming, renameInputRef, setDraftName, startRenaming } = useModeRename({
     modeId: 'mode-1',
     name,
     onRenameMode

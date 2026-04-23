@@ -59,11 +59,7 @@ export function ModeDetailPage() {
               )}
             </span>
             <div className="min-w-0">
-              <ModeDetailTitle
-                modeId={mode.id}
-                name={mode.name}
-                onRenameMode={renameMode}
-              />
+              <ModeDetailTitle modeId={mode.id} name={mode.name} onRenameMode={renameMode} />
               <p
                 className={cn(
                   'text-sm',

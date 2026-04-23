@@ -10,12 +10,7 @@ type ModeDetailTitleProps = {
 
 export function ModeDetailTitle({ modeId, name, onRenameMode }: ModeDetailTitleProps) {
   return (
-    <ModeRenameControl
-      modeId={modeId}
-      name={name}
-      onRenameMode={onRenameMode}
-      variant="title"
-    >
+    <ModeRenameControl modeId={modeId} name={name} onRenameMode={onRenameMode} variant="title">
       {({ startRenaming, triggerButtonClassName, triggerButtonSize }) => (
         <div className="flex min-w-0 items-center gap-2">
           <h2 className="truncate text-2xl font-semibold tracking-normal text-foreground">
