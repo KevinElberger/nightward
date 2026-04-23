@@ -1,21 +1,11 @@
 import { describe, expect, it } from 'vitest';
+import { buildOpenAppModeAction } from '@test/builders/shared/modes';
+import { buildAppData, buildPersistedMode } from '@test/builders/main/persistence';
 import { AppDataStoreError } from './app-data-store-error';
 import { parseAppData, validateAppData } from './app-data-validation';
 import { CURRENT_APP_DATA_SCHEMA_VERSION, type AppData } from './types';
 
-const createMode = () => ({
-  createdAt: '2026-04-20T12:00:00.000Z',
-  id: 'mode-1',
-  name: 'Focus',
-  pinnedAt: null,
-  updatedAt: '2026-04-20T12:00:00.000Z'
-});
-
-const createAppData = (): AppData => ({
-  activeModeId: null,
-  schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
-  modes: [createMode()]
-});
+const createAppData = (): AppData => buildAppData();
 
 describe('app-data-validation', () => {
   it('parses valid app data', () => {
@@ -56,7 +46,7 @@ describe('app-data-validation', () => {
   it('defaults missing activeModeId to null', () => {
     const appData = validateAppData({
       schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
-      modes: [createMode()]
+      modes: [buildPersistedMode()]
     });
 
     expect(appData.activeModeId).toBeNull();
@@ -86,6 +76,10 @@ describe('app-data-validation', () => {
     expect(appData.modes[0]).toMatchObject({
       id: 'mode-1',
       name: 'Focus',
+      actions: {
+        enter: [],
+        exit: []
+      },
       pinnedAt: null
     });
     expect(Date.parse(appData.modes[0].createdAt)).not.toBeNaN();
@@ -123,11 +117,107 @@ describe('app-data-validation', () => {
         schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
         modes: [
           {
-            ...createMode(),
+            ...buildPersistedMode(),
             pinnedAt: 'not-a-date'
           }
         ]
       })
     ).toThrow('modes[0].pinnedAt must be a valid timestamp.');
+  });
+
+  it('accepts valid persisted open-app actions', () => {
+    const appData = validateAppData({
+      schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
+      modes: [
+        buildPersistedMode({
+          actions: {
+            enter: [buildOpenAppModeAction()],
+            exit: []
+          }
+        })
+      ]
+    });
+
+    expect(appData.modes[0].actions.enter).toEqual([buildOpenAppModeAction()]);
+  });
+
+  it('hydrates missing actions to empty action lists', () => {
+    const appData = validateAppData({
+      schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
+      modes: [
+        {
+          createdAt: '2026-04-20T12:00:00.000Z',
+          id: 'mode-1',
+          name: 'Focus',
+          pinnedAt: null,
+          updatedAt: '2026-04-20T12:00:00.000Z'
+        }
+      ]
+    });
+
+    expect(appData.modes[0].actions).toEqual({
+      enter: [],
+      exit: []
+    });
+  });
+
+  it('rejects invalid action collections', () => {
+    expect(() =>
+      validateAppData({
+        schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
+        modes: [
+          {
+            ...buildPersistedMode(),
+            actions: 'nope'
+          }
+        ]
+      })
+    ).toThrow('modes[0].actions must be a JSON object.');
+  });
+
+  it('rejects unsupported action types', () => {
+    expect(() =>
+      validateAppData({
+        schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
+        modes: [
+          {
+            ...buildPersistedMode(),
+            actions: {
+              enter: [
+                {
+                  ...buildOpenAppModeAction(),
+                  type: 'launch-missiles'
+                }
+              ],
+              exit: []
+            }
+          }
+        ]
+      })
+    ).toThrow('modes[0].actions.enter[0].type must be a supported action type.');
+  });
+
+  it('rejects unsupported action repeat policies', () => {
+    expect(() =>
+      validateAppData({
+        schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
+        modes: [
+          {
+            ...buildPersistedMode(),
+            actions: {
+              enter: [
+                {
+                  ...buildOpenAppModeAction(),
+                  repeatPolicy: 'sometimes'
+                }
+              ],
+              exit: []
+            }
+          }
+        ]
+      })
+    ).toThrow(
+      'modes[0].actions.enter[0].repeatPolicy must be a supported repeat policy.'
+    );
   });
 });

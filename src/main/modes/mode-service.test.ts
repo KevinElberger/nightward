@@ -2,32 +2,13 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { buildPersistedMode } from '@test/builders/main/persistence';
-import { createEmptyModeActionSet, MODE_NAME_MAX_LENGTH, type ModeActionSet } from '@shared/modes';
+import { buildAppData } from '@test/builders/main/persistence';
+import { MODE_NAME_MAX_LENGTH } from '@shared/modes';
 import { AppDataStore } from '../persistence/app-data-store';
 import { CURRENT_APP_DATA_SCHEMA_VERSION, type AppData } from '../persistence/types';
 import { ModeService, ModeServiceError, NO_ACTIVE_MODE_LABEL } from './mode-service';
 
-type AppDataWithActions = Omit<AppData, 'modes'> & {
-  modes: Array<AppData['modes'][number] & { actions: ModeActionSet }>;
-};
-
-const createAppData = (): AppDataWithActions => ({
-  activeModeId: null,
-  schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
-  modes: [
-    {
-      ...buildPersistedMode(),
-      actions: createEmptyModeActionSet()
-    }
-  ]
-});
-
-const createPersistedAppData = (): AppData => ({
-  activeModeId: null,
-  schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
-  modes: [buildPersistedMode()]
-});
+const createAppData = (): AppData => buildAppData();
 
 describe('ModeService', () => {
   let userDataPath: string;
@@ -147,7 +128,7 @@ describe('ModeService', () => {
       service.renameMode('mode-1', 'a'.repeat(MODE_NAME_MAX_LENGTH + 1))
     ).rejects.toThrow(`Mode name must be ${MODE_NAME_MAX_LENGTH} characters or less.`);
 
-    await expect(store.read()).resolves.toEqual(createPersistedAppData());
+    await expect(store.read()).resolves.toEqual(createAppData());
   });
 
   it('renames a mode and persists the updated timestamp', async () => {

@@ -1,3 +1,4 @@
+import { createEmptyModeActionSet } from '@shared/modes';
 import {
   CURRENT_APP_DATA_SCHEMA_VERSION,
   type AppData,
@@ -5,6 +6,7 @@ import {
 } from '../../../main/persistence/types';
 
 export const buildPersistedMode = (overrides: Partial<PersistedMode> = {}): PersistedMode => ({
+  actions: createEmptyModeActionSet(),
   createdAt: '2024-01-01T00:00:00.000Z',
   id: 'mode-1',
   name: 'Focus',
