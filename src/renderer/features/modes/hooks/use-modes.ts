@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { SavedMode } from '../../../../shared/modes';
+import type { ModeState, SavedMode } from '../../../../shared/modes';
 
 export type ModesState = {
   activateMode: (id: string) => Promise<boolean>;
@@ -24,6 +24,11 @@ export const useModesState = (): ModesState => {
   const [isLoading, setIsLoading] = useState(true);
   const [modes, setModes] = useState<SavedMode[]>([]);
 
+  const applyModeState = useCallback((modeState: ModeState) => {
+    setActiveModeId(modeState.activeModeId);
+    setModes(modeState.modes);
+  }, []);
+
   const loadModeState = useCallback(async () => {
     setError(null);
     setIsLoading(true);
@@ -31,8 +36,7 @@ export const useModesState = (): ModesState => {
     try {
       const modeState = await window.nightward.modes.getState();
 
-      setActiveModeId(modeState.activeModeId);
-      setModes(modeState.modes);
+      applyModeState(modeState);
     } catch (loadError) {
       setError(getErrorMessage(loadError, 'Unable to load modes.'));
       setActiveModeId(null);
@@ -40,7 +44,7 @@ export const useModesState = (): ModesState => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [applyModeState]);
 
   const runModeMutation = useCallback(
     async <Result>(mutation: () => Promise<Result>, failureResult: Result) => {
@@ -50,8 +54,7 @@ export const useModesState = (): ModesState => {
         const result = await mutation();
         const modeState = await window.nightward.modes.getState();
 
-        setActiveModeId(modeState.activeModeId);
-        setModes(modeState.modes);
+        applyModeState(modeState);
 
         return result;
       } catch (mutationError) {
@@ -60,7 +63,7 @@ export const useModesState = (): ModesState => {
         return failureResult;
       }
     },
-    []
+    [applyModeState]
   );
 
   const createMode = useCallback(
@@ -102,6 +105,16 @@ export const useModesState = (): ModesState => {
 
     void loadInitialModes();
   }, [loadModeState]);
+
+  useEffect(
+    () =>
+      window.nightward.modes.onChanged((modeState) => {
+        setError(null);
+        setIsLoading(false);
+        applyModeState(modeState);
+      }),
+    [applyModeState]
+  );
 
   return {
     activateMode,

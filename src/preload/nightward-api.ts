@@ -1,5 +1,6 @@
 import {
   MODE_IPC_CHANNELS,
+  MODE_IPC_EVENTS,
   type ActivateModeRequest,
   type ActivateModeResponse,
   type CreateModeRequest,
@@ -9,6 +10,7 @@ import {
   type DeleteModeResponse,
   type GetModeStateResponse,
   type ListModesResponse,
+  type ModeStateChangedPayload,
   type RenameModeRequest,
   type RenameModeResponse,
   type SetModePinnedRequest,
@@ -16,11 +18,15 @@ import {
 } from '../shared/mode-ipc';
 import type { NightwardApi } from '../shared/nightward-api';
 
-type IpcInvoker = {
+type IpcRendererListener = (event: unknown, payload: unknown) => void;
+
+type IpcRendererBridge = {
   invoke(channel: string, request?: unknown): Promise<unknown>;
+  on(channel: string, listener: IpcRendererListener): void;
+  removeListener(channel: string, listener: IpcRendererListener): void;
 };
 
-export const createNightwardApi = (ipcRenderer: IpcInvoker): NightwardApi => ({
+export const createNightwardApi = (ipcRenderer: IpcRendererBridge): NightwardApi => ({
   modes: {
     getState: () => ipcRenderer.invoke(MODE_IPC_CHANNELS.getState) as Promise<GetModeStateResponse>,
     list: () => ipcRenderer.invoke(MODE_IPC_CHANNELS.list) as Promise<ListModesResponse>,
@@ -47,6 +53,17 @@ export const createNightwardApi = (ipcRenderer: IpcInvoker): NightwardApi => ({
         id
       } satisfies ActivateModeRequest) as Promise<ActivateModeResponse>,
     deactivate: () =>
-      ipcRenderer.invoke(MODE_IPC_CHANNELS.deactivate) as Promise<DeactivateModeResponse>
+      ipcRenderer.invoke(MODE_IPC_CHANNELS.deactivate) as Promise<DeactivateModeResponse>,
+    onChanged: (listener) => {
+      const ipcListener: IpcRendererListener = (_event, payload) => {
+        listener(payload as ModeStateChangedPayload);
+      };
+
+      ipcRenderer.on(MODE_IPC_EVENTS.stateChanged, ipcListener);
+
+      return () => {
+        ipcRenderer.removeListener(MODE_IPC_EVENTS.stateChanged, ipcListener);
+      };
+    }
   }
 });

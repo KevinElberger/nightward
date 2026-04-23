@@ -87,6 +87,38 @@ describe('useModesState', () => {
     expect(getState).toHaveBeenCalledTimes(2);
   });
 
+  it('updates mode state from preload change events', async () => {
+    const firstModes = [createSavedMode('mode-1', 'Focus')];
+    const nextModes = [...firstModes, createSavedMode('mode-2', 'Deep Work')];
+    const getState = vi.fn().mockResolvedValue(createModeState(firstModes));
+    const unsubscribe = vi.fn();
+    let emitModeStateChange: (modeState: ModeState) => void = () => {};
+    const onChanged = vi.fn((listener: (modeState: ModeState) => void) => {
+      emitModeStateChange = listener;
+
+      return unsubscribe;
+    });
+    installApiMock({ modes: { getState, onChanged } });
+
+    const { result, unmount } = renderHook(() => useModesState());
+
+    await waitFor(() => expect(result.current.modes).toEqual(firstModes));
+
+    act(() => {
+      emitModeStateChange(createModeState(nextModes, 'mode-2'));
+    });
+
+    expect(result.current.activeModeId).toBe('mode-2');
+    expect(result.current.error).toBeNull();
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.modes).toEqual(nextModes);
+    expect(getState).toHaveBeenCalledOnce();
+
+    unmount();
+
+    expect(unsubscribe).toHaveBeenCalledOnce();
+  });
+
   it('creates a mode and refreshes mode state', async () => {
     const firstModes = [createSavedMode('mode-1', 'Focus')];
     const createdMode = createSavedMode('mode-2', 'Deep Work');

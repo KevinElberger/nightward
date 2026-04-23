@@ -5,6 +5,7 @@ import type {
   DeleteModeResponse,
   GetModeStateResponse,
   ListModesResponse,
+  ModeStateChangedPayload,
   RenameModeResponse,
   SetModePinnedResponse
 } from './mode-ipc';
@@ -19,5 +20,6 @@ export type NightwardApi = {
     delete(id: string): Promise<DeleteModeResponse>;
     activate(id: string): Promise<ActivateModeResponse>;
     deactivate(): Promise<DeactivateModeResponse>;
+    onChanged(listener: (modeState: ModeStateChangedPayload) => void): () => void;
   };
 };
