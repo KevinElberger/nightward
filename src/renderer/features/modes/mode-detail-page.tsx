@@ -1,9 +1,10 @@
-import type { ReactNode } from 'react';
-import { ArrowLeft, Bolt, Check, Circle, Play, Power, Workflow } from 'lucide-react';
+import { ArrowLeft, Check, Circle, Play, Power } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAppSelection } from '../app-shell/use-app-selection';
+import { ModeActionPhaseSection } from './components/mode-action-phase-section';
 import { ModeDetailTitle } from './components/mode-detail-title';
+import { ModeTriggerSummary } from './components/mode-trigger-summary';
 import { ModeRowOverflowMenu } from './components/mode-row-overflow-menu';
 import { useModes } from './use-modes-context';
 
@@ -107,63 +108,23 @@ export function ModeDetailPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
-        <ModeDetailSection
-          icon={<Bolt className="size-4" aria-hidden="true" />}
-          title="Actions"
-          meta="0 configured"
-          items={['Apps', 'System', 'Scripts']}
-        />
-        <ModeDetailSection
-          icon={<Workflow className="size-4" aria-hidden="true" />}
-          title="Triggers"
-          meta="Manual"
-          items={['Schedule', 'App launch', 'Shortcut']}
-        />
-        <ModeDetailSection
-          title="Exit behavior"
-          meta="Default"
-          items={['Restore previous state', 'Leave apps unchanged', 'Run cleanup']}
-        />
-      </div>
-    </section>
-  );
-}
-
-function ModeDetailSection({
-  icon,
-  items,
-  meta,
-  title
-}: {
-  icon?: ReactNode;
-  items: string[];
-  meta: string;
-  title: string;
-}) {
-  return (
-    <section className="overflow-hidden rounded-[6px] border border-white/[0.075] bg-white/[0.042] shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
-      <div className="flex items-center justify-between gap-3 border-b border-white/[0.06] bg-white/[0.016] px-4 py-3">
-        <div className="flex min-w-0 items-center gap-2.5">
-          {icon ? (
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-[4px] border border-white/[0.065] bg-white/[0.04] text-primary">
-              {icon}
-            </span>
-          ) : null}
-          <h3 className="truncate text-sm font-semibold tracking-normal text-foreground">
-            {title}
-          </h3>
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="space-y-4">
+          <ModeActionPhaseSection
+            actions={mode.actions.enter}
+            addLabel="Add start action"
+            emptyTitle="No start actions"
+            title="When Mode Starts"
+          />
+          <ModeActionPhaseSection
+            actions={mode.actions.exit}
+            addLabel="Add end action"
+            emptyTitle="No end actions"
+            title="When Mode Ends"
+          />
         </div>
-        <span className="shrink-0 text-xs font-medium text-white/34">{meta}</span>
-      </div>
 
-      <div className="divide-y divide-white/[0.045]">
-        {items.map((item) => (
-          <div key={item} className="flex h-12 w-full items-center justify-between px-4 text-left">
-            <span className="text-sm font-medium text-white/72">{item}</span>
-            <span className="text-xs text-white/30">Not set</span>
-          </div>
-        ))}
+        <ModeTriggerSummary />
       </div>
     </section>
   );

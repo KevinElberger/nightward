@@ -38,7 +38,7 @@ export function ModeLibraryRow({
   return (
     <div
       className={cn(
-        'group/row grid min-h-[3.75rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 transition-colors',
+        'group/row relative grid min-h-[3.75rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 transition-colors',
         isSelected ? 'bg-white/[0.075]' : 'bg-white/[0.03] hover:bg-white/[0.048]'
       )}
     >
@@ -64,11 +64,14 @@ export function ModeLibraryRow({
           <>
             <button
               type="button"
-              className="app-no-drag flex min-w-0 items-center gap-3 text-left"
+              aria-label={`Open details for ${mode.name}`}
+              className="app-no-drag absolute inset-0 z-0 cursor-pointer rounded-[inherit] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/35"
               onClick={() => {
                 onSelectMode(mode.id);
               }}
-            >
+            />
+
+            <div className="pointer-events-none relative z-10 flex min-w-0 items-center gap-3">
               <span
                 className={cn(
                   'flex size-7 shrink-0 items-center justify-center rounded-[4px] border border-white/[0.055] bg-white/[0.025]',
@@ -92,9 +95,9 @@ export function ModeLibraryRow({
                   {statusLabel}
                 </span>
               </span>
-            </button>
+            </div>
 
-            <div className="app-no-drag flex items-center gap-1.5">
+            <div className="app-no-drag relative z-20 flex items-center gap-1.5">
               <Button
                 type="button"
                 variant="ghost"

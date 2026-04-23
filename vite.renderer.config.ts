@@ -13,7 +13,8 @@ export default defineConfig(async () => {
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
-        '@': path.resolve(dirname, 'src/renderer')
+        '@': path.resolve(dirname, 'src/renderer'),
+        '@shared': path.resolve(dirname, 'src/shared')
       }
     }
   };

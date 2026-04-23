@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { MODE_NAME_MAX_LENGTH } from '../../shared/modes';
+import { createEmptyModeActionSet, MODE_NAME_MAX_LENGTH, type ModeActionSet } from '@shared/modes';
 import type { AppDataStore } from '../persistence/app-data-store';
 import { createDefaultAppData, type AppData, type PersistedMode } from '../persistence/types';
 import type { ModeState, SavedMode } from './types';
@@ -14,12 +14,12 @@ export class ModeServiceError extends Error {
 }
 
 export class ModeService {
-  private appData: AppData = createDefaultAppData();
+  private appData: AppDataWithActions = addModeActionsToAppData(createDefaultAppData());
 
   constructor(private readonly appDataStore: AppDataStore) {}
 
   async initialize() {
-    this.appData = await this.appDataStore.read();
+    this.appData = addModeActionsToAppData(await this.appDataStore.read());
   }
 
   getCurrentModeLabel() {
@@ -71,7 +71,8 @@ export class ModeService {
 
   async createMode(name: string) {
     const now = new Date().toISOString();
-    const mode: PersistedMode = {
+    const mode: PersistedModeWithActions = {
+      actions: createEmptyModeActionSet(),
       id: randomUUID(),
       name: normalizeModeName(name),
       createdAt: now,
@@ -94,7 +95,7 @@ export class ModeService {
       return null;
     }
 
-    const renamedMode: PersistedMode = {
+    const renamedMode: PersistedModeWithActions = {
       ...mode,
       name: normalizeModeName(name),
       updatedAt: new Date().toISOString()
@@ -118,7 +119,7 @@ export class ModeService {
     }
 
     const now = new Date().toISOString();
-    const pinnedMode: PersistedMode = {
+    const pinnedMode: PersistedModeWithActions = {
       ...mode,
       pinnedAt: isPinned ? (mode.pinnedAt ?? now) : null,
       updatedAt: now
@@ -150,7 +151,7 @@ export class ModeService {
     return true;
   }
 
-  private async persistAppData(data: AppData) {
+  private async persistAppData(data: AppDataWithActions) {
     await this.appDataStore.write(data);
     this.appData = data;
   }
@@ -174,7 +175,36 @@ const normalizeModeName = (name: string) => {
   return normalizedName;
 };
 
-const toSavedMode = ({ createdAt, id, name, pinnedAt, updatedAt }: PersistedMode): SavedMode => ({
+type PersistedModeWithActions = PersistedMode & {
+  actions: ModeActionSet;
+};
+
+type AppDataWithActions = Omit<AppData, 'modes'> & {
+  modes: PersistedModeWithActions[];
+};
+
+const addModeActionsToPersistedMode = (mode: PersistedMode): PersistedModeWithActions => ({
+  ...mode,
+  actions: createEmptyModeActionSet()
+});
+
+const addModeActionsToAppData = (appData: AppData): AppDataWithActions => ({
+  ...appData,
+  modes: appData.modes.map(addModeActionsToPersistedMode)
+});
+
+const toSavedMode = ({
+  actions,
+  createdAt,
+  id,
+  name,
+  pinnedAt,
+  updatedAt
+}: PersistedModeWithActions): SavedMode => ({
+  actions: {
+    enter: [...actions.enter],
+    exit: [...actions.exit]
+  },
   createdAt,
   id,
   name,

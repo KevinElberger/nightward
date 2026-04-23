@@ -2,23 +2,31 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { MODE_NAME_MAX_LENGTH } from '../../shared/modes';
+import { buildPersistedMode } from '@test/builders/main/persistence';
+import { createEmptyModeActionSet, MODE_NAME_MAX_LENGTH, type ModeActionSet } from '@shared/modes';
 import { AppDataStore } from '../persistence/app-data-store';
 import { CURRENT_APP_DATA_SCHEMA_VERSION, type AppData } from '../persistence/types';
 import { ModeService, ModeServiceError, NO_ACTIVE_MODE_LABEL } from './mode-service';
 
-const createAppData = (): AppData => ({
+type AppDataWithActions = Omit<AppData, 'modes'> & {
+  modes: Array<AppData['modes'][number] & { actions: ModeActionSet }>;
+};
+
+const createAppData = (): AppDataWithActions => ({
   activeModeId: null,
   schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
   modes: [
     {
-      id: 'mode-1',
-      name: 'Focus',
-      createdAt: '2024-01-01T00:00:00.000Z',
-      pinnedAt: null,
-      updatedAt: '2024-01-01T00:00:00.000Z'
+      ...buildPersistedMode(),
+      actions: createEmptyModeActionSet()
     }
   ]
+});
+
+const createPersistedAppData = (): AppData => ({
+  activeModeId: null,
+  schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
+  modes: [buildPersistedMode()]
 });
 
 describe('ModeService', () => {
@@ -43,6 +51,10 @@ describe('ModeService', () => {
 
     expect(service.getSavedModes(5)).toEqual([
       {
+        actions: {
+          enter: [],
+          exit: []
+        },
         createdAt: '2024-01-01T00:00:00.000Z',
         id: 'mode-1',
         name: 'Focus',
@@ -65,6 +77,10 @@ describe('ModeService', () => {
       activeModeId: 'mode-1',
       modes: [
         {
+          actions: {
+            enter: [],
+            exit: []
+          },
           createdAt: '2024-01-01T00:00:00.000Z',
           id: 'mode-1',
           name: 'Focus',
@@ -82,6 +98,10 @@ describe('ModeService', () => {
     const persistedData = await store.read();
 
     expect(createdMode.id).toEqual(expect.any(String));
+    expect(createdMode.actions).toEqual({
+      enter: [],
+      exit: []
+    });
     expect(createdMode.name).toBe('Deep Work');
     expect(Date.parse(createdMode.createdAt)).not.toBeNaN();
     expect(createdMode.pinnedAt).toBeNull();
@@ -127,7 +147,7 @@ describe('ModeService', () => {
       service.renameMode('mode-1', 'a'.repeat(MODE_NAME_MAX_LENGTH + 1))
     ).rejects.toThrow(`Mode name must be ${MODE_NAME_MAX_LENGTH} characters or less.`);
 
-    await expect(store.read()).resolves.toEqual(createAppData());
+    await expect(store.read()).resolves.toEqual(createPersistedAppData());
   });
 
   it('renames a mode and persists the updated timestamp', async () => {
@@ -138,6 +158,10 @@ describe('ModeService', () => {
     const persistedData = await store.read();
 
     expect(renamedMode).toEqual({
+      actions: {
+        enter: [],
+        exit: []
+      },
       createdAt: '2024-01-01T00:00:00.000Z',
       id: 'mode-1',
       name: 'Deep Work',

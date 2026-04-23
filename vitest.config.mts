@@ -7,7 +7,9 @@ const dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   resolve: {
     alias: {
-      '@': path.resolve(dirname, 'src/renderer')
+      '@': path.resolve(dirname, 'src/renderer'),
+      '@shared': path.resolve(dirname, 'src/shared'),
+      '@test': path.resolve(dirname, 'src/test')
     }
   }
 });

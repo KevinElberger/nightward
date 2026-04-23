@@ -2,22 +2,10 @@
 
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { ModeState, SavedMode } from '../../../../shared/modes';
+import { buildModeState, buildSavedMode } from '@test/builders/shared/modes';
 import { clearApiMock, installApiMock } from '../../../test/api-test-utils';
 import { useModesState } from './use-modes';
-
-const createModeState = (modes: SavedMode[], activeModeId: string | null = null): ModeState => ({
-  activeModeId,
-  modes
-});
-
-const createSavedMode = (id: string, name: string): SavedMode => ({
-  createdAt: '2026-04-20T12:00:00.000Z',
-  id,
-  name,
-  pinnedAt: null,
-  updatedAt: '2026-04-20T12:00:00.000Z'
-});
+import type { ModeState, SavedMode } from '../../../../shared/modes';
 
 describe('useModesState', () => {
   afterEach(() => {
@@ -27,8 +15,8 @@ describe('useModesState', () => {
   });
 
   it('loads mode state from the preload bridge on mount', async () => {
-    const modes = [createSavedMode('mode-1', 'Focus')];
-    const getState = vi.fn().mockResolvedValue(createModeState(modes, 'mode-1'));
+    const modes = [buildSavedMode()];
+    const getState = vi.fn().mockResolvedValue(buildModeState({ activeModeId: 'mode-1', modes }));
     installApiMock({ modes: { getState } });
 
     const { result } = renderHook(() => useModesState());
@@ -64,12 +52,12 @@ describe('useModesState', () => {
   });
 
   it('refreshes mode state on demand', async () => {
-    const firstModes = [createSavedMode('mode-1', 'Focus')];
-    const nextModes = [...firstModes, createSavedMode('mode-2', 'Deep Work')];
+    const firstModes = [buildSavedMode()];
+    const nextModes = [...firstModes, buildSavedMode({ id: 'mode-2', name: 'Deep Work' })];
     const getState = vi
       .fn()
-      .mockResolvedValueOnce(createModeState(firstModes))
-      .mockResolvedValueOnce(createModeState(nextModes, 'mode-2'));
+      .mockResolvedValueOnce(buildModeState({ modes: firstModes }))
+      .mockResolvedValueOnce(buildModeState({ activeModeId: 'mode-2', modes: nextModes }));
     installApiMock({ modes: { getState } });
 
     const { result } = renderHook(() => useModesState());
@@ -88,9 +76,9 @@ describe('useModesState', () => {
   });
 
   it('updates mode state from preload change events', async () => {
-    const firstModes = [createSavedMode('mode-1', 'Focus')];
-    const nextModes = [...firstModes, createSavedMode('mode-2', 'Deep Work')];
-    const getState = vi.fn().mockResolvedValue(createModeState(firstModes));
+    const firstModes = [buildSavedMode()];
+    const nextModes = [...firstModes, buildSavedMode({ id: 'mode-2', name: 'Deep Work' })];
+    const getState = vi.fn().mockResolvedValue(buildModeState({ modes: firstModes }));
     const unsubscribe = vi.fn();
     let emitModeStateChange: (modeState: ModeState) => void = () => {};
     const onChanged = vi.fn((listener: (modeState: ModeState) => void) => {
@@ -105,7 +93,7 @@ describe('useModesState', () => {
     await waitFor(() => expect(result.current.modes).toEqual(firstModes));
 
     act(() => {
-      emitModeStateChange(createModeState(nextModes, 'mode-2'));
+      emitModeStateChange(buildModeState({ activeModeId: 'mode-2', modes: nextModes }));
     });
 
     expect(result.current.activeModeId).toBe('mode-2');
@@ -120,13 +108,13 @@ describe('useModesState', () => {
   });
 
   it('creates a mode and refreshes mode state', async () => {
-    const firstModes = [createSavedMode('mode-1', 'Focus')];
-    const createdMode = createSavedMode('mode-2', 'Deep Work');
+    const firstModes = [buildSavedMode()];
+    const createdMode = buildSavedMode({ id: 'mode-2', name: 'Deep Work' });
     const nextModes = [...firstModes, createdMode];
     const getState = vi
       .fn()
-      .mockResolvedValueOnce(createModeState(firstModes, 'mode-1'))
-      .mockResolvedValueOnce(createModeState(nextModes, 'mode-1'));
+      .mockResolvedValueOnce(buildModeState({ activeModeId: 'mode-1', modes: firstModes }))
+      .mockResolvedValueOnce(buildModeState({ activeModeId: 'mode-1', modes: nextModes }));
     const create = vi.fn().mockResolvedValue(createdMode);
     installApiMock({ modes: { create, getState } });
 
@@ -150,12 +138,12 @@ describe('useModesState', () => {
   });
 
   it('renames a mode and refreshes mode state', async () => {
-    const firstModes = [createSavedMode('mode-1', 'Focus')];
-    const renamedMode = createSavedMode('mode-1', 'Writing');
+    const firstModes = [buildSavedMode()];
+    const renamedMode = buildSavedMode({ name: 'Writing' });
     const getState = vi
       .fn()
-      .mockResolvedValueOnce(createModeState(firstModes, 'mode-1'))
-      .mockResolvedValueOnce(createModeState([renamedMode], 'mode-1'));
+      .mockResolvedValueOnce(buildModeState({ activeModeId: 'mode-1', modes: firstModes }))
+      .mockResolvedValueOnce(buildModeState({ activeModeId: 'mode-1', modes: [renamedMode] }));
     const rename = vi.fn().mockResolvedValue(renamedMode);
     installApiMock({ modes: { getState, rename } });
 
@@ -179,11 +167,11 @@ describe('useModesState', () => {
   });
 
   it('deletes a mode and refreshes mode state', async () => {
-    const deletedMode = createSavedMode('mode-1', 'Focus');
+    const deletedMode = buildSavedMode();
     const getState = vi
       .fn()
-      .mockResolvedValueOnce(createModeState([deletedMode], 'mode-1'))
-      .mockResolvedValueOnce(createModeState([]));
+      .mockResolvedValueOnce(buildModeState({ activeModeId: 'mode-1', modes: [deletedMode] }))
+      .mockResolvedValueOnce(buildModeState());
     const deleteMode = vi.fn().mockResolvedValue(true);
     installApiMock({ modes: { delete: deleteMode, getState } });
 
@@ -207,7 +195,7 @@ describe('useModesState', () => {
   });
 
   it('pins a mode and refreshes mode state', async () => {
-    const modes = [createSavedMode('mode-1', 'Focus')];
+    const modes = [buildSavedMode()];
     const pinnedMode = {
       ...modes[0],
       pinnedAt: '2026-04-21T12:00:00.000Z',
@@ -215,8 +203,8 @@ describe('useModesState', () => {
     };
     const getState = vi
       .fn()
-      .mockResolvedValueOnce(createModeState(modes))
-      .mockResolvedValueOnce(createModeState([pinnedMode]));
+      .mockResolvedValueOnce(buildModeState({ modes }))
+      .mockResolvedValueOnce(buildModeState({ modes: [pinnedMode] }));
     const setPinned = vi.fn().mockResolvedValue(pinnedMode);
     installApiMock({ modes: { getState, setPinned } });
 
@@ -237,7 +225,7 @@ describe('useModesState', () => {
   });
 
   it('keeps existing mode state visible while a mutation is pending', async () => {
-    const modes = [createSavedMode('mode-1', 'Focus')];
+    const modes = [buildSavedMode()];
     let resolveActivate: (value: boolean) => void = () => {};
     const activate = vi.fn(
       () =>
@@ -247,8 +235,8 @@ describe('useModesState', () => {
     );
     const getState = vi
       .fn()
-      .mockResolvedValueOnce(createModeState(modes))
-      .mockResolvedValueOnce(createModeState(modes, 'mode-1'));
+      .mockResolvedValueOnce(buildModeState({ modes }))
+      .mockResolvedValueOnce(buildModeState({ activeModeId: 'mode-1', modes }));
     installApiMock({ modes: { activate, getState } });
 
     const { result } = renderHook(() => useModesState());
@@ -278,11 +266,11 @@ describe('useModesState', () => {
   });
 
   it('activates a mode and refreshes mode state', async () => {
-    const modes = [createSavedMode('mode-1', 'Focus')];
+    const modes = [buildSavedMode()];
     const getState = vi
       .fn()
-      .mockResolvedValueOnce(createModeState(modes))
-      .mockResolvedValueOnce(createModeState(modes, 'mode-1'));
+      .mockResolvedValueOnce(buildModeState({ modes }))
+      .mockResolvedValueOnce(buildModeState({ activeModeId: 'mode-1', modes }));
     const activate = vi.fn().mockResolvedValue(true);
     installApiMock({ modes: { activate, getState } });
 
@@ -306,11 +294,11 @@ describe('useModesState', () => {
   });
 
   it('deactivates a mode and refreshes mode state', async () => {
-    const modes = [createSavedMode('mode-1', 'Focus')];
+    const modes = [buildSavedMode()];
     const getState = vi
       .fn()
-      .mockResolvedValueOnce(createModeState(modes, 'mode-1'))
-      .mockResolvedValueOnce(createModeState(modes));
+      .mockResolvedValueOnce(buildModeState({ activeModeId: 'mode-1', modes }))
+      .mockResolvedValueOnce(buildModeState({ modes }));
     const deactivate = vi.fn().mockResolvedValue(true);
     installApiMock({ modes: { deactivate, getState } });
 
@@ -334,8 +322,8 @@ describe('useModesState', () => {
   });
 
   it('stores an error and keeps current mode state when a mutation fails', async () => {
-    const modes = [createSavedMode('mode-1', 'Focus')];
-    const getState = vi.fn().mockResolvedValue(createModeState(modes, 'mode-1'));
+    const modes = [buildSavedMode()];
+    const getState = vi.fn().mockResolvedValue(buildModeState({ activeModeId: 'mode-1', modes }));
     const create = vi.fn().mockRejectedValue(new Error('Mode name already exists'));
     installApiMock({ modes: { create, getState } });
 
@@ -343,13 +331,7 @@ describe('useModesState', () => {
 
     await waitFor(() => expect(result.current.modes).toEqual(modes));
 
-    let response: SavedMode | null = {
-      createdAt: '2026-04-20T12:00:00.000Z',
-      id: 'stale',
-      name: 'Stale',
-      pinnedAt: null,
-      updatedAt: '2026-04-20T12:00:00.000Z'
-    };
+    let response: SavedMode | null = buildSavedMode({ id: 'stale', name: 'Stale' });
 
     await act(async () => {
       response = await result.current.createMode('Focus');

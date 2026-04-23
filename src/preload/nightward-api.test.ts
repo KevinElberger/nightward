@@ -1,14 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { MODE_IPC_CHANNELS, MODE_IPC_EVENTS } from '../shared/mode-ipc';
+import { buildModeState, buildSavedMode } from '@test/builders/shared/modes';
 import { createNightwardApi } from './nightward-api';
-
-const createSavedMode = (id: string, name: string) => ({
-  createdAt: '2026-04-20T12:00:00.000Z',
-  id,
-  name,
-  pinnedAt: null,
-  updatedAt: '2026-04-20T12:00:00.000Z'
-});
 
 const createIpcRendererMock = ({
   invoke = vi.fn(),
@@ -22,10 +15,10 @@ const createIpcRendererMock = ({
 
 describe('createNightwardApi', () => {
   it('invokes the get mode state channel', async () => {
-    const modeState = {
+    const modeState = buildModeState({
       activeModeId: 'mode-1',
-      modes: [createSavedMode('mode-1', 'Focus')]
-    };
+      modes: [buildSavedMode()]
+    });
     const invoke = vi.fn().mockResolvedValue(modeState);
     const api = createNightwardApi(createIpcRendererMock({ invoke }));
 
@@ -44,7 +37,7 @@ describe('createNightwardApi', () => {
   });
 
   it('invokes the create mode channel with a typed request payload', async () => {
-    const createdMode = createSavedMode('mode-1', 'Focus');
+    const createdMode = buildSavedMode();
     const invoke = vi.fn().mockResolvedValue(createdMode);
     const api = createNightwardApi(createIpcRendererMock({ invoke }));
 
@@ -56,7 +49,7 @@ describe('createNightwardApi', () => {
   });
 
   it('invokes the rename mode channel with a typed request payload', async () => {
-    const renamedMode = createSavedMode('mode-1', 'Deep Work');
+    const renamedMode = buildSavedMode({ name: 'Deep Work' });
     const invoke = vi.fn().mockResolvedValue(renamedMode);
     const api = createNightwardApi(createIpcRendererMock({ invoke }));
 
@@ -70,7 +63,7 @@ describe('createNightwardApi', () => {
 
   it('invokes the set pinned mode channel with a typed request payload', async () => {
     const pinnedMode = {
-      ...createSavedMode('mode-1', 'Focus'),
+      ...buildSavedMode(),
       pinnedAt: '2026-04-21T12:00:00.000Z'
     };
     const invoke = vi.fn().mockResolvedValue(pinnedMode);
@@ -116,10 +109,10 @@ describe('createNightwardApi', () => {
   });
 
   it('subscribes to mode state change events and returns an unsubscribe callback', () => {
-    const modeState = {
+    const modeState = buildModeState({
       activeModeId: 'mode-1',
-      modes: [createSavedMode('mode-1', 'Focus')]
-    };
+      modes: [buildSavedMode()]
+    });
     const listener = vi.fn();
     const on = vi.fn();
     const removeListener = vi.fn();
