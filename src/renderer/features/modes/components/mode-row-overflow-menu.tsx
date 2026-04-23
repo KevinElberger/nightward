@@ -24,6 +24,7 @@ type ModeRowOverflowMenuProps = {
   onDeleteMode?: () => Promise<boolean>;
   onRename?: () => void;
   onSetPinned?: (isPinned: boolean) => Promise<unknown>;
+  showRenameOption?: boolean;
 };
 
 export function ModeRowOverflowMenu({
@@ -31,7 +32,8 @@ export function ModeRowOverflowMenu({
   modeName,
   onDeleteMode,
   onRename,
-  onSetPinned
+  onSetPinned,
+  showRenameOption = true
 }: ModeRowOverflowMenuProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -70,15 +72,17 @@ export function ModeRowOverflowMenu({
           align="end"
           className="min-w-40 rounded-[6px] border-white/[0.08] bg-[#09090a]/95 text-white/80 shadow-[0_14px_42px_rgba(0,0,0,0.45)] backdrop-blur-xl"
         >
-          <DropdownMenuItem
-            disabled={onRename === undefined}
-            onSelect={() => {
-              onRename?.();
-            }}
-          >
-            <Pencil className="size-3.5" aria-hidden="true" />
-            Rename
-          </DropdownMenuItem>
+          {showRenameOption ? (
+            <DropdownMenuItem
+              disabled={onRename === undefined}
+              onSelect={() => {
+                onRename?.();
+              }}
+            >
+              <Pencil className="size-3.5" aria-hidden="true" />
+              Rename
+            </DropdownMenuItem>
+          ) : null}
           <DropdownMenuItem disabled>
             <Copy className="size-3.5" aria-hidden="true" />
             Duplicate

@@ -18,6 +18,7 @@ export function ModeLibrary() {
     error,
     isLoading,
     modes,
+    renameMode,
     setModePinned
   } = useModes();
   const { selectMode, selectedModeId } = useAppSelection();
@@ -106,6 +107,7 @@ export function ModeLibrary() {
                   onActivateMode={activateMode}
                   onDeactivateMode={deactivateMode}
                   onDeleteMode={deleteMode}
+                  onRenameMode={renameMode}
                   onSelectMode={selectMode}
                   onSetPinned={setModePinned}
                 />

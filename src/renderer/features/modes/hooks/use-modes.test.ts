@@ -204,6 +204,47 @@ describe('useModesState', () => {
     expect(getState).toHaveBeenCalledTimes(2);
   });
 
+  it('keeps existing mode state visible while a mutation is pending', async () => {
+    const modes = [createSavedMode('mode-1', 'Focus')];
+    let resolveActivate: (value: boolean) => void = () => {};
+    const activate = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          resolveActivate = resolve;
+        })
+    );
+    const getState = vi
+      .fn()
+      .mockResolvedValueOnce(createModeState(modes))
+      .mockResolvedValueOnce(createModeState(modes, 'mode-1'));
+    installApiMock({ modes: { activate, getState } });
+
+    const { result } = renderHook(() => useModesState());
+
+    await waitFor(() => expect(result.current.modes).toEqual(modes));
+
+    let responsePromise = Promise.resolve(false);
+
+    await act(async () => {
+      responsePromise = result.current.activateMode('mode-1');
+    });
+
+    expect(activate).toHaveBeenCalledWith('mode-1');
+    expect(result.current.activeModeId).toBeNull();
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.modes).toEqual(modes);
+
+    await act(async () => {
+      resolveActivate(true);
+      await responsePromise;
+    });
+
+    expect(result.current.activeModeId).toBe('mode-1');
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.modes).toEqual(modes);
+    expect(getState).toHaveBeenCalledTimes(2);
+  });
+
   it('activates a mode and refreshes mode state', async () => {
     const modes = [createSavedMode('mode-1', 'Focus')];
     const getState = vi

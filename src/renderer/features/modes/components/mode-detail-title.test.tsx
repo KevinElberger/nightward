@@ -33,6 +33,18 @@ describe('ModeDetailTitle', () => {
     expect(document.activeElement).toBe(input);
   });
 
+  it('renders the rename control as a focusable icon button', () => {
+    renderModeDetailTitle();
+
+    const renameButton = screen.getByRole('button', { name: /rename mode/i });
+
+    renameButton.focus();
+
+    expect(renameButton.tagName).toBe('BUTTON');
+    expect(renameButton.getAttribute('title')).toBe('Rename mode');
+    expect(document.activeElement).toBe(renameButton);
+  });
+
   it('saves a trimmed mode name', async () => {
     const { onRenameMode } = renderModeDetailTitle();
     const input = startRenaming();
