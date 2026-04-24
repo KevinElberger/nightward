@@ -16,15 +16,18 @@ const renderModeDetailPage = (mode = buildSavedMode()) => {
   const modesState: ModesState = {
     activateMode: vi.fn().mockResolvedValue(true),
     activeModeId: null,
+    createModeAction: vi.fn().mockResolvedValue(mode),
     createMode: vi.fn().mockResolvedValue(null),
     deactivateMode: vi.fn().mockResolvedValue(true),
+    deleteModeAction: vi.fn().mockResolvedValue(mode),
     deleteMode: vi.fn().mockResolvedValue(true),
     error: null,
     isLoading: false,
     modes: [mode],
     refreshModes: vi.fn().mockResolvedValue(undefined),
     renameMode: vi.fn().mockResolvedValue(mode),
-    setModePinned: vi.fn().mockResolvedValue(mode)
+    setModePinned: vi.fn().mockResolvedValue(mode),
+    updateModeAction: vi.fn().mockResolvedValue(mode)
   };
 
   render(

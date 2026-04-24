@@ -2,7 +2,11 @@
 
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { buildModeState, buildSavedMode } from '@test/builders/shared/modes';
+import {
+  buildModeState,
+  buildOpenAppModeActionInput,
+  buildSavedMode
+} from '@test/builders/shared/modes';
 import { clearApiMock, installApiMock } from '../../../test/api-test-utils';
 import { useModesState } from './use-modes';
 import type { ModeState, SavedMode } from '../../../../shared/modes';
@@ -221,6 +225,86 @@ describe('useModesState', () => {
     expect(setPinned).toHaveBeenCalledWith('mode-1', true);
     expect(response).toEqual(pinnedMode);
     expect(result.current.modes).toEqual([pinnedMode]);
+    expect(getState).toHaveBeenCalledTimes(2);
+  });
+
+  it('creates a mode action and refreshes mode state', async () => {
+    const modes = [buildSavedMode()];
+    const updatedMode = buildSavedMode();
+    const action = buildOpenAppModeActionInput();
+    const getState = vi
+      .fn()
+      .mockResolvedValueOnce(buildModeState({ modes }))
+      .mockResolvedValueOnce(buildModeState({ modes: [updatedMode] }));
+    const createAction = vi.fn().mockResolvedValue(updatedMode);
+    installApiMock({ modes: { createAction, getState } });
+
+    const { result } = renderHook(() => useModesState());
+
+    await waitFor(() => expect(result.current.modes).toEqual(modes));
+
+    let response: SavedMode | null = null;
+
+    await act(async () => {
+      response = await result.current.createModeAction('mode-1', 'enter', action);
+    });
+
+    expect(createAction).toHaveBeenCalledWith('mode-1', 'enter', action);
+    expect(response).toEqual(updatedMode);
+    expect(result.current.modes).toEqual([updatedMode]);
+    expect(getState).toHaveBeenCalledTimes(2);
+  });
+
+  it('updates a mode action and refreshes mode state', async () => {
+    const modes = [buildSavedMode()];
+    const updatedMode = buildSavedMode();
+    const action = buildOpenAppModeActionInput({ appName: 'Mail' });
+    const getState = vi
+      .fn()
+      .mockResolvedValueOnce(buildModeState({ modes }))
+      .mockResolvedValueOnce(buildModeState({ modes: [updatedMode] }));
+    const updateAction = vi.fn().mockResolvedValue(updatedMode);
+    installApiMock({ modes: { getState, updateAction } });
+
+    const { result } = renderHook(() => useModesState());
+
+    await waitFor(() => expect(result.current.modes).toEqual(modes));
+
+    let response: SavedMode | null = null;
+
+    await act(async () => {
+      response = await result.current.updateModeAction('mode-1', 'enter', 'action-1', action);
+    });
+
+    expect(updateAction).toHaveBeenCalledWith('mode-1', 'enter', 'action-1', action);
+    expect(response).toEqual(updatedMode);
+    expect(result.current.modes).toEqual([updatedMode]);
+    expect(getState).toHaveBeenCalledTimes(2);
+  });
+
+  it('deletes a mode action and refreshes mode state', async () => {
+    const modes = [buildSavedMode()];
+    const updatedMode = buildSavedMode();
+    const getState = vi
+      .fn()
+      .mockResolvedValueOnce(buildModeState({ modes }))
+      .mockResolvedValueOnce(buildModeState({ modes: [updatedMode] }));
+    const deleteAction = vi.fn().mockResolvedValue(updatedMode);
+    installApiMock({ modes: { deleteAction, getState } });
+
+    const { result } = renderHook(() => useModesState());
+
+    await waitFor(() => expect(result.current.modes).toEqual(modes));
+
+    let response: SavedMode | null = null;
+
+    await act(async () => {
+      response = await result.current.deleteModeAction('mode-1', 'enter', 'action-1');
+    });
+
+    expect(deleteAction).toHaveBeenCalledWith('mode-1', 'enter', 'action-1');
+    expect(response).toEqual(updatedMode);
+    expect(result.current.modes).toEqual([updatedMode]);
     expect(getState).toHaveBeenCalledTimes(2);
   });
 
