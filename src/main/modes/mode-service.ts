@@ -1,5 +1,11 @@
 import { randomUUID } from 'node:crypto';
-import { createEmptyModeActionSet, MODE_NAME_MAX_LENGTH } from '@shared/modes';
+import {
+  createEmptyModeActionSet,
+  MODE_NAME_MAX_LENGTH,
+  type ModeAction,
+  type ModeActionInput,
+  type ModeActionPhase
+} from '@shared/modes';
 import type { AppDataStore } from '../persistence/app-data-store';
 import { createDefaultAppData, type AppData, type PersistedMode } from '../persistence/types';
 import type { ModeState, SavedMode } from './types';
@@ -89,50 +95,74 @@ export class ModeService {
   }
 
   async renameMode(modeId: string, name: string) {
-    const mode = this.appData.modes.find((savedMode) => savedMode.id === modeId);
-
-    if (mode === undefined) {
-      return null;
-    }
-
-    const renamedMode: PersistedMode = {
+    return this.updateMode(modeId, (mode) => ({
       ...mode,
       name: normalizeModeName(name),
       updatedAt: new Date().toISOString()
-    };
-
-    await this.persistAppData({
-      ...this.appData,
-      modes: this.appData.modes.map((savedMode) =>
-        savedMode.id === modeId ? renamedMode : savedMode
-      )
-    });
-
-    return toSavedMode(renamedMode);
+    }));
   }
 
   async setModePinned(modeId: string, isPinned: boolean) {
-    const mode = this.appData.modes.find((savedMode) => savedMode.id === modeId);
+    return this.updateMode(modeId, (mode) => {
+      const now = new Date().toISOString();
 
-    if (mode === undefined) {
-      return null;
-    }
-
-    const now = new Date().toISOString();
-    const pinnedMode: PersistedMode = {
-      ...mode,
-      pinnedAt: isPinned ? (mode.pinnedAt ?? now) : null,
-      updatedAt: now
-    };
-
-    await this.persistAppData({
-      ...this.appData,
-      modes: this.appData.modes.map((savedMode) =>
-        savedMode.id === modeId ? pinnedMode : savedMode
-      )
+      return {
+        ...mode,
+        pinnedAt: isPinned ? (mode.pinnedAt ?? now) : null,
+        updatedAt: now
+      };
     });
+  }
 
-    return toSavedMode(pinnedMode);
+  async createModeAction(modeId: string, phase: ModeActionPhase, action: ModeActionInput) {
+    return this.updateMode(modeId, (mode) => ({
+      ...mode,
+      actions: appendModeAction(mode.actions, phase, {
+        ...action,
+        id: randomUUID()
+      }),
+      updatedAt: new Date().toISOString()
+    }));
+  }
+
+  async updateModeAction(
+    modeId: string,
+    phase: ModeActionPhase,
+    actionId: string,
+    action: ModeActionInput
+  ) {
+    return this.updateMode(modeId, (mode) => {
+      const nextActions = replaceModeAction(mode.actions, phase, actionId, {
+        ...action,
+        id: actionId
+      });
+
+      if (nextActions === null) {
+        return null;
+      }
+
+      return {
+        ...mode,
+        actions: nextActions,
+        updatedAt: new Date().toISOString()
+      };
+    });
+  }
+
+  async deleteModeAction(modeId: string, phase: ModeActionPhase, actionId: string) {
+    return this.updateMode(modeId, (mode) => {
+      const nextActions = removeModeAction(mode.actions, phase, actionId);
+
+      if (nextActions === null) {
+        return null;
+      }
+
+      return {
+        ...mode,
+        actions: nextActions,
+        updatedAt: new Date().toISOString()
+      };
+    });
   }
 
   async deleteMode(modeId: string) {
@@ -154,6 +184,29 @@ export class ModeService {
   private async persistAppData(data: AppData) {
     await this.appDataStore.write(data);
     this.appData = data;
+  }
+
+  private async updateMode(modeId: string, updater: (mode: PersistedMode) => PersistedMode | null) {
+    const currentMode = this.appData.modes.find((savedMode) => savedMode.id === modeId);
+
+    if (currentMode === undefined) {
+      return null;
+    }
+
+    const updatedMode = updater(currentMode);
+
+    if (updatedMode === null) {
+      return null;
+    }
+
+    await this.persistAppData({
+      ...this.appData,
+      modes: this.appData.modes.map((savedMode) =>
+        savedMode.id === modeId ? updatedMode : savedMode
+      )
+    });
+
+    return toSavedMode(updatedMode);
   }
 
   private getActiveMode() {
@@ -193,3 +246,48 @@ const toSavedMode = ({
   pinnedAt,
   updatedAt
 });
+
+const appendModeAction = (
+  actions: PersistedMode['actions'],
+  phase: ModeActionPhase,
+  action: ModeAction
+): PersistedMode['actions'] => ({
+  ...actions,
+  [phase]: [...actions[phase], action]
+});
+
+const replaceModeAction = (
+  actions: PersistedMode['actions'],
+  phase: ModeActionPhase,
+  actionId: string,
+  nextAction: ModeAction
+): PersistedMode['actions'] | null => {
+  const currentActions = actions[phase];
+
+  if (!currentActions.some((action) => action.id === actionId)) {
+    return null;
+  }
+
+  return {
+    ...actions,
+    [phase]: currentActions.map((action) => (action.id === actionId ? nextAction : action))
+  };
+};
+
+const removeModeAction = (
+  actions: PersistedMode['actions'],
+  phase: ModeActionPhase,
+  actionId: string
+): PersistedMode['actions'] | null => {
+  const currentActions = actions[phase];
+  const nextActions = currentActions.filter((action) => action.id !== actionId);
+
+  if (nextActions.length === currentActions.length) {
+    return null;
+  }
+
+  return {
+    ...actions,
+    [phase]: nextActions
+  };
+};

@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import { MODE_IPC_CHANNELS, MODE_IPC_EVENTS } from '../shared/mode-ipc';
-import { buildModeState, buildSavedMode } from '@test/builders/shared/modes';
+import {
+  buildModeState,
+  buildOpenAppModeActionInput,
+  buildSavedMode
+} from '@test/builders/shared/modes';
 import { createNightwardApi } from './nightward-api';
 
 const createIpcRendererMock = ({
@@ -106,6 +110,55 @@ describe('createNightwardApi', () => {
     await expect(api.modes.deactivate()).resolves.toBe(true);
 
     expect(invoke).toHaveBeenCalledWith(MODE_IPC_CHANNELS.deactivate);
+  });
+
+  it('invokes the create action channel with a typed request payload', async () => {
+    const updatedMode = buildSavedMode();
+    const action = buildOpenAppModeActionInput();
+    const invoke = vi.fn().mockResolvedValue(updatedMode);
+    const api = createNightwardApi(createIpcRendererMock({ invoke }));
+
+    await expect(api.modes.createAction('mode-1', 'enter', action)).resolves.toEqual(updatedMode);
+
+    expect(invoke).toHaveBeenCalledWith(MODE_IPC_CHANNELS.createAction, {
+      action,
+      modeId: 'mode-1',
+      phase: 'enter'
+    });
+  });
+
+  it('invokes the update action channel with a typed request payload', async () => {
+    const updatedMode = buildSavedMode();
+    const action = buildOpenAppModeActionInput({ appName: 'Mail' });
+    const invoke = vi.fn().mockResolvedValue(updatedMode);
+    const api = createNightwardApi(createIpcRendererMock({ invoke }));
+
+    await expect(api.modes.updateAction('mode-1', 'enter', 'action-1', action)).resolves.toEqual(
+      updatedMode
+    );
+
+    expect(invoke).toHaveBeenCalledWith(MODE_IPC_CHANNELS.updateAction, {
+      action,
+      actionId: 'action-1',
+      modeId: 'mode-1',
+      phase: 'enter'
+    });
+  });
+
+  it('invokes the delete action channel with a typed request payload', async () => {
+    const updatedMode = buildSavedMode();
+    const invoke = vi.fn().mockResolvedValue(updatedMode);
+    const api = createNightwardApi(createIpcRendererMock({ invoke }));
+
+    await expect(api.modes.deleteAction('mode-1', 'enter', 'action-1')).resolves.toEqual(
+      updatedMode
+    );
+
+    expect(invoke).toHaveBeenCalledWith(MODE_IPC_CHANNELS.deleteAction, {
+      actionId: 'action-1',
+      modeId: 'mode-1',
+      phase: 'enter'
+    });
   });
 
   it('subscribes to mode state change events and returns an unsubscribe callback', () => {

@@ -1,5 +1,6 @@
 import {
   type ModeActionSet,
+  type OpenAppModeActionInput,
   type ModeState,
   type OpenAppModeAction,
   type SavedMode
@@ -26,6 +27,22 @@ export const buildOpenAppModeAction = (
   type: 'open-app',
   ...overrides
 });
+
+export const buildOpenAppModeActionInput = (
+  overrides: Partial<OpenAppModeActionInput> = {}
+): OpenAppModeActionInput => {
+  const action = buildOpenAppModeAction(overrides as Partial<OpenAppModeAction>);
+
+  return {
+    appName: action.appName,
+    appPath: action.appPath,
+    ...(action.bundleId === undefined ? {} : { bundleId: action.bundleId }),
+    enabled: action.enabled,
+    onlyOpenIfNotRunning: action.onlyOpenIfNotRunning,
+    repeatPolicy: action.repeatPolicy,
+    type: action.type
+  };
+};
 
 export const buildModeActionSet = (overrides: ModeActionSetOverrides = {}): ModeActionSet => ({
   enter: overrides.enter ? [...overrides.enter] : [],

@@ -1,4 +1,4 @@
-import type { ModeState, SavedMode } from './modes';
+import type { ModeActionInput, ModeActionPhase, ModeState, SavedMode } from './modes';
 
 export const MODE_IPC_CHANNELS = {
   getState: 'modes:get-state',
@@ -8,7 +8,10 @@ export const MODE_IPC_CHANNELS = {
   setPinned: 'modes:set-pinned',
   delete: 'modes:delete',
   activate: 'modes:activate',
-  deactivate: 'modes:deactivate'
+  deactivate: 'modes:deactivate',
+  createAction: 'modes:create-action',
+  updateAction: 'modes:update-action',
+  deleteAction: 'modes:delete-action'
 } as const;
 
 export const MODE_IPC_EVENTS = {
@@ -37,6 +40,25 @@ export type ActivateModeRequest = {
   id: string;
 };
 
+export type CreateModeActionRequest = {
+  modeId: string;
+  phase: ModeActionPhase;
+  action: ModeActionInput;
+};
+
+export type UpdateModeActionRequest = {
+  modeId: string;
+  phase: ModeActionPhase;
+  actionId: string;
+  action: ModeActionInput;
+};
+
+export type DeleteModeActionRequest = {
+  modeId: string;
+  phase: ModeActionPhase;
+  actionId: string;
+};
+
 export type GetModeStateResponse = ModeState;
 export type ListModesResponse = SavedMode[];
 export type CreateModeResponse = SavedMode;
@@ -45,4 +67,7 @@ export type SetModePinnedResponse = SavedMode | null;
 export type DeleteModeResponse = boolean;
 export type ActivateModeResponse = boolean;
 export type DeactivateModeResponse = boolean;
+export type CreateModeActionResponse = SavedMode | null;
+export type UpdateModeActionResponse = SavedMode | null;
+export type DeleteModeActionResponse = SavedMode | null;
 export type ModeStateChangedPayload = ModeState;

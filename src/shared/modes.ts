@@ -18,6 +18,10 @@ export type OpenAppModeAction = {
 
 export type ModeAction = OpenAppModeAction;
 
+export type OpenAppModeActionInput = Omit<OpenAppModeAction, 'id'>;
+
+export type ModeActionInput = OpenAppModeActionInput;
+
 export type ModeActionSet = {
   enter: ModeAction[];
   exit: ModeAction[];

@@ -1,10 +1,10 @@
 import {
   createEmptyModeActionSet,
   type ModeAction,
-  type ModeActionRepeatPolicy,
   type ModeActionSet
 } from '@shared/modes';
-import { getRequiredString, isRecord, type JsonRecord } from '../validation/json-record';
+import { isRecord } from '../validation/json-record';
+import { parseModeAction } from '../validation/mode-action-record';
 import { AppDataStoreError } from './app-data-store-error';
 
 export const validateModeActionSet = (value: unknown, modePath: string): ModeActionSet => {
@@ -35,69 +35,5 @@ const validateModeActionList = (value: unknown, actionListPath: string): ModeAct
 };
 
 const validateModeAction = (value: unknown, actionPath: string): ModeAction => {
-  if (!isRecord(value)) {
-    throw new AppDataStoreError(`${actionPath} must be a JSON object.`);
-  }
-
-  const type = getRequiredAppDataString(value, 'type', actionPath);
-
-  if (type !== 'open-app') {
-    throw new AppDataStoreError(`${actionPath}.type must be a supported action type.`);
-  }
-
-  const bundleId = getOptionalAppDataString(value, 'bundleId', actionPath);
-
-  return {
-    appName: getRequiredAppDataString(value, 'appName', actionPath),
-    appPath: getRequiredAppDataString(value, 'appPath', actionPath),
-    ...(bundleId === undefined ? {} : { bundleId }),
-    enabled: getRequiredBoolean(value, 'enabled', actionPath),
-    id: getRequiredAppDataString(value, 'id', actionPath),
-    onlyOpenIfNotRunning: getRequiredBoolean(value, 'onlyOpenIfNotRunning', actionPath),
-    repeatPolicy: validateRepeatPolicy(value.repeatPolicy, actionPath),
-    type
-  };
-};
-
-const validateRepeatPolicy = (
-  value: unknown,
-  actionPath: string
-): ModeActionRepeatPolicy => {
-  if (value === 'every-activation' || value === 'once-per-day') {
-    return value;
-  }
-
-  throw new AppDataStoreError(`${actionPath}.repeatPolicy must be a supported repeat policy.`);
-};
-
-const getRequiredAppDataString = (record: JsonRecord, property: string, recordPath: string) =>
-  getRequiredString({
-    createError: (message) => new AppDataStoreError(message),
-    label: recordPath,
-    record,
-    property
-  });
-
-const getOptionalAppDataString = (record: JsonRecord, property: string, recordPath: string) => {
-  const value = record[property];
-
-  if (value === undefined) {
-    return undefined;
-  }
-
-  if (typeof value !== 'string' || value.trim() === '') {
-    throw new AppDataStoreError(`${recordPath}.${property} must be a non-empty string.`);
-  }
-
-  return value;
-};
-
-const getRequiredBoolean = (record: JsonRecord, property: string, recordPath: string) => {
-  const value = record[property];
-
-  if (typeof value !== 'boolean') {
-    throw new AppDataStoreError(`${recordPath}.${property} must be a boolean.`);
-  }
-
-  return value;
+  return parseModeAction(value, actionPath, (message) => new AppDataStoreError(message));
 };

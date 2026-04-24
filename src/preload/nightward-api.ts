@@ -3,9 +3,13 @@ import {
   MODE_IPC_EVENTS,
   type ActivateModeRequest,
   type ActivateModeResponse,
+  type CreateModeActionRequest,
+  type CreateModeActionResponse,
   type CreateModeRequest,
   type CreateModeResponse,
   type DeactivateModeResponse,
+  type DeleteModeActionRequest,
+  type DeleteModeActionResponse,
   type DeleteModeRequest,
   type DeleteModeResponse,
   type GetModeStateResponse,
@@ -14,7 +18,9 @@ import {
   type RenameModeRequest,
   type RenameModeResponse,
   type SetModePinnedRequest,
-  type SetModePinnedResponse
+  type SetModePinnedResponse,
+  type UpdateModeActionRequest,
+  type UpdateModeActionResponse
 } from '../shared/mode-ipc';
 import type { NightwardApi } from '../shared/nightward-api';
 
@@ -54,6 +60,25 @@ export const createNightwardApi = (ipcRenderer: IpcRendererBridge): NightwardApi
       } satisfies ActivateModeRequest) as Promise<ActivateModeResponse>,
     deactivate: () =>
       ipcRenderer.invoke(MODE_IPC_CHANNELS.deactivate) as Promise<DeactivateModeResponse>,
+    createAction: (modeId, phase, action) =>
+      ipcRenderer.invoke(MODE_IPC_CHANNELS.createAction, {
+        action,
+        modeId,
+        phase
+      } satisfies CreateModeActionRequest) as Promise<CreateModeActionResponse>,
+    updateAction: (modeId, phase, actionId, action) =>
+      ipcRenderer.invoke(MODE_IPC_CHANNELS.updateAction, {
+        action,
+        actionId,
+        modeId,
+        phase
+      } satisfies UpdateModeActionRequest) as Promise<UpdateModeActionResponse>,
+    deleteAction: (modeId, phase, actionId) =>
+      ipcRenderer.invoke(MODE_IPC_CHANNELS.deleteAction, {
+        actionId,
+        modeId,
+        phase
+      } satisfies DeleteModeActionRequest) as Promise<DeleteModeActionResponse>,
     onChanged: (listener) => {
       const ipcListener: IpcRendererListener = (_event, payload) => {
         listener(payload as ModeStateChangedPayload);
