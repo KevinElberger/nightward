@@ -106,6 +106,47 @@ describe('registerModeIpcHandlers', () => {
     });
   });
 
+  it('selects an application without refreshing mode consumers', async () => {
+    const { ipcMain, invoke } = createFakeIpcMain();
+    const onModesChanged = vi.fn();
+    const selectedApplication = {
+      appName: 'Spotify',
+      appPath: '/Applications/Spotify.app',
+      iconDataUrl: 'data:image/png;base64,abc'
+    };
+    registerModeIpcHandlers({
+      ipcMain,
+      modeService,
+      onModesChanged,
+      selectApplication: vi.fn().mockResolvedValue(selectedApplication)
+    });
+
+    await expect(invoke(MODE_IPC_CHANNELS.selectApplication)).resolves.toEqual(selectedApplication);
+
+    expect(onModesChanged).not.toHaveBeenCalled();
+  });
+
+  it('gets an application icon without refreshing mode consumers', async () => {
+    const { ipcMain, invoke } = createFakeIpcMain();
+    const getApplicationIcon = vi.fn().mockResolvedValue('data:image/png;base64,abc');
+    const onModesChanged = vi.fn();
+    registerModeIpcHandlers({
+      getApplicationIcon,
+      ipcMain,
+      modeService,
+      onModesChanged
+    });
+
+    await expect(
+      invoke(MODE_IPC_CHANNELS.getApplicationIcon, {
+        appPath: '/Applications/Spotify.app'
+      })
+    ).resolves.toBe('data:image/png;base64,abc');
+
+    expect(getApplicationIcon).toHaveBeenCalledWith('/Applications/Spotify.app');
+    expect(onModesChanged).not.toHaveBeenCalled();
+  });
+
   it('renames modes and refreshes mode consumers', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
     const onModesChanged = vi.fn();
@@ -225,9 +266,9 @@ describe('registerModeIpcHandlers', () => {
         ]
       }
     });
-    expect((updatedMode as { actions: { enter: Array<{ id: string }> } }).actions.enter[0]?.id).toEqual(
-      expect.any(String)
-    );
+    expect(
+      (updatedMode as { actions: { enter: Array<{ id: string }> } }).actions.enter[0]?.id
+    ).toEqual(expect.any(String));
     expect(onModesChanged).toHaveBeenCalledOnce();
   });
 

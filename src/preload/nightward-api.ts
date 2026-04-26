@@ -12,11 +12,14 @@ import {
   type DeleteModeActionResponse,
   type DeleteModeRequest,
   type DeleteModeResponse,
+  type GetApplicationIconRequest,
+  type GetApplicationIconResponse,
   type GetModeStateResponse,
   type ListModesResponse,
   type ModeStateChangedPayload,
   type RenameModeRequest,
   type RenameModeResponse,
+  type SelectApplicationResponse,
   type SetModePinnedRequest,
   type SetModePinnedResponse,
   type UpdateModeActionRequest,
@@ -90,5 +93,13 @@ export const createNightwardApi = (ipcRenderer: IpcRendererBridge): NightwardApi
         ipcRenderer.removeListener(MODE_IPC_EVENTS.stateChanged, ipcListener);
       };
     }
+  },
+  applications: {
+    getIcon: (appPath) =>
+      ipcRenderer.invoke(MODE_IPC_CHANNELS.getApplicationIcon, {
+        appPath
+      } satisfies GetApplicationIconRequest) as Promise<GetApplicationIconResponse>,
+    select: () =>
+      ipcRenderer.invoke(MODE_IPC_CHANNELS.selectApplication) as Promise<SelectApplicationResponse>
   }
 });

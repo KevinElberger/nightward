@@ -6,7 +6,10 @@ import {
   type CreateModeRequest,
   type DeleteModeActionRequest,
   type DeleteModeRequest,
+  type GetApplicationIconRequest,
+  type GetApplicationIconResponse,
   type RenameModeRequest,
+  type SelectApplicationResponse,
   type SetModePinnedRequest,
   type UpdateModeActionRequest
 } from '../../shared/mode-ipc';
@@ -20,6 +23,8 @@ type RegisterModeIpcHandlersOptions = {
   ipcMain: IpcMainRouter;
   modeService: ModeService;
   onModesChanged: () => void;
+  getApplicationIcon?: (appPath: string) => Promise<GetApplicationIconResponse>;
+  selectApplication?: () => Promise<SelectApplicationResponse>;
 };
 
 export class ModeIpcHandlerError extends Error {
@@ -30,9 +35,11 @@ export class ModeIpcHandlerError extends Error {
 }
 
 export const registerModeIpcHandlers = ({
+  getApplicationIcon = async () => null,
   ipcMain,
   modeService,
-  onModesChanged
+  onModesChanged,
+  selectApplication = async () => null
 }: RegisterModeIpcHandlersOptions) => {
   ipcMain.handle(MODE_IPC_CHANNELS.getState, () => modeService.getModeState());
 
@@ -130,6 +137,14 @@ export const registerModeIpcHandlers = ({
     return mode;
   });
 
+  ipcMain.handle(MODE_IPC_CHANNELS.selectApplication, () => selectApplication());
+
+  ipcMain.handle(MODE_IPC_CHANNELS.getApplicationIcon, (_event, request: unknown) => {
+    const { appPath } = parseGetApplicationIconRequest(request);
+
+    return getApplicationIcon(appPath);
+  });
+
   return () => {
     Object.values(MODE_IPC_CHANNELS).forEach((channel) => {
       ipcMain.removeHandler(channel);
@@ -153,6 +168,10 @@ const parseSetModePinnedRequest = (request: unknown): SetModePinnedRequest => ({
 
 const parseDeleteModeRequest = (request: unknown): DeleteModeRequest => ({
   id: getStringProperty(request, 'id', MODE_IPC_CHANNELS.delete)
+});
+
+const parseGetApplicationIconRequest = (request: unknown): GetApplicationIconRequest => ({
+  appPath: getStringProperty(request, 'appPath', MODE_IPC_CHANNELS.getApplicationIcon)
 });
 
 const parseActivateModeRequest = (request: unknown): ActivateModeRequest => ({

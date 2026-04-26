@@ -73,7 +73,7 @@ export function ModeLibrary() {
         />
       ) : null}
 
-      <div className="overflow-hidden rounded-[6px] border border-white/[0.065] bg-white/[0.018] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+      <div className="overflow-hidden rounded-[6px] border border-surface-border-subtle bg-surface-panel-muted shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
         {isLoading ? (
           <ModeLibrarySkeleton />
         ) : error !== null ? (
@@ -93,7 +93,7 @@ export function ModeLibrary() {
             }}
           />
         ) : (
-          <div className="divide-y divide-white/[0.055]">
+          <div className="divide-y divide-surface-border-subtle">
             {filteredModes.map((mode) => {
               const isActive = mode.id === activeModeId;
               const isSelected = mode.id === selectedModeId;

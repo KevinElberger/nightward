@@ -161,6 +161,33 @@ describe('createNightwardApi', () => {
     });
   });
 
+  it('invokes the select application channel', async () => {
+    const selectedApplication = {
+      appName: 'Spotify',
+      appPath: '/Applications/Spotify.app',
+      iconDataUrl: 'data:image/png;base64,abc'
+    };
+    const invoke = vi.fn().mockResolvedValue(selectedApplication);
+    const api = createNightwardApi(createIpcRendererMock({ invoke }));
+
+    await expect(api.applications.select()).resolves.toEqual(selectedApplication);
+
+    expect(invoke).toHaveBeenCalledWith(MODE_IPC_CHANNELS.selectApplication);
+  });
+
+  it('invokes the get application icon channel with a typed request payload', async () => {
+    const invoke = vi.fn().mockResolvedValue('data:image/png;base64,abc');
+    const api = createNightwardApi(createIpcRendererMock({ invoke }));
+
+    await expect(api.applications.getIcon('/Applications/Spotify.app')).resolves.toBe(
+      'data:image/png;base64,abc'
+    );
+
+    expect(invoke).toHaveBeenCalledWith(MODE_IPC_CHANNELS.getApplicationIcon, {
+      appPath: '/Applications/Spotify.app'
+    });
+  });
+
   it('subscribes to mode state change events and returns an unsubscribe callback', () => {
     const modeState = buildModeState({
       activeModeId: 'mode-1',

@@ -5,11 +5,13 @@ import type {
   DeactivateModeResponse,
   DeleteModeActionResponse,
   DeleteModeResponse,
+  GetApplicationIconResponse,
   GetModeStateResponse,
   ListModesResponse,
   ModeStateChangedPayload,
   RenameModeResponse,
   UpdateModeActionResponse,
+  SelectApplicationResponse,
   SetModePinnedResponse
 } from './mode-ipc';
 import type { ModeActionInput, ModeActionPhase } from './modes';
@@ -41,5 +43,9 @@ export type NightwardApi = {
       actionId: string
     ): Promise<DeleteModeActionResponse>;
     onChanged(listener: (modeState: ModeStateChangedPayload) => void): () => void;
+  };
+  applications: {
+    getIcon(appPath: string): Promise<GetApplicationIconResponse>;
+    select(): Promise<SelectApplicationResponse>;
   };
 };

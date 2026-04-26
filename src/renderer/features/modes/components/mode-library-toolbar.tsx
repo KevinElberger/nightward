@@ -33,7 +33,7 @@ export function ModeLibraryToolbar({
           }}
           aria-label="Search modes"
           placeholder="Search modes"
-          className="h-9 rounded-[4px] border-white/[0.075] bg-white/[0.025] pl-9 text-sm text-foreground placeholder:text-white/28 focus-visible:ring-primary/20"
+          className="h-9 rounded-[4px] border-surface-border bg-surface-field pl-9 text-sm text-foreground placeholder:text-white/28 focus-visible:ring-primary/20"
         />
       </div>
 

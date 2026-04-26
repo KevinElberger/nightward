@@ -39,7 +39,7 @@ export function ModeLibraryRow({
     <div
       className={cn(
         'group/row relative grid min-h-[3.75rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 transition-colors',
-        isSelected ? 'bg-white/[0.075]' : 'bg-white/[0.03] hover:bg-white/[0.048]'
+        isSelected ? 'bg-surface-active' : 'bg-surface-card hover:bg-surface-hover'
       )}
     >
       <ModeRenameControl
@@ -50,7 +50,7 @@ export function ModeLibraryRow({
         leadingContent={
           <span
             className={cn(
-              'flex size-7 shrink-0 items-center justify-center rounded-[4px] border border-white/[0.055] bg-white/[0.025]',
+              'flex size-7 shrink-0 items-center justify-center rounded-[4px] border border-surface-border-subtle bg-surface-field',
               isActive
                 ? 'border-status-active/20 bg-status-active/8 text-status-active'
                 : 'text-status-neutral/50'
@@ -74,7 +74,7 @@ export function ModeLibraryRow({
             <div className="pointer-events-none relative z-10 flex min-w-0 items-center gap-3">
               <span
                 className={cn(
-                  'flex size-7 shrink-0 items-center justify-center rounded-[4px] border border-white/[0.055] bg-white/[0.025]',
+                  'flex size-7 shrink-0 items-center justify-center rounded-[4px] border border-surface-border-subtle bg-surface-field',
                   isActive
                     ? 'border-status-active/20 bg-status-active/8 text-status-active'
                     : 'text-status-neutral/50'
@@ -102,7 +102,7 @@ export function ModeLibraryRow({
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-8 rounded-[4px] px-2.5 text-white/48 hover:bg-white/[0.035] hover:text-foreground disabled:opacity-35"
+                className="h-8 rounded-[4px] px-2.5 text-white/48 hover:bg-surface-hover hover:text-foreground disabled:opacity-35"
                 onClick={() => {
                   void (isActive ? onDeactivateMode() : onActivateMode(mode.id));
                 }}

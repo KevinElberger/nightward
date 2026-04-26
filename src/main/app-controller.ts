@@ -1,4 +1,5 @@
 import { ipcMain, type App } from 'electron';
+import { ApplicationService } from './applications/application-service';
 import { registerModeIpcHandlers } from './ipc/mode-ipc-handlers';
 import { ModeService } from './modes/mode-service';
 import { createAppDataStore } from './persistence/app-data-store';
@@ -12,6 +13,7 @@ type AppControllerOptions = {
 };
 
 export class AppController {
+  private readonly applicationService: ApplicationService;
   private readonly app: App;
   private readonly platform: NodeJS.Platform;
   private readonly settingsWindow: SettingsWindowController;
@@ -20,6 +22,7 @@ export class AppController {
 
   constructor({ app, platform, renderer }: AppControllerOptions) {
     this.app = app;
+    this.applicationService = new ApplicationService({ app, platform });
     this.platform = platform;
     this.settingsWindow = new SettingsWindowController({
       platform,
@@ -42,9 +45,11 @@ export class AppController {
       });
 
       registerModeIpcHandlers({
+        getApplicationIcon: this.applicationService.getApplicationIcon,
         ipcMain,
         modeService: this.modeService,
-        onModesChanged: this.handleModesChanged
+        onModesChanged: this.handleModesChanged,
+        selectApplication: this.applicationService.selectApplication
       });
 
       this.settingsWindow.create();

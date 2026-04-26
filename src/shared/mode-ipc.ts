@@ -11,7 +11,9 @@ export const MODE_IPC_CHANNELS = {
   deactivate: 'modes:deactivate',
   createAction: 'modes:create-action',
   updateAction: 'modes:update-action',
-  deleteAction: 'modes:delete-action'
+  deleteAction: 'modes:delete-action',
+  selectApplication: 'modes:select-application',
+  getApplicationIcon: 'modes:get-application-icon'
 } as const;
 
 export const MODE_IPC_EVENTS = {
@@ -59,6 +61,16 @@ export type DeleteModeActionRequest = {
   actionId: string;
 };
 
+export type SelectedApplication = {
+  appName: string;
+  appPath: string;
+  iconDataUrl: string | null;
+};
+
+export type GetApplicationIconRequest = {
+  appPath: string;
+};
+
 export type GetModeStateResponse = ModeState;
 export type ListModesResponse = SavedMode[];
 export type CreateModeResponse = SavedMode;
@@ -70,4 +82,6 @@ export type DeactivateModeResponse = boolean;
 export type CreateModeActionResponse = SavedMode | null;
 export type UpdateModeActionResponse = SavedMode | null;
 export type DeleteModeActionResponse = SavedMode | null;
+export type SelectApplicationResponse = SelectedApplication | null;
+export type GetApplicationIconResponse = string | null;
 export type ModeStateChangedPayload = ModeState;
