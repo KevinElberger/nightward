@@ -3,6 +3,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { buildOpenAppModeActionInput } from '@test/builders/shared/modes';
 import { MODE_IPC_CHANNELS } from '../../shared/mode-ipc';
 import { ModeService } from '../modes/mode-service';
 import { AppDataStore } from '../persistence/app-data-store';
@@ -105,6 +106,47 @@ describe('registerModeIpcHandlers', () => {
     });
   });
 
+  it('selects an application without refreshing mode consumers', async () => {
+    const { ipcMain, invoke } = createFakeIpcMain();
+    const onModesChanged = vi.fn();
+    const selectedApplication = {
+      appName: 'Spotify',
+      appPath: '/Applications/Spotify.app',
+      iconDataUrl: 'data:image/png;base64,abc'
+    };
+    registerModeIpcHandlers({
+      ipcMain,
+      modeService,
+      onModesChanged,
+      selectApplication: vi.fn().mockResolvedValue(selectedApplication)
+    });
+
+    await expect(invoke(MODE_IPC_CHANNELS.selectApplication)).resolves.toEqual(selectedApplication);
+
+    expect(onModesChanged).not.toHaveBeenCalled();
+  });
+
+  it('gets an application icon without refreshing mode consumers', async () => {
+    const { ipcMain, invoke } = createFakeIpcMain();
+    const getApplicationIcon = vi.fn().mockResolvedValue('data:image/png;base64,abc');
+    const onModesChanged = vi.fn();
+    registerModeIpcHandlers({
+      getApplicationIcon,
+      ipcMain,
+      modeService,
+      onModesChanged
+    });
+
+    await expect(
+      invoke(MODE_IPC_CHANNELS.getApplicationIcon, {
+        appPath: '/Applications/Spotify.app'
+      })
+    ).resolves.toBe('data:image/png;base64,abc');
+
+    expect(getApplicationIcon).toHaveBeenCalledWith('/Applications/Spotify.app');
+    expect(onModesChanged).not.toHaveBeenCalled();
+  });
+
   it('renames modes and refreshes mode consumers', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
     const onModesChanged = vi.fn();
@@ -202,6 +244,99 @@ describe('registerModeIpcHandlers', () => {
     expect(onModesChanged).toHaveBeenCalledOnce();
   });
 
+  it('creates mode actions and refreshes mode consumers', async () => {
+    const { ipcMain, invoke } = createFakeIpcMain();
+    const onModesChanged = vi.fn();
+    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged });
+    const createdMode = await modeService.createMode('Focus');
+
+    const updatedMode = await invoke(MODE_IPC_CHANNELS.createAction, {
+      action: buildOpenAppModeActionInput({ appName: 'Notes' }),
+      modeId: createdMode.id,
+      phase: 'enter'
+    });
+
+    expect(updatedMode).toMatchObject({
+      id: createdMode.id,
+      actions: {
+        enter: [
+          {
+            appName: 'Notes'
+          }
+        ]
+      }
+    });
+    expect(
+      (updatedMode as { actions: { enter: Array<{ id: string }> } }).actions.enter[0]?.id
+    ).toEqual(expect.any(String));
+    expect(onModesChanged).toHaveBeenCalledOnce();
+  });
+
+  it('updates mode actions and refreshes mode consumers', async () => {
+    const { ipcMain, invoke } = createFakeIpcMain();
+    const onModesChanged = vi.fn();
+    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged });
+    const createdMode = await modeService.createMode('Focus');
+    const modeWithAction = await modeService.createModeAction(
+      createdMode.id,
+      'enter',
+      buildOpenAppModeActionInput()
+    );
+
+    const actionId = modeWithAction?.actions.enter[0]?.id;
+
+    const updatedMode = await invoke(MODE_IPC_CHANNELS.updateAction, {
+      action: buildOpenAppModeActionInput({
+        appName: 'Mail',
+        onlyOpenIfNotRunning: true
+      }),
+      actionId,
+      modeId: createdMode.id,
+      phase: 'enter'
+    });
+
+    expect(updatedMode).toMatchObject({
+      actions: {
+        enter: [
+          {
+            id: actionId,
+            appName: 'Mail',
+            onlyOpenIfNotRunning: true
+          }
+        ]
+      }
+    });
+    expect(onModesChanged).toHaveBeenCalledOnce();
+  });
+
+  it('deletes mode actions and refreshes mode consumers', async () => {
+    const { ipcMain, invoke } = createFakeIpcMain();
+    const onModesChanged = vi.fn();
+    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged });
+    const createdMode = await modeService.createMode('Focus');
+    const modeWithAction = await modeService.createModeAction(
+      createdMode.id,
+      'enter',
+      buildOpenAppModeActionInput()
+    );
+
+    const actionId = modeWithAction?.actions.enter[0]?.id;
+
+    const updatedMode = await invoke(MODE_IPC_CHANNELS.deleteAction, {
+      actionId,
+      modeId: createdMode.id,
+      phase: 'enter'
+    });
+
+    expect(updatedMode).toMatchObject({
+      actions: {
+        enter: [],
+        exit: []
+      }
+    });
+    expect(onModesChanged).toHaveBeenCalledOnce();
+  });
+
   it('does not refresh mode consumers when there is no active mode to deactivate', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
     const onModesChanged = vi.fn();
@@ -220,6 +355,13 @@ describe('registerModeIpcHandlers', () => {
     await expect(invoke(MODE_IPC_CHANNELS.create, { name: 12 })).rejects.toBeInstanceOf(
       ModeIpcHandlerError
     );
+    await expect(
+      invoke(MODE_IPC_CHANNELS.createAction, {
+        action: buildOpenAppModeActionInput(),
+        modeId: 'mode-1',
+        phase: 'sideways'
+      })
+    ).rejects.toBeInstanceOf(ModeIpcHandlerError);
     expect(modeService.getSavedModes()).toEqual([]);
     expect(onModesChanged).not.toHaveBeenCalled();
   });

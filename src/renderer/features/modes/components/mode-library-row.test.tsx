@@ -2,39 +2,36 @@
 
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { buildSavedMode } from '@test/builders/shared/modes';
 import { MODE_NAME_MAX_LENGTH, type SavedMode } from '../../../../shared/modes';
 import { ModeLibraryRow } from './mode-library-row';
 
-const createSavedMode = (id: string, name: string): SavedMode => ({
-  createdAt: '2026-04-20T12:00:00.000Z',
-  id,
-  name,
-  pinnedAt: null,
-  updatedAt: '2026-04-20T12:00:00.000Z'
-});
-
 const renderModeLibraryRow = ({
-  mode = createSavedMode('mode-1', 'Focus'),
-  onRenameMode = vi.fn().mockResolvedValue(createSavedMode('mode-1', 'Deep Work'))
+  mode = buildSavedMode(),
+  onActivateMode = vi.fn().mockResolvedValue(true),
+  onRenameMode = vi.fn().mockResolvedValue(buildSavedMode({ name: 'Deep Work' })),
+  onSelectMode = vi.fn()
 }: {
   mode?: SavedMode;
+  onActivateMode?: (id: string) => Promise<boolean>;
   onRenameMode?: (id: string, name: string) => Promise<SavedMode | null>;
+  onSelectMode?: (modeId: string | null) => void;
 } = {}) => {
   render(
     <ModeLibraryRow
       isActive={false}
       isSelected={false}
       mode={mode}
-      onActivateMode={vi.fn().mockResolvedValue(true)}
+      onActivateMode={onActivateMode}
       onDeactivateMode={vi.fn().mockResolvedValue(true)}
       onDeleteMode={vi.fn().mockResolvedValue(true)}
       onRenameMode={onRenameMode}
-      onSelectMode={vi.fn()}
+      onSelectMode={onSelectMode}
       onSetPinned={vi.fn().mockResolvedValue(mode)}
     />
   );
 
-  return { mode, onRenameMode };
+  return { mode, onActivateMode, onRenameMode, onSelectMode };
 };
 
 const startRenaming = async () => {
@@ -63,6 +60,25 @@ describe('ModeLibraryRow', () => {
     expect(input.value).toBe('Focus');
     expect(input.maxLength).toBe(MODE_NAME_MAX_LENGTH);
     expect(document.activeElement).toBe(input);
+  });
+
+  it('selects the mode from the row details hit target', () => {
+    const { onSelectMode } = renderModeLibraryRow();
+
+    fireEvent.click(screen.getByRole('button', { name: /open details for focus/i }));
+
+    expect(onSelectMode).toHaveBeenCalledWith('mode-1');
+  });
+
+  it('does not select the mode when activating from the row controls', () => {
+    const onActivateMode = vi.fn().mockResolvedValue(true);
+    const onSelectMode = vi.fn();
+    renderModeLibraryRow({ onActivateMode, onSelectMode });
+
+    fireEvent.click(screen.getByRole('button', { name: /^activate$/i }));
+
+    expect(onActivateMode).toHaveBeenCalledWith('mode-1');
+    expect(onSelectMode).not.toHaveBeenCalled();
   });
 
   it('saves a trimmed inline rename', async () => {

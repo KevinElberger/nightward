@@ -2,24 +2,14 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { MODE_NAME_MAX_LENGTH } from '../../shared/modes';
+import { buildAppData } from '@test/builders/main/persistence';
+import { buildOpenAppModeAction, buildOpenAppModeActionInput } from '@test/builders/shared/modes';
+import { MODE_NAME_MAX_LENGTH } from '@shared/modes';
 import { AppDataStore } from '../persistence/app-data-store';
 import { CURRENT_APP_DATA_SCHEMA_VERSION, type AppData } from '../persistence/types';
 import { ModeService, ModeServiceError, NO_ACTIVE_MODE_LABEL } from './mode-service';
 
-const createAppData = (): AppData => ({
-  activeModeId: null,
-  schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
-  modes: [
-    {
-      id: 'mode-1',
-      name: 'Focus',
-      createdAt: '2024-01-01T00:00:00.000Z',
-      pinnedAt: null,
-      updatedAt: '2024-01-01T00:00:00.000Z'
-    }
-  ]
-});
+const createAppData = (): AppData => buildAppData();
 
 describe('ModeService', () => {
   let userDataPath: string;
@@ -43,6 +33,10 @@ describe('ModeService', () => {
 
     expect(service.getSavedModes(5)).toEqual([
       {
+        actions: {
+          enter: [],
+          exit: []
+        },
         createdAt: '2024-01-01T00:00:00.000Z',
         id: 'mode-1',
         name: 'Focus',
@@ -65,6 +59,10 @@ describe('ModeService', () => {
       activeModeId: 'mode-1',
       modes: [
         {
+          actions: {
+            enter: [],
+            exit: []
+          },
           createdAt: '2024-01-01T00:00:00.000Z',
           id: 'mode-1',
           name: 'Focus',
@@ -82,6 +80,10 @@ describe('ModeService', () => {
     const persistedData = await store.read();
 
     expect(createdMode.id).toEqual(expect.any(String));
+    expect(createdMode.actions).toEqual({
+      enter: [],
+      exit: []
+    });
     expect(createdMode.name).toBe('Deep Work');
     expect(Date.parse(createdMode.createdAt)).not.toBeNaN();
     expect(createdMode.pinnedAt).toBeNull();
@@ -138,6 +140,10 @@ describe('ModeService', () => {
     const persistedData = await store.read();
 
     expect(renamedMode).toEqual({
+      actions: {
+        enter: [],
+        exit: []
+      },
       createdAt: '2024-01-01T00:00:00.000Z',
       id: 'mode-1',
       name: 'Deep Work',
@@ -189,6 +195,111 @@ describe('ModeService', () => {
     await service.initialize();
 
     await expect(service.renameMode('missing-mode', 'Focus')).resolves.toBeNull();
+  });
+
+  it('creates a mode action and persists it', async () => {
+    await store.write(createAppData());
+    await service.initialize();
+
+    const createdMode = await service.createModeAction(
+      'mode-1',
+      'enter',
+      buildOpenAppModeActionInput({ appName: 'Notes' })
+    );
+    const persistedData = await store.read();
+
+    expect(createdMode).toMatchObject({
+      id: 'mode-1',
+      actions: {
+        enter: [
+          {
+            appName: 'Notes',
+            appPath: '/Applications/Calendar.app',
+            enabled: true,
+            onlyOpenIfNotRunning: false,
+            repeatPolicy: 'every-activation',
+            type: 'open-app'
+          }
+        ],
+        exit: []
+      }
+    });
+    expect(createdMode?.actions.enter[0]?.id).toEqual(expect.any(String));
+    expect(persistedData.modes[0].actions.enter).toHaveLength(1);
+    expect(persistedData.modes[0].updatedAt).toBe(createdMode?.updatedAt);
+  });
+
+  it('updates a mode action and preserves its identifier', async () => {
+    await store.write(
+      buildAppData({
+        modes: [
+          {
+            ...createAppData().modes[0],
+            actions: {
+              enter: [buildOpenAppModeAction()],
+              exit: []
+            }
+          }
+        ]
+      })
+    );
+    await service.initialize();
+
+    const updatedMode = await service.updateModeAction(
+      'mode-1',
+      'enter',
+      'action-1',
+      buildOpenAppModeActionInput({
+        appName: 'Mail',
+        onlyOpenIfNotRunning: true,
+        repeatPolicy: 'once-per-day'
+      })
+    );
+
+    expect(updatedMode).toMatchObject({
+      actions: {
+        enter: [
+          {
+            id: 'action-1',
+            appName: 'Mail',
+            onlyOpenIfNotRunning: true,
+            repeatPolicy: 'once-per-day'
+          }
+        ]
+      }
+    });
+  });
+
+  it('deletes a mode action and persists the updated mode', async () => {
+    await store.write(
+      buildAppData({
+        modes: [
+          {
+            ...createAppData().modes[0],
+            actions: {
+              enter: [buildOpenAppModeAction()],
+              exit: []
+            }
+          }
+        ]
+      })
+    );
+    await service.initialize();
+
+    const updatedMode = await service.deleteModeAction('mode-1', 'enter', 'action-1');
+    const persistedData = await store.read();
+
+    expect(updatedMode?.actions.enter).toEqual([]);
+    expect(persistedData.modes[0].actions.enter).toEqual([]);
+  });
+
+  it('returns null when updating a missing mode action', async () => {
+    await store.write(createAppData());
+    await service.initialize();
+
+    await expect(
+      service.updateModeAction('mode-1', 'enter', 'missing-action', buildOpenAppModeActionInput())
+    ).resolves.toBeNull();
   });
 
   it('deletes a mode, persists the removal, and clears the active mode', async () => {

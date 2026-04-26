@@ -1,11 +1,26 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { ModeState, SavedMode } from '../../../../shared/modes';
+import type { ModeActionInput, ModeActionPhase, ModeState, SavedMode } from '@shared/modes';
+
+type RunModeMutation = <Result>(
+  mutation: () => Promise<Result>,
+  failureResult: Result
+) => Promise<Result>;
 
 export type ModesState = {
   activateMode: (id: string) => Promise<boolean>;
   activeModeId: string | null;
+  createModeAction: (
+    modeId: string,
+    phase: ModeActionPhase,
+    action: ModeActionInput
+  ) => Promise<SavedMode | null>;
   createMode: (name: string) => Promise<SavedMode | null>;
   deactivateMode: () => Promise<boolean>;
+  deleteModeAction: (
+    modeId: string,
+    phase: ModeActionPhase,
+    actionId: string
+  ) => Promise<SavedMode | null>;
   deleteMode: (id: string) => Promise<boolean>;
   error: string | null;
   isLoading: boolean;
@@ -13,6 +28,12 @@ export type ModesState = {
   renameMode: (id: string, name: string) => Promise<SavedMode | null>;
   refreshModes: () => Promise<void>;
   setModePinned: (id: string, isPinned: boolean) => Promise<SavedMode | null>;
+  updateModeAction: (
+    modeId: string,
+    phase: ModeActionPhase,
+    actionId: string,
+    action: ModeActionInput
+  ) => Promise<SavedMode | null>;
 };
 
 const getErrorMessage = (error: unknown, fallbackMessage: string) =>
@@ -46,7 +67,7 @@ export const useModesState = (): ModesState => {
     }
   }, [applyModeState]);
 
-  const runModeMutation = useCallback(
+  const runModeMutation: RunModeMutation = useCallback(
     async <Result>(mutation: () => Promise<Result>, failureResult: Result) => {
       setError(null);
 
@@ -98,6 +119,27 @@ export const useModesState = (): ModesState => {
     [runModeMutation]
   );
 
+  const createModeAction = useCallback(
+    (modeId: string, phase: ModeActionPhase, action: ModeActionInput) =>
+      runModeMutation(() => window.nightward.modes.createAction(modeId, phase, action), null),
+    [runModeMutation]
+  );
+
+  const updateModeAction = useCallback(
+    (modeId: string, phase: ModeActionPhase, actionId: string, action: ModeActionInput) =>
+      runModeMutation(
+        () => window.nightward.modes.updateAction(modeId, phase, actionId, action),
+        null
+      ),
+    [runModeMutation]
+  );
+
+  const deleteModeAction = useCallback(
+    (modeId: string, phase: ModeActionPhase, actionId: string) =>
+      runModeMutation(() => window.nightward.modes.deleteAction(modeId, phase, actionId), null),
+    [runModeMutation]
+  );
+
   useEffect(() => {
     const loadInitialModes = async () => {
       await loadModeState();
@@ -119,14 +161,17 @@ export const useModesState = (): ModesState => {
   return {
     activateMode,
     activeModeId,
+    createModeAction,
     createMode,
     deactivateMode,
+    deleteModeAction,
     deleteMode,
     error,
     isLoading,
     modes,
     renameMode,
     refreshModes: loadModeState,
-    setModePinned
+    setModePinned,
+    updateModeAction
   };
 };

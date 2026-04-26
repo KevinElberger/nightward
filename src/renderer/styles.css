@@ -14,6 +14,16 @@
     'Courier New', monospace;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
+  --surface-panel: oklch(1 0 0);
+  --surface-panel-muted: oklch(0.985 0 0);
+  --surface-card: oklch(0.99 0 0);
+  --surface-field: oklch(1 0 0);
+  --surface-control: oklch(0.97 0 0);
+  --surface-hover: oklch(0.95 0 0);
+  --surface-active: oklch(0.92 0 0);
+  --surface-border-subtle: oklch(0.94 0 0);
+  --surface-border: oklch(0.922 0 0);
+  --surface-border-strong: oklch(0.82 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -62,45 +72,55 @@
 
 .dark {
   --background: oklch(0.075 0.006 285);
-  --foreground: oklch(0.965 0.006 285);
-  --card: oklch(0.13 0.012 285);
-  --card-foreground: oklch(0.965 0.006 285);
-  --popover: oklch(0.12 0.012 285);
-  --popover-foreground: oklch(0.965 0.006 285);
+  --foreground: oklch(0.965 0 0);
+  --surface-panel: rgb(255 255 255 / 0.042);
+  --surface-panel-muted: rgb(255 255 255 / 0.016);
+  --surface-card: rgb(255 255 255 / 0.028);
+  --surface-field: rgb(255 255 255 / 0.025);
+  --surface-control: rgb(255 255 255 / 0.035);
+  --surface-hover: rgb(255 255 255 / 0.048);
+  --surface-active: rgb(255 255 255 / 0.075);
+  --surface-border-subtle: rgb(255 255 255 / 0.06);
+  --surface-border: rgb(255 255 255 / 0.075);
+  --surface-border-strong: rgb(255 255 255 / 0.14);
+  --card: rgb(9 9 10);
+  --card-foreground: oklch(0.965 0 0);
+  --popover: rgb(9 9 10);
+  --popover-foreground: oklch(0.965 0 0);
   --primary: #5351ea;
   --primary-foreground: #ffffff;
-  --secondary: oklch(0.19 0.018 285);
-  --secondary-foreground: oklch(0.94 0.006 285);
-  --muted: oklch(0.18 0.014 285);
-  --muted-foreground: oklch(0.68 0.016 285);
-  --accent: oklch(0.2 0.045 296);
-  --accent-foreground: oklch(0.96 0.01 285);
+  --secondary: var(--surface-control);
+  --secondary-foreground: oklch(0.94 0 0);
+  --muted: var(--surface-control);
+  --muted-foreground: oklch(0.68 0 0);
+  --accent: var(--surface-hover);
+  --accent-foreground: oklch(0.96 0 0);
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
-  --border: oklch(0.28 0.014 285);
-  --input: oklch(0.24 0.014 285);
+  --border: var(--surface-border);
+  --input: rgb(255 255 255 / 0.17);
   --ring: #5351ea;
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.105 0.01 285);
-  --sidebar-foreground: oklch(0.955 0.006 285);
+  --sidebar: rgb(255 255 255 / 0.026);
+  --sidebar-foreground: oklch(0.955 0 0);
   --sidebar-primary: #5351ea;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: oklch(0.18 0.02 285);
-  --sidebar-accent-foreground: oklch(0.96 0.006 285);
-  --sidebar-border: oklch(0.26 0.012 285);
+  --sidebar-accent: var(--surface-hover);
+  --sidebar-accent-foreground: oklch(0.96 0 0);
+  --sidebar-border: var(--surface-border);
   --sidebar-ring: #5351ea;
   --status-active: #4ade80;
   --status-warning: #f5c451;
   --status-error: #ff5c77;
   --status-sync: #6bc9fb;
-  --status-neutral: oklch(0.68 0.016 285);
+  --status-neutral: oklch(0.68 0 0);
   --scrollbar-track: transparent;
-  --scrollbar-thumb: oklch(0.34 0.014 285);
-  --scrollbar-thumb-hover: oklch(0.47 0.018 285);
+  --scrollbar-thumb: rgb(255 255 255 / 0.18);
+  --scrollbar-thumb-hover: rgb(255 255 255 / 0.32);
 }
 
 @theme inline {
@@ -148,6 +168,16 @@
   --color-status-error: var(--status-error);
   --color-status-sync: var(--status-sync);
   --color-status-neutral: var(--status-neutral);
+  --color-surface-panel: var(--surface-panel);
+  --color-surface-panel-muted: var(--surface-panel-muted);
+  --color-surface-card: var(--surface-card);
+  --color-surface-field: var(--surface-field);
+  --color-surface-control: var(--surface-control);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-active: var(--surface-active);
+  --color-surface-border-subtle: var(--surface-border-subtle);
+  --color-surface-border: var(--surface-border);
+  --color-surface-border-strong: var(--surface-border-strong);
 }
 
 @layer base {

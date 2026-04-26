@@ -2,16 +2,10 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { buildOpenAppModeAction } from '@test/builders/shared/modes';
+import { buildAppData, buildPersistedMode } from '@test/builders/main/persistence';
 import { AppDataStore, AppDataStoreError } from './app-data-store';
 import { CURRENT_APP_DATA_SCHEMA_VERSION, createDefaultAppData, type AppData } from './types';
-
-const createTestPersistedMode = () => ({
-  createdAt: '2026-04-20T12:00:00.000Z',
-  id: 'mode-1',
-  name: 'Focus',
-  pinnedAt: null,
-  updatedAt: '2026-04-20T12:00:00.000Z'
-});
 
 describe('AppDataStore', () => {
   let userDataPath: string;
@@ -31,11 +25,17 @@ describe('AppDataStore', () => {
   });
 
   it('round-trips valid app data through disk', async () => {
-    const appData: AppData = {
+    const appData: AppData = buildAppData({
       activeModeId: 'mode-1',
-      schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
-      modes: [createTestPersistedMode()]
-    };
+      modes: [
+        buildPersistedMode({
+          actions: {
+            enter: [buildOpenAppModeAction()],
+            exit: []
+          }
+        })
+      ]
+    });
 
     await store.write(appData);
 
@@ -48,7 +48,7 @@ describe('AppDataStore', () => {
       store.filePath,
       JSON.stringify({
         schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
-        modes: [createTestPersistedMode()]
+        modes: [buildPersistedMode()]
       }),
       'utf8'
     );
@@ -56,7 +56,7 @@ describe('AppDataStore', () => {
     await expect(store.read()).resolves.toEqual({
       activeModeId: null,
       schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
-      modes: [createTestPersistedMode()]
+      modes: [buildPersistedMode()]
     });
   });
 
@@ -78,6 +78,10 @@ describe('AppDataStore', () => {
     const appData = await store.read();
 
     expect(appData.modes[0]).toMatchObject({
+      actions: {
+        enter: [],
+        exit: []
+      },
       id: 'mode-1',
       name: 'Focus'
     });

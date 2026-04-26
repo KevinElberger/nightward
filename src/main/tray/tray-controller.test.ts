@@ -1,6 +1,6 @@
 import type { App } from 'electron';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { SavedMode } from '../../shared/modes';
+import { buildSavedMode } from '@test/builders/shared/modes';
 import type { ModeService } from '../modes/mode-service';
 
 const electronMock = vi.hoisted(() => {
@@ -43,15 +43,7 @@ type TrayMenuItem = {
   type?: string;
 };
 
-const createSavedMode = (id: string, name: string): SavedMode => ({
-  createdAt: '2026-04-20T12:00:00.000Z',
-  id,
-  name,
-  pinnedAt: null,
-  updatedAt: '2026-04-20T12:00:00.000Z'
-});
-
-const modes = [createSavedMode('mode-1', 'Focus')];
+const modes = [buildSavedMode()];
 
 const createModeService = ({
   activeModeId = null,

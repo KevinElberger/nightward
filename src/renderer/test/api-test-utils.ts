@@ -2,8 +2,10 @@ import { vi } from 'vitest';
 import type { NightwardApi } from '../../shared/nightward-api';
 
 type ModesApiOverrides = Partial<NightwardApi['modes']>;
+type ApplicationsApiOverrides = Partial<NightwardApi['applications']>;
 
 type ApiOverrides = {
+  applications?: ApplicationsApiOverrides;
   modes?: ModesApiOverrides;
 };
 
@@ -20,8 +22,16 @@ export const createApiMock = (overrides: ApiOverrides = {}): NightwardApi => ({
     delete: vi.fn(),
     activate: vi.fn(),
     deactivate: vi.fn(),
+    createAction: vi.fn(),
+    updateAction: vi.fn(),
+    deleteAction: vi.fn(),
     onChanged: vi.fn(() => vi.fn()),
     ...overrides.modes
+  },
+  applications: {
+    getIcon: vi.fn().mockResolvedValue(null),
+    select: vi.fn().mockResolvedValue(null),
+    ...overrides.applications
   }
 });
 
