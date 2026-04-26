@@ -3,10 +3,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { buildAppData } from '@test/builders/main/persistence';
-import {
-  buildOpenAppModeAction,
-  buildOpenAppModeActionInput
-} from '@test/builders/shared/modes';
+import { buildOpenAppModeAction, buildOpenAppModeActionInput } from '@test/builders/shared/modes';
 import { MODE_NAME_MAX_LENGTH } from '@shared/modes';
 import { AppDataStore } from '../persistence/app-data-store';
 import { CURRENT_APP_DATA_SCHEMA_VERSION, type AppData } from '../persistence/types';

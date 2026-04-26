@@ -216,8 +216,6 @@ describe('app-data-validation', () => {
           }
         ]
       })
-    ).toThrow(
-      'modes[0].actions.enter[0].repeatPolicy must be a supported repeat policy.'
-    );
+    ).toThrow('modes[0].actions.enter[0].repeatPolicy must be a supported repeat policy.');
   });
 });

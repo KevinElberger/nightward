@@ -1,8 +1,4 @@
-import {
-  createEmptyModeActionSet,
-  type ModeAction,
-  type ModeActionSet
-} from '@shared/modes';
+import { createEmptyModeActionSet, type ModeAction, type ModeActionSet } from '@shared/modes';
 import { isRecord } from '../validation/json-record';
 import { parseModeAction } from '../validation/mode-action-record';
 import { AppDataStoreError } from './app-data-store-error';
