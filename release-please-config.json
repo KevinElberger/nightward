@@ -1,0 +1,9 @@
+{
+  "include-component-in-tag": false,
+  "packages": {
+    ".": {
+      "package-name": "nightward",
+      "release-type": "node"
+    }
+  }
+}
