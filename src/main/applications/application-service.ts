@@ -1,4 +1,4 @@
-import { dialog, type App, type OpenDialogOptions } from 'electron';
+import { dialog, shell, type App, type OpenDialogOptions } from 'electron';
 import { execFile } from 'node:child_process';
 import { access, mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -10,21 +10,35 @@ const execFileAsync = promisify(execFile);
 
 type ApplicationDialog = Pick<typeof dialog, 'showOpenDialog'>;
 type ApplicationServiceApp = Pick<App, 'getFileIcon'>;
+type ApplicationShell = Pick<typeof shell, 'openPath'>;
+
+export type ApplicationRunningCheckInput = {
+  appName: string;
+  appPath: string;
+};
 
 type ApplicationServiceOptions = {
   app: ApplicationServiceApp;
   applicationDialog?: ApplicationDialog;
+  applicationShell?: ApplicationShell;
   platform: NodeJS.Platform;
 };
 
 export class ApplicationService {
   private readonly app: ApplicationServiceApp;
   private readonly applicationDialog: ApplicationDialog;
+  private readonly applicationShell: ApplicationShell;
   private readonly platform: NodeJS.Platform;
 
-  constructor({ app, applicationDialog = dialog, platform }: ApplicationServiceOptions) {
+  constructor({
+    app,
+    applicationDialog = dialog,
+    applicationShell = shell,
+    platform
+  }: ApplicationServiceOptions) {
     this.app = app;
     this.applicationDialog = applicationDialog;
+    this.applicationShell = applicationShell;
     this.platform = platform;
   }
 
@@ -75,6 +89,22 @@ export class ApplicationService {
     }
   };
 
+  readonly openApplication = async (appPath: string) => {
+    const errorMessage = await this.applicationShell.openPath(appPath);
+
+    if (errorMessage !== '') {
+      throw new Error(errorMessage);
+    }
+  };
+
+  readonly isApplicationRunning = async ({ appName, appPath }: ApplicationRunningCheckInput) => {
+    if (appName.trim() !== '' && (await this.hasRunningProcess(['-x', appName]))) {
+      return true;
+    }
+
+    return this.hasRunningProcess(['-f', appPath]);
+  };
+
   private readonly getMacApplicationDisplayName = async (appPath: string) => {
     if (!this.isMacApplicationBundle(appPath)) {
       return null;
@@ -110,6 +140,7 @@ export class ApplicationService {
     const outputPath = path.join(temporaryDirectory, 'icon.png');
 
     try {
+      // macOS app icons are often .icns files; convert to a small PNG the renderer can display.
       await execFileAsync('/usr/bin/sips', [
         '-s',
         'format',
@@ -134,6 +165,7 @@ export class ApplicationService {
     const infoPlistPath = path.join(appPath, 'Contents', 'Info.plist');
 
     try {
+      // Read a single value from the app bundle's Info.plist as plain text.
       const { stdout } = await execFileAsync('/usr/bin/plutil', [
         '-extract',
         key,
@@ -152,4 +184,15 @@ export class ApplicationService {
 
   private readonly isMacApplicationBundle = (appPath: string) =>
     this.platform === 'darwin' && appPath.toLowerCase().endsWith('.app');
+
+  private readonly hasRunningProcess = async (args: string[]) => {
+    try {
+      // pgrep exits successfully when it finds a matching running process.
+      await execFileAsync('/usr/bin/pgrep', args);
+
+      return true;
+    } catch {
+      return false;
+    }
+  };
 }

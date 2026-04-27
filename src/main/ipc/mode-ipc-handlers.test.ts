@@ -3,8 +3,10 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { buildModeAutomationServiceDouble } from '@test/builders/main/services';
 import { buildOpenAppModeActionInput } from '@test/builders/shared/modes';
 import { MODE_IPC_CHANNELS } from '../../shared/mode-ipc';
+import type { ModeAutomationService } from '../modes/mode-automation-service';
 import { ModeService } from '../modes/mode-service';
 import { AppDataStore } from '../persistence/app-data-store';
 import { registerModeIpcHandlers, ModeIpcHandlerError } from './mode-ipc-handlers';
@@ -43,6 +45,21 @@ describe('registerModeIpcHandlers', () => {
   let userDataPath: string;
   let modeService: ModeService;
 
+  const registerHandlers = ({
+    modeAutomationService = buildModeAutomationServiceDouble(),
+    ...options
+  }: Omit<
+    Parameters<typeof registerModeIpcHandlers>[0],
+    'modeAutomationService' | 'modeService'
+  > & {
+    modeAutomationService?: Pick<ModeAutomationService, 'activateMode' | 'deactivateMode'>;
+  }) =>
+    registerModeIpcHandlers({
+      modeAutomationService,
+      modeService,
+      ...options
+    });
+
   beforeEach(async () => {
     userDataPath = await mkdtemp(path.join(tmpdir(), 'nightward-mode-ipc-'));
     modeService = new ModeService(new AppDataStore({ userDataPath }));
@@ -55,9 +72,8 @@ describe('registerModeIpcHandlers', () => {
 
   it('registers and unregisters all mode channels', () => {
     const { handlers, ipcMain } = createFakeIpcMain();
-    const unregister = registerModeIpcHandlers({
+    const unregister = registerHandlers({
       ipcMain,
-      modeService,
       onModesChanged: vi.fn()
     });
 
@@ -72,7 +88,7 @@ describe('registerModeIpcHandlers', () => {
   it('creates modes and refreshes mode consumers', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
     const onModesChanged = vi.fn();
-    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged });
+    registerHandlers({ ipcMain, onModesChanged });
 
     const createdMode = await invoke(MODE_IPC_CHANNELS.create, {
       name: '  Focus  '
@@ -88,7 +104,7 @@ describe('registerModeIpcHandlers', () => {
 
   it('lists modes', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
-    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged: vi.fn() });
+    registerHandlers({ ipcMain, onModesChanged: vi.fn() });
     const createdMode = await modeService.createMode('Focus');
 
     await expect(invoke(MODE_IPC_CHANNELS.list)).resolves.toEqual([createdMode]);
@@ -96,7 +112,7 @@ describe('registerModeIpcHandlers', () => {
 
   it('gets mode state', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
-    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged: vi.fn() });
+    registerHandlers({ ipcMain, onModesChanged: vi.fn() });
     const createdMode = await modeService.createMode('Focus');
     await modeService.activateSavedMode(createdMode.id);
 
@@ -114,9 +130,8 @@ describe('registerModeIpcHandlers', () => {
       appPath: '/Applications/Spotify.app',
       iconDataUrl: 'data:image/png;base64,abc'
     };
-    registerModeIpcHandlers({
+    registerHandlers({
       ipcMain,
-      modeService,
       onModesChanged,
       selectApplication: vi.fn().mockResolvedValue(selectedApplication)
     });
@@ -130,10 +145,9 @@ describe('registerModeIpcHandlers', () => {
     const { ipcMain, invoke } = createFakeIpcMain();
     const getApplicationIcon = vi.fn().mockResolvedValue('data:image/png;base64,abc');
     const onModesChanged = vi.fn();
-    registerModeIpcHandlers({
+    registerHandlers({
       getApplicationIcon,
       ipcMain,
-      modeService,
       onModesChanged
     });
 
@@ -150,7 +164,7 @@ describe('registerModeIpcHandlers', () => {
   it('renames modes and refreshes mode consumers', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
     const onModesChanged = vi.fn();
-    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged });
+    registerHandlers({ ipcMain, onModesChanged });
     const createdMode = await modeService.createMode('Focus');
 
     const renamedMode = await invoke(MODE_IPC_CHANNELS.rename, {
@@ -170,7 +184,7 @@ describe('registerModeIpcHandlers', () => {
   it('pins modes and refreshes mode consumers', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
     const onModesChanged = vi.fn();
-    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged });
+    registerHandlers({ ipcMain, onModesChanged });
     const createdMode = await modeService.createMode('Focus');
 
     const pinnedMode = await invoke(MODE_IPC_CHANNELS.setPinned, {
@@ -189,7 +203,7 @@ describe('registerModeIpcHandlers', () => {
   it('does not refresh mode consumers when pinning a missing mode', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
     const onModesChanged = vi.fn();
-    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged });
+    registerHandlers({ ipcMain, onModesChanged });
 
     await expect(
       invoke(MODE_IPC_CHANNELS.setPinned, {
@@ -204,7 +218,7 @@ describe('registerModeIpcHandlers', () => {
   it('deletes modes and refreshes mode consumers', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
     const onModesChanged = vi.fn();
-    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged });
+    registerHandlers({ ipcMain, onModesChanged });
     const createdMode = await modeService.createMode('Focus');
 
     await expect(
@@ -218,8 +232,10 @@ describe('registerModeIpcHandlers', () => {
 
   it('activates modes and refreshes mode consumers', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
+    const activateMode = vi.fn().mockResolvedValue(true);
+    const modeAutomationService = buildModeAutomationServiceDouble({ activateMode });
     const onModesChanged = vi.fn();
-    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged });
+    registerHandlers({ ipcMain, modeAutomationService, onModesChanged });
     const createdMode = await modeService.createMode('Focus');
 
     await expect(
@@ -227,27 +243,27 @@ describe('registerModeIpcHandlers', () => {
         id: createdMode.id
       })
     ).resolves.toBe(true);
-    expect(modeService.getCurrentModeLabel()).toBe('Focus');
+    expect(activateMode).toHaveBeenCalledWith(createdMode.id);
     expect(onModesChanged).toHaveBeenCalledOnce();
   });
 
   it('deactivates modes and refreshes mode consumers', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
+    const deactivateMode = vi.fn().mockResolvedValue(true);
+    const modeAutomationService = buildModeAutomationServiceDouble({ deactivateMode });
     const onModesChanged = vi.fn();
-    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged });
-    const createdMode = await modeService.createMode('Focus');
-    await modeService.activateSavedMode(createdMode.id);
+    registerHandlers({ ipcMain, modeAutomationService, onModesChanged });
 
     await expect(invoke(MODE_IPC_CHANNELS.deactivate)).resolves.toBe(true);
 
-    expect(modeService.getModeState().activeModeId).toBeNull();
+    expect(deactivateMode).toHaveBeenCalledOnce();
     expect(onModesChanged).toHaveBeenCalledOnce();
   });
 
   it('creates mode actions and refreshes mode consumers', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
     const onModesChanged = vi.fn();
-    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged });
+    registerHandlers({ ipcMain, onModesChanged });
     const createdMode = await modeService.createMode('Focus');
 
     const updatedMode = await invoke(MODE_IPC_CHANNELS.createAction, {
@@ -275,7 +291,7 @@ describe('registerModeIpcHandlers', () => {
   it('updates mode actions and refreshes mode consumers', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
     const onModesChanged = vi.fn();
-    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged });
+    registerHandlers({ ipcMain, onModesChanged });
     const createdMode = await modeService.createMode('Focus');
     const modeWithAction = await modeService.createModeAction(
       createdMode.id,
@@ -312,7 +328,7 @@ describe('registerModeIpcHandlers', () => {
   it('deletes mode actions and refreshes mode consumers', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
     const onModesChanged = vi.fn();
-    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged });
+    registerHandlers({ ipcMain, onModesChanged });
     const createdMode = await modeService.createMode('Focus');
     const modeWithAction = await modeService.createModeAction(
       createdMode.id,
@@ -339,8 +355,11 @@ describe('registerModeIpcHandlers', () => {
 
   it('does not refresh mode consumers when there is no active mode to deactivate', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
+    const modeAutomationService = buildModeAutomationServiceDouble({
+      deactivateMode: vi.fn().mockResolvedValue(false)
+    });
     const onModesChanged = vi.fn();
-    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged });
+    registerHandlers({ ipcMain, modeAutomationService, onModesChanged });
 
     await expect(invoke(MODE_IPC_CHANNELS.deactivate)).resolves.toBe(false);
 
@@ -350,7 +369,7 @@ describe('registerModeIpcHandlers', () => {
   it('rejects malformed payloads before calling mode service methods', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
     const onModesChanged = vi.fn();
-    registerModeIpcHandlers({ ipcMain, modeService, onModesChanged });
+    registerHandlers({ ipcMain, onModesChanged });
 
     await expect(invoke(MODE_IPC_CHANNELS.create, { name: 12 })).rejects.toBeInstanceOf(
       ModeIpcHandlerError

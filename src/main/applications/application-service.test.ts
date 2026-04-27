@@ -91,4 +91,33 @@ describe('ApplicationService', () => {
 
     await expect(service.getApplicationIcon('/Applications/Spotify.app')).resolves.toBeNull();
   });
+
+  it('opens an application path', async () => {
+    const applicationShell = {
+      openPath: vi.fn().mockResolvedValue('')
+    };
+    const service = new ApplicationService({
+      app: buildApp(),
+      applicationShell,
+      platform: 'darwin'
+    });
+
+    await expect(service.openApplication('/Applications/Spotify.app')).resolves.toBeUndefined();
+
+    expect(applicationShell.openPath).toHaveBeenCalledWith('/Applications/Spotify.app');
+  });
+
+  it('rejects when opening an application fails', async () => {
+    const service = new ApplicationService({
+      app: buildApp(),
+      applicationShell: {
+        openPath: vi.fn().mockResolvedValue('Could not open app.')
+      },
+      platform: 'darwin'
+    });
+
+    await expect(service.openApplication('/Applications/Spotify.app')).rejects.toThrow(
+      'Could not open app.'
+    );
+  });
 });

@@ -14,6 +14,7 @@ import {
   type UpdateModeActionRequest
 } from '../../shared/mode-ipc';
 import type { ModeService } from '../modes/mode-service';
+import type { ModeAutomationService } from '../modes/mode-automation-service';
 import { parseModeActionInput, parseModeActionPhase } from '../validation/mode-action-record';
 import { getRequiredString, isRecord } from '../validation/json-record';
 
@@ -21,6 +22,7 @@ type IpcMainRouter = Pick<IpcMain, 'handle' | 'removeHandler'>;
 
 type RegisterModeIpcHandlersOptions = {
   ipcMain: IpcMainRouter;
+  modeAutomationService: Pick<ModeAutomationService, 'activateMode' | 'deactivateMode'>;
   modeService: ModeService;
   onModesChanged: () => void;
   getApplicationIcon?: (appPath: string) => Promise<GetApplicationIconResponse>;
@@ -37,6 +39,7 @@ export class ModeIpcHandlerError extends Error {
 export const registerModeIpcHandlers = ({
   getApplicationIcon = async () => null,
   ipcMain,
+  modeAutomationService,
   modeService,
   onModesChanged,
   selectApplication = async () => null
@@ -85,7 +88,9 @@ export const registerModeIpcHandlers = ({
   });
 
   ipcMain.handle(MODE_IPC_CHANNELS.activate, async (_event, request: unknown) => {
-    const activated = await modeService.activateSavedMode(parseActivateModeRequest(request).id);
+    const activated = await modeAutomationService.activateMode(
+      parseActivateModeRequest(request).id
+    );
 
     if (activated) {
       onModesChanged();
@@ -95,7 +100,7 @@ export const registerModeIpcHandlers = ({
   });
 
   ipcMain.handle(MODE_IPC_CHANNELS.deactivate, async () => {
-    const deactivated = await modeService.deactivateActiveMode();
+    const deactivated = await modeAutomationService.deactivateMode();
 
     if (deactivated) {
       onModesChanged();
