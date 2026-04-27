@@ -20,7 +20,6 @@ type AppDataOverrides = Omit<Partial<AppData>, 'modes'> & {
 };
 
 export const buildAppData = (overrides: AppDataOverrides = {}): AppData => ({
-  activeModeId: null,
   schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
   modes: [buildPersistedMode()],
   ...overrides

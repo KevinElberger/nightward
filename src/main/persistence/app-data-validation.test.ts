@@ -43,23 +43,17 @@ describe('app-data-validation', () => {
     ).toThrow('App data modes must be an array.');
   });
 
-  it('defaults missing activeModeId to null', () => {
+  it('ignores legacy active mode IDs because active mode state is runtime-only', () => {
     const appData = validateAppData({
+      activeModeId: 'mode-1',
       schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
       modes: [buildPersistedMode()]
     });
 
-    expect(appData.activeModeId).toBeNull();
-  });
-
-  it('rejects invalid activeModeId values', () => {
-    expect(() =>
-      validateAppData({
-        activeModeId: '',
-        schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
-        modes: []
-      })
-    ).toThrow('App data active mode ID must be a non-empty string or null.');
+    expect(appData).toEqual({
+      schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
+      modes: [buildPersistedMode()]
+    });
   });
 
   it('hydrates missing mode timestamps', () => {
