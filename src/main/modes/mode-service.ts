@@ -20,12 +20,14 @@ export class ModeServiceError extends Error {
 }
 
 export class ModeService {
+  private activeModeId: string | null = null;
   private appData: AppData = createDefaultAppData();
 
   constructor(private readonly appDataStore: AppDataStore) {}
 
   async initialize() {
     this.appData = await this.appDataStore.read();
+    this.activeModeId = null;
   }
 
   getCurrentModeLabel() {
@@ -54,23 +56,17 @@ export class ModeService {
       return false;
     }
 
-    await this.persistAppData({
-      ...this.appData,
-      activeModeId: mode.id
-    });
+    this.activeModeId = mode.id;
 
     return true;
   }
 
   async deactivateActiveMode() {
-    if (this.appData.activeModeId === null) {
+    if (this.activeModeId === null) {
       return false;
     }
 
-    await this.persistAppData({
-      ...this.appData,
-      activeModeId: null
-    });
+    this.activeModeId = null;
 
     return true;
   }
@@ -170,11 +166,12 @@ export class ModeService {
       return false;
     }
 
-    const activeModeId = this.appData.activeModeId === modeId ? null : this.appData.activeModeId;
+    if (this.activeModeId === modeId) {
+      this.activeModeId = null;
+    }
 
     await this.persistAppData({
       ...this.appData,
-      activeModeId,
       modes: this.appData.modes.filter((mode) => mode.id !== modeId)
     });
 
@@ -210,7 +207,7 @@ export class ModeService {
   }
 
   private getActiveMode() {
-    return this.appData.modes.find((mode) => mode.id === this.appData.activeModeId) ?? null;
+    return this.appData.modes.find((mode) => mode.id === this.activeModeId) ?? null;
   }
 }
 

@@ -63,7 +63,7 @@ export class AppController {
         selectApplication: this.applicationService.selectApplication
       });
 
-      this.settingsWindow.create();
+      this.settingsWindow.show();
       this.tray.create();
 
       this.app.on('activate', () => {

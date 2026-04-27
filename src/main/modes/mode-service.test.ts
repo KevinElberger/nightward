@@ -46,17 +46,14 @@ describe('ModeService', () => {
     ]);
   });
 
-  it('initializes active mode state from persisted app data', async () => {
-    await store.write({
-      ...createAppData(),
-      activeModeId: 'mode-1'
-    });
+  it('initializes active mode state as runtime-only', async () => {
+    await store.write(createAppData());
 
     await service.initialize();
 
-    expect(service.getCurrentModeLabel()).toBe('Focus');
+    expect(service.getCurrentModeLabel()).toBe(NO_ACTIVE_MODE_LABEL);
     expect(service.getModeState()).toEqual({
-      activeModeId: 'mode-1',
+      activeModeId: null,
       modes: [
         {
           actions: {
@@ -102,7 +99,6 @@ describe('ModeService', () => {
 
     await expect(service.createMode('   ')).rejects.toBeInstanceOf(ModeServiceError);
     await expect(store.read()).resolves.toEqual({
-      activeModeId: null,
       schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
       modes: []
     });
@@ -115,7 +111,6 @@ describe('ModeService', () => {
       `Mode name must be ${MODE_NAME_MAX_LENGTH} characters or less.`
     );
     await expect(store.read()).resolves.toEqual({
-      activeModeId: null,
       schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
       modes: []
     });
@@ -312,7 +307,6 @@ describe('ModeService', () => {
 
     expect(service.getCurrentModeLabel()).toBe(NO_ACTIVE_MODE_LABEL);
     await expect(store.read()).resolves.toEqual({
-      activeModeId: null,
       schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
       modes: []
     });
@@ -331,19 +325,28 @@ describe('ModeService', () => {
     expect(service.getCurrentModeLabel()).toBe(NO_ACTIVE_MODE_LABEL);
   });
 
-  it('activates a saved mode and persists it', async () => {
+  it('activates a saved mode in runtime state without persisting it', async () => {
     await store.write(createAppData());
     await service.initialize();
 
     await expect(service.activateSavedMode('mode-1')).resolves.toBe(true);
 
     expect(service.getCurrentModeLabel()).toBe('Focus');
-    await expect(store.read()).resolves.toMatchObject({
-      activeModeId: 'mode-1'
-    });
+    await expect(store.read()).resolves.toEqual(createAppData());
   });
 
-  it('deactivates the active mode and persists it', async () => {
+  it('resets active mode state when reinitialized', async () => {
+    await store.write(createAppData());
+    await service.initialize();
+    await service.activateSavedMode('mode-1');
+
+    await service.initialize();
+
+    expect(service.getCurrentModeLabel()).toBe(NO_ACTIVE_MODE_LABEL);
+    expect(service.getModeState().activeModeId).toBeNull();
+  });
+
+  it('deactivates the active mode in runtime state without persisting it', async () => {
     await store.write(createAppData());
     await service.initialize();
     await service.activateSavedMode('mode-1');
@@ -351,9 +354,7 @@ describe('ModeService', () => {
     await expect(service.deactivateActiveMode()).resolves.toBe(true);
 
     expect(service.getCurrentModeLabel()).toBe(NO_ACTIVE_MODE_LABEL);
-    await expect(store.read()).resolves.toMatchObject({
-      activeModeId: null
-    });
+    await expect(store.read()).resolves.toEqual(createAppData());
   });
 
   it('returns false when deactivating with no active mode', async () => {
@@ -361,8 +362,6 @@ describe('ModeService', () => {
     await service.initialize();
 
     await expect(service.deactivateActiveMode()).resolves.toBe(false);
-    await expect(store.read()).resolves.toMatchObject({
-      activeModeId: null
-    });
+    await expect(store.read()).resolves.toEqual(createAppData());
   });
 });

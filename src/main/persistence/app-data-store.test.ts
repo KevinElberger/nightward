@@ -26,7 +26,6 @@ describe('AppDataStore', () => {
 
   it('round-trips valid app data through disk', async () => {
     const appData: AppData = buildAppData({
-      activeModeId: 'mode-1',
       modes: [
         buildPersistedMode({
           actions: {
@@ -43,10 +42,11 @@ describe('AppDataStore', () => {
     await expect(readFile(store.filePath, 'utf8')).resolves.toContain('"modes"');
   });
 
-  it('defaults missing active mode IDs to null', async () => {
+  it('ignores legacy active mode IDs when reading app data', async () => {
     await writeFile(
       store.filePath,
       JSON.stringify({
+        activeModeId: 'mode-1',
         schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
         modes: [buildPersistedMode()]
       }),
@@ -54,7 +54,6 @@ describe('AppDataStore', () => {
     );
 
     await expect(store.read()).resolves.toEqual({
-      activeModeId: null,
       schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
       modes: [buildPersistedMode()]
     });
@@ -130,22 +129,5 @@ describe('AppDataStore', () => {
 
     await expect(store.read()).rejects.toBeInstanceOf(AppDataStoreError);
     await expect(store.read()).rejects.toThrow('modes[0].name must be a non-empty string.');
-  });
-
-  it('throws an app data store error for invalid active mode IDs', async () => {
-    await writeFile(
-      store.filePath,
-      JSON.stringify({
-        activeModeId: '',
-        schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
-        modes: []
-      }),
-      'utf8'
-    );
-
-    await expect(store.read()).rejects.toBeInstanceOf(AppDataStoreError);
-    await expect(store.read()).rejects.toThrow(
-      'App data active mode ID must be a non-empty string or null.'
-    );
   });
 });
