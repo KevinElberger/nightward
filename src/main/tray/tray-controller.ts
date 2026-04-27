@@ -1,4 +1,5 @@
 import { Menu, nativeImage, Tray, type App, type MenuItemConstructorOptions } from 'electron';
+import type { ModeAutomationService } from '../modes/mode-automation-service';
 import type { ModeService } from '../modes/mode-service';
 import { TRAY_ICON_DATA_URL } from './tray-icon';
 
@@ -6,6 +7,7 @@ const SAVED_MODE_MENU_LIMIT = 5;
 
 type TrayControllerOptions = {
   app: App;
+  modeAutomationService: Pick<ModeAutomationService, 'activateMode' | 'deactivateMode'>;
   modeService: ModeService;
   onModesChanged: () => void;
   onOpenSettings: () => void;
@@ -13,14 +15,25 @@ type TrayControllerOptions = {
 
 export class TrayController {
   private readonly app: App;
+  private readonly modeAutomationService: Pick<
+    ModeAutomationService,
+    'activateMode' | 'deactivateMode'
+  >;
   private readonly modeService: ModeService;
   private readonly onModesChanged: () => void;
   private readonly onOpenSettings: () => void;
   private tray: Tray | null = null;
 
-  constructor({ app, modeService, onModesChanged, onOpenSettings }: TrayControllerOptions) {
+  constructor({
+    app,
+    modeAutomationService,
+    modeService,
+    onModesChanged,
+    onOpenSettings
+  }: TrayControllerOptions) {
     this.app = app;
     this.modeService = modeService;
+    this.modeAutomationService = modeAutomationService;
     this.onModesChanged = onModesChanged;
     this.onOpenSettings = onOpenSettings;
   }
@@ -79,7 +92,7 @@ export class TrayController {
     return this.modeService.getSavedModes(SAVED_MODE_MENU_LIMIT).map((mode) => ({
       label: mode.name,
       click: async () => {
-        const activated = await this.modeService.activateSavedMode(mode.id);
+        const activated = await this.modeAutomationService.activateMode(mode.id);
 
         if (activated) {
           this.onModesChanged();
@@ -97,7 +110,7 @@ export class TrayController {
       {
         label: 'Deactivate Mode',
         click: async () => {
-          const deactivated = await this.modeService.deactivateActiveMode();
+          const deactivated = await this.modeAutomationService.deactivateMode();
 
           if (deactivated) {
             this.onModesChanged();
