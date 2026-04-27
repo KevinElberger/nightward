@@ -15,6 +15,10 @@ import { ModeDetailPage } from './mode-detail-page';
 import type { ModesState } from './hooks/use-modes';
 
 const renderModeDetailPage = (mode = buildSavedMode(), overrides: Partial<ModesState> = {}) => {
+  if (!('nightward' in window)) {
+    installApiMock();
+  }
+
   const modesState: ModesState = {
     activateMode: vi.fn().mockResolvedValue(true),
     activeModeId: null,
@@ -82,6 +86,27 @@ describe('ModeDetailPage', () => {
     expect(screen.getByText('Skips if already running')).not.toBeNull();
     expect(screen.getByText('Enabled')).not.toBeNull();
     expect(screen.queryByText('No start actions')).toBeNull();
+  });
+
+  it('hydrates open app icons in the action list', async () => {
+    const getIcon = vi.fn().mockResolvedValue('data:image/png;base64,discord');
+    installApiMock({ applications: { getIcon } });
+    renderModeDetailPage(
+      buildSavedMode({
+        actions: buildModeActionSet({
+          enter: [
+            buildOpenAppModeAction({
+              appName: 'Discord',
+              appPath: '/Applications/Discord.app'
+            })
+          ]
+        })
+      })
+    );
+
+    await waitFor(() => expect(getIcon).toHaveBeenCalledWith('/Applications/Discord.app'));
+
+    expect(document.querySelector('img[src="data:image/png;base64,discord"]')).not.toBeNull();
   });
 
   it('surfaces warning when the same app is configured in both phases', () => {

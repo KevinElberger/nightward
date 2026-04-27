@@ -2,6 +2,7 @@ import { ChevronRight } from 'lucide-react';
 import type { ModeAction } from '@shared/modes';
 import { cn } from '@/lib/utils';
 import { getModeActionTypeDefinition } from '../mode-action-registry';
+import { ModeActionIcon } from './mode-action-icon';
 
 type ModeActionCardProps = {
   action: ModeAction;
@@ -15,7 +16,7 @@ export function ModeActionCard({ action, lifecycleNotice, onEditAction }: ModeAc
   const content = (
     <div className="grid min-h-16 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-[8px] border border-surface-border-subtle bg-surface-card px-3 py-2.5">
       <span className="flex size-8 shrink-0 items-center justify-center rounded-[4px] border border-surface-border-subtle bg-surface-control text-white/58">
-        <actionTypeDefinition.Icon className="size-4" aria-hidden="true" />
+        <ModeActionIcon action={action} FallbackIcon={actionTypeDefinition.Icon} />
       </span>
       <div className="min-w-0">
         <div className="truncate text-sm font-medium text-foreground">
