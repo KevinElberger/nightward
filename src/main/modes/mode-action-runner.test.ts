@@ -108,12 +108,18 @@ describe('ModeActionRunner', () => {
       .mockRejectedValueOnce(new Error('Could not open app'))
       .mockResolvedValueOnce(undefined);
 
-    await runner.runActions([
+    const failures = await runner.runActions([
       buildOpenAppModeAction({ id: 'action-1' }),
       buildOpenAppModeAction({ id: 'action-2' })
     ]);
 
     expect(applicationService.openApplication).toHaveBeenCalledTimes(2);
+    expect(failures).toEqual([
+      {
+        action: expect.objectContaining({ id: 'action-1' }),
+        message: 'Could not open app'
+      }
+    ]);
     expect(logger.warn).toHaveBeenCalledWith('Failed to run mode action.', {
       actionId: 'action-1',
       error: expect.any(Error)

@@ -1,6 +1,11 @@
 import type { ModeAction } from '@shared/modes';
 import type { ApplicationRunningCheckInput } from '../applications/application-service';
 
+export type ModeActionRunFailure = {
+  action: ModeAction;
+  message: string;
+};
+
 type ApplicationActionService = {
   isApplicationRunning: (input: ApplicationRunningCheckInput) => Promise<boolean>;
   openApplication: (appPath: string) => Promise<void>;
@@ -29,14 +34,22 @@ export class ModeActionRunner {
   }
 
   async runActions(actions: ModeAction[]) {
+    const failures: ModeActionRunFailure[] = [];
+
     for (const action of actions) {
-      await this.runAction(action);
+      const failure = await this.runAction(action);
+
+      if (failure !== null) {
+        failures.push(failure);
+      }
     }
+
+    return failures;
   }
 
   private async runAction(action: ModeAction) {
     if (!this.shouldAttemptAction(action)) {
-      return;
+      return null;
     }
 
     try {
@@ -47,7 +60,7 @@ export class ModeActionRunner {
         });
 
         if (isRunning) {
-          return;
+          return null;
         }
       }
 
@@ -58,7 +71,14 @@ export class ModeActionRunner {
         actionId: action.id,
         error
       });
+
+      return {
+        action,
+        message: getErrorMessage(error)
+      };
     }
+
+    return null;
   }
 
   private shouldAttemptAction(action: ModeAction) {
@@ -88,3 +108,6 @@ function getLocalDateKey() {
 
   return `${year}-${month}-${day}`;
 }
+
+const getErrorMessage = (error: unknown) =>
+  error instanceof Error ? error.message : 'Unknown action failure.';

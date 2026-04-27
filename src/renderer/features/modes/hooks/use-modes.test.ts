@@ -7,14 +7,25 @@ import {
   buildOpenAppModeActionInput,
   buildSavedMode
 } from '@test/builders/shared/modes';
+import { createModeAutomationResult } from '../../../../shared/mode-automation';
 import { clearApiMock, installApiMock } from '../../../test/api-test-utils';
 import { useModesState } from './use-modes';
 import type { ModeState, SavedMode } from '../../../../shared/modes';
+import type { ActivateModeResponse } from '../../../../shared/mode-ipc';
+
+const sonnerMock = vi.hoisted(() => ({
+  error: vi.fn()
+}));
+
+vi.mock('sonner', () => ({
+  toast: sonnerMock
+}));
 
 describe('useModesState', () => {
   afterEach(() => {
     cleanup();
     clearApiMock();
+    sonnerMock.error.mockClear();
     vi.restoreAllMocks();
   });
 
@@ -310,10 +321,10 @@ describe('useModesState', () => {
 
   it('keeps existing mode state visible while a mutation is pending', async () => {
     const modes = [buildSavedMode()];
-    let resolveActivate: (value: boolean) => void = () => {};
+    let resolveActivate: (value: ActivateModeResponse) => void = () => {};
     const activate = vi.fn(
       () =>
-        new Promise<boolean>((resolve) => {
+        new Promise<ActivateModeResponse>((resolve) => {
           resolveActivate = resolve;
         })
     );
@@ -339,7 +350,7 @@ describe('useModesState', () => {
     expect(result.current.modes).toEqual(modes);
 
     await act(async () => {
-      resolveActivate(true);
+      resolveActivate(createModeAutomationResult(true));
       await responsePromise;
     });
 
@@ -355,7 +366,7 @@ describe('useModesState', () => {
       .fn()
       .mockResolvedValueOnce(buildModeState({ modes }))
       .mockResolvedValueOnce(buildModeState({ activeModeId: 'mode-1', modes }));
-    const activate = vi.fn().mockResolvedValue(true);
+    const activate = vi.fn().mockResolvedValue(createModeAutomationResult(true));
     installApiMock({ modes: { activate, getState } });
 
     const { result } = renderHook(() => useModesState());
@@ -383,7 +394,7 @@ describe('useModesState', () => {
       .fn()
       .mockResolvedValueOnce(buildModeState({ activeModeId: 'mode-1', modes }))
       .mockResolvedValueOnce(buildModeState({ modes }));
-    const deactivate = vi.fn().mockResolvedValue(true);
+    const deactivate = vi.fn().mockResolvedValue(createModeAutomationResult(true));
     installApiMock({ modes: { deactivate, getState } });
 
     const { result } = renderHook(() => useModesState());
@@ -428,5 +439,39 @@ describe('useModesState', () => {
     expect(result.current.isLoading).toBe(false);
     expect(result.current.modes).toEqual(modes);
     expect(getState).toHaveBeenCalledOnce();
+  });
+
+  it('shows a toast when mode activation actions fail', async () => {
+    const modes = [buildSavedMode()];
+    const getState = vi
+      .fn()
+      .mockResolvedValueOnce(buildModeState({ modes }))
+      .mockResolvedValueOnce(buildModeState({ activeModeId: 'mode-1', modes }));
+    const activate = vi.fn().mockResolvedValue(
+      createModeAutomationResult(true, [
+        {
+          actionId: 'action-1',
+          actionType: 'open-app',
+          appName: 'Discord',
+          message: 'Could not open app.',
+          modeId: 'mode-1',
+          modeName: 'Focus',
+          phase: 'enter'
+        }
+      ])
+    );
+    installApiMock({ modes: { activate, getState } });
+
+    const { result } = renderHook(() => useModesState());
+
+    await waitFor(() => expect(result.current.modes).toEqual(modes));
+
+    await act(async () => {
+      await result.current.activateMode('mode-1');
+    });
+
+    expect(sonnerMock.error).toHaveBeenCalledWith("Couldn't open Discord.", {
+      description: 'Could not open app.'
+    });
   });
 });

@@ -1,3 +1,4 @@
+import { Toaster } from '@/components/ui/sonner';
 import { AppSelectionProvider } from './features/app-shell/app-selection-provider';
 import { AppSidebar } from './features/app-shell/app-sidebar';
 import { ModesPage } from './features/modes/modes-page';
@@ -12,6 +13,7 @@ export function App() {
             <AppSidebar />
             <ModesPage />
           </div>
+          <Toaster position="bottom-right" richColors />
         </main>
       </AppSelectionProvider>
     </ModesProvider>

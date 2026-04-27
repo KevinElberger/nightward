@@ -5,6 +5,7 @@ import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildModeAutomationServiceDouble } from '@test/builders/main/services';
 import { buildOpenAppModeActionInput } from '@test/builders/shared/modes';
+import { createModeAutomationResult } from '../../shared/mode-automation';
 import { MODE_IPC_CHANNELS } from '../../shared/mode-ipc';
 import type { ModeAutomationService } from '../modes/mode-automation-service';
 import { ModeService } from '../modes/mode-service';
@@ -232,7 +233,7 @@ describe('registerModeIpcHandlers', () => {
 
   it('activates modes and refreshes mode consumers', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
-    const activateMode = vi.fn().mockResolvedValue(true);
+    const activateMode = vi.fn().mockResolvedValue(createModeAutomationResult(true));
     const modeAutomationService = buildModeAutomationServiceDouble({ activateMode });
     const onModesChanged = vi.fn();
     registerHandlers({ ipcMain, modeAutomationService, onModesChanged });
@@ -242,19 +243,21 @@ describe('registerModeIpcHandlers', () => {
       invoke(MODE_IPC_CHANNELS.activate, {
         id: createdMode.id
       })
-    ).resolves.toBe(true);
+    ).resolves.toEqual(createModeAutomationResult(true));
     expect(activateMode).toHaveBeenCalledWith(createdMode.id);
     expect(onModesChanged).toHaveBeenCalledOnce();
   });
 
   it('deactivates modes and refreshes mode consumers', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
-    const deactivateMode = vi.fn().mockResolvedValue(true);
+    const deactivateMode = vi.fn().mockResolvedValue(createModeAutomationResult(true));
     const modeAutomationService = buildModeAutomationServiceDouble({ deactivateMode });
     const onModesChanged = vi.fn();
     registerHandlers({ ipcMain, modeAutomationService, onModesChanged });
 
-    await expect(invoke(MODE_IPC_CHANNELS.deactivate)).resolves.toBe(true);
+    await expect(invoke(MODE_IPC_CHANNELS.deactivate)).resolves.toEqual(
+      createModeAutomationResult(true)
+    );
 
     expect(deactivateMode).toHaveBeenCalledOnce();
     expect(onModesChanged).toHaveBeenCalledOnce();
@@ -356,12 +359,14 @@ describe('registerModeIpcHandlers', () => {
   it('does not refresh mode consumers when there is no active mode to deactivate', async () => {
     const { ipcMain, invoke } = createFakeIpcMain();
     const modeAutomationService = buildModeAutomationServiceDouble({
-      deactivateMode: vi.fn().mockResolvedValue(false)
+      deactivateMode: vi.fn().mockResolvedValue(createModeAutomationResult(false))
     });
     const onModesChanged = vi.fn();
     registerHandlers({ ipcMain, modeAutomationService, onModesChanged });
 
-    await expect(invoke(MODE_IPC_CHANNELS.deactivate)).resolves.toBe(false);
+    await expect(invoke(MODE_IPC_CHANNELS.deactivate)).resolves.toEqual(
+      createModeAutomationResult(false)
+    );
 
     expect(onModesChanged).not.toHaveBeenCalled();
   });

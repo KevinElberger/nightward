@@ -88,25 +88,23 @@ export const registerModeIpcHandlers = ({
   });
 
   ipcMain.handle(MODE_IPC_CHANNELS.activate, async (_event, request: unknown) => {
-    const activated = await modeAutomationService.activateMode(
-      parseActivateModeRequest(request).id
-    );
+    const result = await modeAutomationService.activateMode(parseActivateModeRequest(request).id);
 
-    if (activated) {
+    if (result.ok) {
       onModesChanged();
     }
 
-    return activated;
+    return result;
   });
 
   ipcMain.handle(MODE_IPC_CHANNELS.deactivate, async () => {
-    const deactivated = await modeAutomationService.deactivateMode();
+    const result = await modeAutomationService.deactivateMode();
 
-    if (deactivated) {
+    if (result.ok) {
       onModesChanged();
     }
 
-    return deactivated;
+    return result;
   });
 
   ipcMain.handle(MODE_IPC_CHANNELS.createAction, async (_event, request: unknown) => {

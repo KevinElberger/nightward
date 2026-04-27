@@ -2,6 +2,7 @@ import type { App } from 'electron';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { buildModeAutomationServiceDouble } from '@test/builders/main/services';
 import { buildSavedMode } from '@test/builders/shared/modes';
+import { createModeAutomationResult } from '../../shared/mode-automation';
 import type { ModeAutomationService } from '../modes/mode-automation-service';
 import type { ModeService } from '../modes/mode-service';
 
@@ -106,7 +107,7 @@ describe('TrayController', () => {
   });
 
   it('notifies when a mode is activated from the tray', async () => {
-    const activateMode = vi.fn().mockResolvedValue(true);
+    const activateMode = vi.fn().mockResolvedValue(createModeAutomationResult(true));
     const modeAutomationService = buildModeAutomationServiceDouble({ activateMode });
     const onModesChanged = vi.fn();
     createTrayController({ modeAutomationService, onModesChanged });
@@ -118,7 +119,7 @@ describe('TrayController', () => {
   });
 
   it('notifies when the active mode is deactivated from the tray', async () => {
-    const deactivateMode = vi.fn().mockResolvedValue(true);
+    const deactivateMode = vi.fn().mockResolvedValue(createModeAutomationResult(true));
     const modeAutomationService = buildModeAutomationServiceDouble({ deactivateMode });
     const modeService = createModeService({ activeModeId: 'mode-1' });
     const onModesChanged = vi.fn();
@@ -132,7 +133,7 @@ describe('TrayController', () => {
 
   it('does not notify when a tray activation does not change mode state', async () => {
     const modeAutomationService = buildModeAutomationServiceDouble({
-      activateMode: vi.fn().mockResolvedValue(false)
+      activateMode: vi.fn().mockResolvedValue(createModeAutomationResult(false))
     });
     const onModesChanged = vi.fn();
     createTrayController({ modeAutomationService, onModesChanged });
