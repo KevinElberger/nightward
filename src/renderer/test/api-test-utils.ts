@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+import { createModeAutomationResult } from '../../shared/mode-automation';
 import type { NightwardApi } from '../../shared/nightward-api';
 
 type ModesApiOverrides = Partial<NightwardApi['modes']>;
@@ -20,8 +21,8 @@ export const createApiMock = (overrides: ApiOverrides = {}): NightwardApi => ({
     rename: vi.fn(),
     setPinned: vi.fn(),
     delete: vi.fn(),
-    activate: vi.fn(),
-    deactivate: vi.fn(),
+    activate: vi.fn().mockResolvedValue(createModeAutomationResult(false)),
+    deactivate: vi.fn().mockResolvedValue(createModeAutomationResult(false)),
     createAction: vi.fn(),
     updateAction: vi.fn(),
     deleteAction: vi.fn(),

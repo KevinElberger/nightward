@@ -1,3 +1,4 @@
+import type { ModeAutomationResult } from './mode-automation';
 import type { ModeActionInput, ModeActionPhase, ModeState, SavedMode } from './modes';
 
 export const MODE_IPC_CHANNELS = {
@@ -77,8 +78,8 @@ export type CreateModeResponse = SavedMode;
 export type RenameModeResponse = SavedMode | null;
 export type SetModePinnedResponse = SavedMode | null;
 export type DeleteModeResponse = boolean;
-export type ActivateModeResponse = boolean;
-export type DeactivateModeResponse = boolean;
+export type ActivateModeResponse = ModeAutomationResult;
+export type DeactivateModeResponse = ModeAutomationResult;
 export type CreateModeActionResponse = SavedMode | null;
 export type UpdateModeActionResponse = SavedMode | null;
 export type DeleteModeActionResponse = SavedMode | null;

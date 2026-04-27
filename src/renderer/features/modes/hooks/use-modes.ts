@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import type { ModeActionFailure, ModeAutomationResult } from '@shared/mode-automation';
 import type { ModeActionInput, ModeActionPhase, ModeState, SavedMode } from '@shared/modes';
 
 type RunModeMutation = <Result>(
@@ -38,6 +40,25 @@ export type ModesState = {
 
 const getErrorMessage = (error: unknown, fallbackMessage: string) =>
   error instanceof Error ? error.message : fallbackMessage;
+
+const createFailedModeAutomationResult = (): ModeAutomationResult => ({
+  actionFailures: [],
+  ok: false
+});
+
+const showModeActionFailureToast = (failure: ModeActionFailure) => {
+  toast.error(getModeActionFailureToastTitle(failure), {
+    description: failure.message
+  });
+};
+
+const getModeActionFailureToastTitle = (failure: ModeActionFailure) => {
+  if (failure.actionType === 'open-app') {
+    return `Couldn't open ${failure.appName ?? 'app'}.`;
+  }
+
+  return 'Mode action failed.';
+};
 
 export const useModesState = (): ModesState => {
   const [activeModeId, setActiveModeId] = useState<string | null>(null);
@@ -110,14 +131,29 @@ export const useModesState = (): ModesState => {
   );
 
   const activateMode = useCallback(
-    (id: string) => runModeMutation(() => window.nightward.modes.activate(id), false),
+    async (id: string) => {
+      const result = await runModeMutation(
+        () => window.nightward.modes.activate(id),
+        createFailedModeAutomationResult()
+      );
+
+      result.actionFailures.forEach(showModeActionFailureToast);
+
+      return result.ok;
+    },
     [runModeMutation]
   );
 
-  const deactivateMode = useCallback(
-    () => runModeMutation(() => window.nightward.modes.deactivate(), false),
-    [runModeMutation]
-  );
+  const deactivateMode = useCallback(async () => {
+    const result = await runModeMutation(
+      () => window.nightward.modes.deactivate(),
+      createFailedModeAutomationResult()
+    );
+
+    result.actionFailures.forEach(showModeActionFailureToast);
+
+    return result.ok;
+  }, [runModeMutation]);
 
   const createModeAction = useCallback(
     (modeId: string, phase: ModeActionPhase, action: ModeActionInput) =>

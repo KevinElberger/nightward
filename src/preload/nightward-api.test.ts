@@ -5,6 +5,7 @@ import {
   buildOpenAppModeActionInput,
   buildSavedMode
 } from '@test/builders/shared/modes';
+import { createModeAutomationResult } from '../shared/mode-automation';
 import { createNightwardApi } from './nightward-api';
 
 const createIpcRendererMock = ({
@@ -93,10 +94,11 @@ describe('createNightwardApi', () => {
   });
 
   it('invokes the activate mode channel with a typed request payload', async () => {
-    const invoke = vi.fn().mockResolvedValue(true);
+    const response = createModeAutomationResult(true);
+    const invoke = vi.fn().mockResolvedValue(response);
     const api = createNightwardApi(createIpcRendererMock({ invoke }));
 
-    await expect(api.modes.activate('mode-1')).resolves.toBe(true);
+    await expect(api.modes.activate('mode-1')).resolves.toEqual(response);
 
     expect(invoke).toHaveBeenCalledWith(MODE_IPC_CHANNELS.activate, {
       id: 'mode-1'
@@ -104,10 +106,11 @@ describe('createNightwardApi', () => {
   });
 
   it('invokes the deactivate mode channel', async () => {
-    const invoke = vi.fn().mockResolvedValue(true);
+    const response = createModeAutomationResult(true);
+    const invoke = vi.fn().mockResolvedValue(response);
     const api = createNightwardApi(createIpcRendererMock({ invoke }));
 
-    await expect(api.modes.deactivate()).resolves.toBe(true);
+    await expect(api.modes.deactivate()).resolves.toEqual(response);
 
     expect(invoke).toHaveBeenCalledWith(MODE_IPC_CHANNELS.deactivate);
   });

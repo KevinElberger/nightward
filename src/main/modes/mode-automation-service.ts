@@ -1,3 +1,8 @@
+import {
+  createModeAutomationResult,
+  type ModeActionFailure,
+  type ModeAutomationResult
+} from '../../shared/mode-automation';
 import type { ModeActionPhase, SavedMode } from '@shared/modes';
 import type { ModeService } from './mode-service';
 import type { ModeActionRunner } from './mode-action-runner';
@@ -16,45 +21,61 @@ export class ModeAutomationService {
     this.modeService = modeService;
   }
 
-  readonly activateMode = async (modeId: string) => {
+  readonly activateMode = async (modeId: string): Promise<ModeAutomationResult> => {
     const previousActiveMode = this.getActiveMode();
     const activated = await this.modeService.activateSavedMode(modeId);
 
     if (!activated) {
-      return false;
+      return createModeAutomationResult(false);
     }
 
     const activatedMode = this.getModeById(modeId);
 
     if (previousActiveMode?.id === activatedMode?.id) {
-      return true;
+      return createModeAutomationResult(true);
     }
 
-    await this.runModePhase(previousActiveMode, 'exit');
-    await this.runModePhase(activatedMode, 'enter');
+    const actionFailures = [
+      ...(await this.runModePhase(previousActiveMode, 'exit')),
+      ...(await this.runModePhase(activatedMode, 'enter'))
+    ];
 
-    return true;
+    return createModeAutomationResult(true, actionFailures);
   };
 
-  readonly deactivateMode = async () => {
+  readonly deactivateMode = async (): Promise<ModeAutomationResult> => {
     const previousActiveMode = this.getActiveMode();
     const deactivated = await this.modeService.deactivateActiveMode();
 
     if (!deactivated) {
-      return false;
+      return createModeAutomationResult(false);
     }
 
-    await this.runModePhase(previousActiveMode, 'exit');
+    const actionFailures = await this.runModePhase(previousActiveMode, 'exit');
 
-    return true;
+    return createModeAutomationResult(true, actionFailures);
   };
 
   private async runModePhase(mode: SavedMode | null, phase: ModeActionPhase) {
     if (mode === null) {
-      return;
+      return [];
     }
 
-    await this.actionRunner.runActions(mode.actions[phase]);
+    const failures = await this.actionRunner.runActions(mode.actions[phase]);
+
+    return failures.map(({ action, message }): ModeActionFailure => {
+      const appName = action.type === 'open-app' ? action.appName : null;
+
+      return {
+        actionId: action.id,
+        actionType: action.type,
+        appName,
+        message,
+        modeId: mode.id,
+        modeName: mode.name,
+        phase
+      };
+    });
   }
 
   private getActiveMode() {

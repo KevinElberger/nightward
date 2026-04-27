@@ -92,9 +92,9 @@ export class TrayController {
     return this.modeService.getSavedModes(SAVED_MODE_MENU_LIMIT).map((mode) => ({
       label: mode.name,
       click: async () => {
-        const activated = await this.modeAutomationService.activateMode(mode.id);
+        const result = await this.modeAutomationService.activateMode(mode.id);
 
-        if (activated) {
+        if (result.ok) {
           this.onModesChanged();
         }
       }
@@ -110,9 +110,9 @@ export class TrayController {
       {
         label: 'Deactivate Mode',
         click: async () => {
-          const deactivated = await this.modeAutomationService.deactivateMode();
+          const result = await this.modeAutomationService.deactivateMode();
 
-          if (deactivated) {
+          if (result.ok) {
             this.onModesChanged();
           }
         }
