@@ -79,7 +79,7 @@ describe('ModeDetailPage', () => {
     expect(screen.getByText('1 action')).not.toBeNull();
     expect(screen.getByText('Calendar')).not.toBeNull();
     expect(screen.getByText('Once per day')).not.toBeNull();
-    expect(screen.getByText('Skips if already open')).not.toBeNull();
+    expect(screen.getByText('Skips if already running')).not.toBeNull();
     expect(screen.getByText('Enabled')).not.toBeNull();
     expect(screen.queryByText('No start actions')).toBeNull();
   });
@@ -131,8 +131,7 @@ describe('ModeDetailPage', () => {
         buildOpenAppModeActionInput({
           appName: 'Spotify',
           appPath: '/Applications/Spotify.app',
-          bundleId: 'com.spotify.client',
-          onlyOpenIfNotRunning: true
+          bundleId: 'com.spotify.client'
         })
       )
     );

@@ -59,7 +59,7 @@ export function ModeOpenAppActionEditor({
   const [isSelectingApplication, setIsSelectingApplication] = useState(false);
   const [applicationSelectionError, setApplicationSelectionError] = useState<string | null>(null);
   const [onlyOpenIfNotRunning, setOnlyOpenIfNotRunning] = useState(
-    () => action?.onlyOpenIfNotRunning ?? true
+    () => action?.onlyOpenIfNotRunning ?? false
   );
   const [repeatPolicy, setRepeatPolicy] = useState<OpenAppModeActionInput['repeatPolicy']>(
     () => action?.repeatPolicy ?? 'every-activation'
@@ -283,11 +283,11 @@ export function ModeOpenAppActionEditor({
                 />
 
                 <OpenAppToggleRow
-                  description="Skip launching if the app is already running."
+                  description="Leave the app alone if macOS says it is already running."
                   disabled={isActionLocked}
                   icon={<Check className="size-3.5" aria-hidden="true" />}
                   isActive={onlyOpenIfNotRunning}
-                  label="Only if closed"
+                  label="Skip if already running"
                   onCheckedChange={setOnlyOpenIfNotRunning}
                 />
 

@@ -19,7 +19,7 @@ const modeActionTypeDefinitions = {
       appName: '',
       appPath: '',
       enabled: true,
-      onlyOpenIfNotRunning: true,
+      onlyOpenIfNotRunning: false,
       repeatPolicy: 'every-activation',
       type: 'open-app'
     }),
@@ -28,7 +28,7 @@ const modeActionTypeDefinitions = {
       const tokens = [getRepeatPolicyLabel(action.repeatPolicy)];
 
       if (action.onlyOpenIfNotRunning) {
-        tokens.push('Skips if already open');
+        tokens.push('Skips if already running');
       }
 
       return tokens;
