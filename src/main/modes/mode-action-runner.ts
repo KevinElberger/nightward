@@ -1,4 +1,4 @@
-import type { ModeAction } from '@shared/modes';
+import type { ModeAction, OpenAppModeAction, OpenUrlModeAction } from '@shared/modes';
 import type { ApplicationRunningCheckInput } from '../applications/application-service';
 
 export type ModeActionRunFailure = {
@@ -9,6 +9,7 @@ export type ModeActionRunFailure = {
 type ApplicationActionService = {
   isApplicationRunning: (input: ApplicationRunningCheckInput) => Promise<boolean>;
   openApplication: (appPath: string) => Promise<void>;
+  openUrl: (url: string) => Promise<void>;
 };
 
 type ModeActionRunnerOptions = {
@@ -53,19 +54,11 @@ export class ModeActionRunner {
     }
 
     try {
-      if (action.onlyOpenIfNotRunning) {
-        const isRunning = await this.applicationService.isApplicationRunning({
-          appName: action.appName,
-          appPath: action.appPath
-        });
+      const didRunAction = await this.runEnabledAction(action);
 
-        if (isRunning) {
-          return null;
-        }
+      if (didRunAction) {
+        this.recordActionRun(action);
       }
-
-      await this.applicationService.openApplication(action.appPath);
-      this.recordActionRun(action);
     } catch (error) {
       this.logger.warn('Failed to run mode action.', {
         actionId: action.id,
@@ -79,6 +72,39 @@ export class ModeActionRunner {
     }
 
     return null;
+  }
+
+  private async runEnabledAction(action: ModeAction) {
+    switch (action.type) {
+      case 'open-app':
+        return this.runOpenAppAction(action);
+
+      case 'open-url':
+        return this.runOpenUrlAction(action);
+    }
+  }
+
+  private async runOpenAppAction(action: OpenAppModeAction) {
+    if (action.onlyOpenIfNotRunning) {
+      const isRunning = await this.applicationService.isApplicationRunning({
+        appName: action.appName,
+        appPath: action.appPath
+      });
+
+      if (isRunning) {
+        return false;
+      }
+    }
+
+    await this.applicationService.openApplication(action.appPath);
+
+    return true;
+  }
+
+  private async runOpenUrlAction(action: OpenUrlModeAction) {
+    await this.applicationService.openUrl(action.url);
+
+    return true;
   }
 
   private shouldAttemptAction(action: ModeAction) {

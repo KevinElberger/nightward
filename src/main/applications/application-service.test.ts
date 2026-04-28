@@ -94,6 +94,7 @@ describe('ApplicationService', () => {
 
   it('opens an application path', async () => {
     const applicationShell = {
+      openExternal: vi.fn().mockResolvedValue(undefined),
       openPath: vi.fn().mockResolvedValue('')
     };
     const service = new ApplicationService({
@@ -107,10 +108,31 @@ describe('ApplicationService', () => {
     expect(applicationShell.openPath).toHaveBeenCalledWith('/Applications/Spotify.app');
   });
 
+  it('opens an external URL', async () => {
+    const applicationShell = {
+      openExternal: vi.fn().mockResolvedValue(undefined),
+      openPath: vi.fn().mockResolvedValue('')
+    };
+    const service = new ApplicationService({
+      app: buildApp(),
+      applicationShell,
+      platform: 'darwin'
+    });
+
+    await expect(
+      service.openUrl('https://open.spotify.com/playlist/focus')
+    ).resolves.toBeUndefined();
+
+    expect(applicationShell.openExternal).toHaveBeenCalledWith(
+      'https://open.spotify.com/playlist/focus'
+    );
+  });
+
   it('rejects when opening an application fails', async () => {
     const service = new ApplicationService({
       app: buildApp(),
       applicationShell: {
+        openExternal: vi.fn().mockResolvedValue(undefined),
         openPath: vi.fn().mockResolvedValue('Could not open app.')
       },
       platform: 'darwin'

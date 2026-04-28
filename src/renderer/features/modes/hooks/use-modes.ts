@@ -57,6 +57,10 @@ const getModeActionFailureToastTitle = (failure: ModeActionFailure) => {
     return `Couldn't open ${failure.appName ?? 'app'}.`;
   }
 
+  if (failure.actionType === 'open-url') {
+    return "Couldn't open URL.";
+  }
+
   return 'Mode action failed.';
 };
 

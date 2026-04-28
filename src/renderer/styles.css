@@ -99,7 +99,7 @@
   --destructive-foreground: #ffffff;
   --border: var(--surface-border);
   --input: rgb(255 255 255 / 0.17);
-  --ring: #5351ea;
+  --ring: #7c6cff;
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -112,7 +112,7 @@
   --sidebar-accent: var(--surface-hover);
   --sidebar-accent-foreground: oklch(0.96 0 0);
   --sidebar-border: var(--surface-border);
-  --sidebar-ring: #5351ea;
+  --sidebar-ring: #7c6cff;
   --status-active: #4ade80;
   --status-warning: #f5c451;
   --status-error: #ff5c77;

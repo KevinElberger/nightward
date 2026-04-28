@@ -6,6 +6,8 @@ import {
   buildModeActionSet,
   buildOpenAppModeAction,
   buildOpenAppModeActionInput,
+  buildOpenUrlModeAction,
+  buildOpenUrlModeActionInput,
   buildSavedMode
 } from '@test/builders/shared/modes';
 import { AppSelectionContext } from '../app-shell/app-selection-context';
@@ -109,6 +111,27 @@ describe('ModeDetailPage', () => {
     expect(document.querySelector('img[src="data:image/png;base64,discord"]')).not.toBeNull();
   });
 
+  it('renders configured open URL actions', () => {
+    renderModeDetailPage(
+      buildSavedMode({
+        actions: buildModeActionSet({
+          enter: [
+            buildOpenUrlModeAction({
+              label: 'Deep Work Playlist',
+              repeatPolicy: 'once-per-day'
+            })
+          ]
+        })
+      })
+    );
+
+    expect(screen.getByText('1 action')).not.toBeNull();
+    expect(screen.getByText('Deep Work Playlist')).not.toBeNull();
+    expect(screen.getByText('Once per day')).not.toBeNull();
+    expect(screen.getByText('open.spotify.com')).not.toBeNull();
+    expect(screen.getByText('Enabled')).not.toBeNull();
+  });
+
   it('surfaces warning when the same app is configured in both phases', () => {
     renderModeDetailPage(
       buildSavedMode({
@@ -164,6 +187,61 @@ describe('ModeDetailPage', () => {
     await waitFor(() =>
       expect(screen.queryByRole('button', { name: /create action/i })).toBeNull()
     );
+  });
+
+  it('creates an open URL action from the composer overlay', async () => {
+    const createdMode = buildSavedMode();
+    const createModeAction = vi.fn().mockResolvedValue(createdMode);
+    renderModeDetailPage(buildSavedMode(), { createModeAction });
+
+    fireEvent.click(screen.getByRole('button', { name: /add your first start action/i }));
+    fireEvent.click(screen.getByRole('button', { name: /open url/i }));
+
+    const urlInput = screen.getByLabelText('URL');
+
+    await waitFor(() => expect(document.activeElement).toBe(urlInput));
+
+    fireEvent.change(screen.getByLabelText('URL'), {
+      target: { value: 'open.spotify.com/playlist/focus' }
+    });
+    fireEvent.change(screen.getByLabelText('Label'), {
+      target: { value: 'Deep Work Playlist' }
+    });
+    fireEvent.click(screen.getByRole('button', { name: /create action/i }));
+
+    await waitFor(() =>
+      expect(createModeAction).toHaveBeenCalledWith(
+        'mode-1',
+        'enter',
+        buildOpenUrlModeActionInput({
+          label: 'Deep Work Playlist',
+          url: 'https://open.spotify.com/playlist/focus'
+        })
+      )
+    );
+  });
+
+  it('blocks saving an invalid open URL action', async () => {
+    const createModeAction = vi.fn();
+    renderModeDetailPage(buildSavedMode(), { createModeAction });
+
+    fireEvent.click(screen.getByRole('button', { name: /add your first start action/i }));
+    fireEvent.click(screen.getByRole('button', { name: /open url/i }));
+    const urlInput = screen.getByLabelText('URL');
+
+    fireEvent.change(urlInput, {
+      target: { value: 'spotify' }
+    });
+
+    expect(screen.queryByText('Enter a valid http or https URL.')).toBeNull();
+
+    fireEvent.blur(urlInput);
+
+    expect(screen.getByText('Enter a valid http or https URL.')).not.toBeNull();
+    expect(screen.getByRole<HTMLButtonElement>('button', { name: /create action/i }).disabled).toBe(
+      true
+    );
+    expect(createModeAction).not.toHaveBeenCalled();
   });
 
   it('selects an application from the native picker', async () => {
@@ -276,6 +354,44 @@ describe('ModeDetailPage', () => {
         'enter',
         'action-1',
         buildOpenAppModeActionInput({ repeatPolicy: 'once-per-day' })
+      )
+    );
+  });
+
+  it('edits an existing open URL action in the composer overlay', async () => {
+    const mode = buildSavedMode({
+      actions: buildModeActionSet({
+        enter: [buildOpenUrlModeAction()]
+      })
+    });
+    const updateModeAction = vi.fn().mockResolvedValue(mode);
+    renderModeDetailPage(mode, { updateModeAction });
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /edit open url action for focus playlist/i })
+    );
+
+    const urlInput = screen.getByLabelText<HTMLInputElement>('URL');
+
+    await waitFor(() => expect(document.activeElement).toBe(urlInput));
+    expect(urlInput.selectionStart).toBe(urlInput.value.length);
+    expect(urlInput.selectionEnd).toBe(urlInput.value.length);
+
+    fireEvent.change(screen.getByLabelText('Label'), {
+      target: { value: 'Writing Playlist' }
+    });
+    fireEvent.click(screen.getByRole('button', { name: /once per day/i }));
+    fireEvent.click(screen.getByRole('button', { name: /save action/i }));
+
+    await waitFor(() =>
+      expect(updateModeAction).toHaveBeenCalledWith(
+        'mode-1',
+        'enter',
+        'action-1',
+        buildOpenUrlModeActionInput({
+          label: 'Writing Playlist',
+          repeatPolicy: 'once-per-day'
+        })
       )
     );
   });

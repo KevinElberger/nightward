@@ -1,5 +1,6 @@
 import { Plus, Sparkles, Sunrise, Sunset, Workflow, type LucideIcon } from 'lucide-react';
 import type { ModeAction, ModeActionPhase } from '@shared/modes';
+import { normalizeOpenUrl } from '@shared/open-url';
 import { Button } from '@/components/ui/button';
 import { useModeActionDialog } from './mode-action-dialog-context';
 import { ModeActionCard } from './mode-action-card';
@@ -140,12 +141,33 @@ function getLifecycleNotice(
   otherPhaseActions: ModeAction[],
   copy: ModeActionPhaseSectionCopy
 ) {
-  return hasMatchingOpenAppAction(action, otherPhaseActions) ? copy.oppositePhaseNotice : undefined;
+  return hasMatchingLifecycleAction(action, otherPhaseActions)
+    ? copy.oppositePhaseNotice
+    : undefined;
 }
 
-function hasMatchingOpenAppAction(action: ModeAction, actions: ModeAction[]) {
+function hasMatchingLifecycleAction(action: ModeAction, actions: ModeAction[]) {
+  if (action.type === 'open-app') {
+    return hasMatchingOpenAppAction(action, actions);
+  }
+
+  if (action.type === 'open-url') {
+    return hasMatchingOpenUrlAction(action, actions);
+  }
+
+  return false;
+}
+
+function hasMatchingOpenAppAction(
+  action: Extract<ModeAction, { type: 'open-app' }>,
+  actions: ModeAction[]
+) {
   return actions.some((candidate) => {
     if (candidate.id === action.id) {
+      return false;
+    }
+
+    if (candidate.type !== 'open-app') {
       return false;
     }
 
@@ -160,6 +182,25 @@ function hasMatchingOpenAppAction(action: ModeAction, actions: ModeAction[]) {
   });
 }
 
+function hasMatchingOpenUrlAction(
+  action: Extract<ModeAction, { type: 'open-url' }>,
+  actions: ModeAction[]
+) {
+  const normalizedActionUrl = normalizeComparableUrl(action.url);
+
+  return actions.some((candidate) => {
+    if (candidate.id === action.id || candidate.type !== 'open-url') {
+      return false;
+    }
+
+    return normalizedActionUrl === normalizeComparableUrl(candidate.url);
+  });
+}
+
 function normalizeComparableValue(value: string) {
   return value.trim().toLowerCase();
+}
+
+function normalizeComparableUrl(value: string) {
+  return (normalizeOpenUrl(value) ?? value).trim().toLowerCase();
 }

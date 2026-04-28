@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { buildOpenAppModeAction } from '@test/builders/shared/modes';
+import { buildOpenAppModeAction, buildOpenUrlModeAction } from '@test/builders/shared/modes';
 import { ModeActionRunner } from './mode-action-runner';
 
 const createRunner = ({
@@ -11,7 +11,8 @@ const createRunner = ({
 } = {}) => {
   const applicationService = {
     isApplicationRunning: vi.fn().mockResolvedValue(isApplicationRunning),
-    openApplication: vi.fn().mockResolvedValue(undefined)
+    openApplication: vi.fn().mockResolvedValue(undefined),
+    openUrl: vi.fn().mockResolvedValue(undefined)
   };
   const logger = {
     warn: vi.fn()
@@ -32,6 +33,16 @@ describe('ModeActionRunner', () => {
     await runner.runActions([buildOpenAppModeAction()]);
 
     expect(applicationService.openApplication).toHaveBeenCalledWith('/Applications/Calendar.app');
+  });
+
+  it('opens enabled open-url actions', async () => {
+    const { applicationService, runner } = createRunner();
+
+    await runner.runActions([buildOpenUrlModeAction()]);
+
+    expect(applicationService.openUrl).toHaveBeenCalledWith(
+      'https://open.spotify.com/playlist/focus'
+    );
   });
 
   it('skips disabled actions', async () => {
@@ -58,7 +69,8 @@ describe('ModeActionRunner', () => {
     let today = '2026-04-27';
     const applicationService = {
       isApplicationRunning: vi.fn().mockResolvedValue(false),
-      openApplication: vi.fn().mockResolvedValue(undefined)
+      openApplication: vi.fn().mockResolvedValue(undefined),
+      openUrl: vi.fn().mockResolvedValue(undefined)
     };
     const runner = new ModeActionRunner({
       applicationService,
@@ -83,7 +95,8 @@ describe('ModeActionRunner', () => {
 
       const applicationService = {
         isApplicationRunning: vi.fn().mockResolvedValue(false),
-        openApplication: vi.fn().mockResolvedValue(undefined)
+        openApplication: vi.fn().mockResolvedValue(undefined),
+        openUrl: vi.fn().mockResolvedValue(undefined)
       };
       const runner = new ModeActionRunner({
         applicationService,

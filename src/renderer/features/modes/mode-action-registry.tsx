@@ -1,5 +1,6 @@
-import { AppWindow, type LucideIcon } from 'lucide-react';
+import { AppWindow, Link2, type LucideIcon } from 'lucide-react';
 import type { ModeAction, ModeActionInput, ModeActionPhase } from '@shared/modes';
+import { getOpenUrlDisplayName } from '@shared/open-url';
 
 export type ModeActionType = ModeAction['type'];
 
@@ -27,16 +28,39 @@ const modeActionTypeDefinitions = {
     getSummaryTokens: (action) => {
       const tokens = [getRepeatPolicyLabel(action.repeatPolicy)];
 
-      if (action.onlyOpenIfNotRunning) {
+      if (action.type === 'open-app' && action.onlyOpenIfNotRunning) {
         tokens.push('Skips if already running');
       }
 
       return tokens;
     },
-    getTitle: (action) => action.appName,
+    getTitle: (action) => (action.type === 'open-app' ? action.appName : ''),
     Icon: AppWindow,
     label: 'Open App',
     type: 'open-app'
+  },
+  'open-url': {
+    createDefaultInput: () => ({
+      enabled: true,
+      repeatPolicy: 'every-activation',
+      type: 'open-url',
+      url: ''
+    }),
+    description: 'Open a web link.',
+    getSummaryTokens: (action) => {
+      const tokens = [getRepeatPolicyLabel(action.repeatPolicy)];
+
+      if (action.type === 'open-url' && action.label?.trim()) {
+        tokens.push(getOpenUrlDisplayName(action.url));
+      }
+
+      return tokens;
+    },
+    getTitle: (action) =>
+      action.type === 'open-url' ? action.label?.trim() || getOpenUrlDisplayName(action.url) : '',
+    Icon: Link2,
+    label: 'Open URL',
+    type: 'open-url'
   }
 } satisfies Record<ModeActionType, ModeActionTypeDefinition>;
 

@@ -64,12 +64,10 @@ export class ModeAutomationService {
     const failures = await this.actionRunner.runActions(mode.actions[phase]);
 
     return failures.map(({ action, message }): ModeActionFailure => {
-      const appName = action.type === 'open-app' ? action.appName : null;
-
       return {
         actionId: action.id,
         actionType: action.type,
-        appName,
+        appName: action.type === 'open-app' ? action.appName : null,
         message,
         modeId: mode.id,
         modeName: mode.name,

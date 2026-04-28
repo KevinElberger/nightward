@@ -3,6 +3,8 @@ import {
   type OpenAppModeActionInput,
   type ModeState,
   type OpenAppModeAction,
+  type OpenUrlModeAction,
+  type OpenUrlModeActionInput,
   type SavedMode
 } from '../../../shared/modes';
 
@@ -41,6 +43,32 @@ export const buildOpenAppModeActionInput = (
     onlyOpenIfNotRunning: action.onlyOpenIfNotRunning,
     repeatPolicy: action.repeatPolicy,
     type: action.type
+  };
+};
+
+export const buildOpenUrlModeAction = (
+  overrides: Partial<OpenUrlModeAction> = {}
+): OpenUrlModeAction => ({
+  enabled: true,
+  id: 'action-1',
+  label: 'Focus Playlist',
+  repeatPolicy: 'every-activation',
+  type: 'open-url',
+  url: 'https://open.spotify.com/playlist/focus',
+  ...overrides
+});
+
+export const buildOpenUrlModeActionInput = (
+  overrides: Partial<OpenUrlModeActionInput> = {}
+): OpenUrlModeActionInput => {
+  const action = buildOpenUrlModeAction(overrides as Partial<OpenUrlModeAction>);
+
+  return {
+    enabled: action.enabled,
+    ...(action.label === undefined ? {} : { label: action.label }),
+    repeatPolicy: action.repeatPolicy,
+    type: action.type,
+    url: action.url
   };
 };
 
