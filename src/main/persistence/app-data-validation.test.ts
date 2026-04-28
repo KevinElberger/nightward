@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildOpenAppModeAction } from '@test/builders/shared/modes';
+import { buildOpenAppModeAction, buildOpenUrlModeAction } from '@test/builders/shared/modes';
 import { buildAppData, buildPersistedMode } from '@test/builders/main/persistence';
 import { AppDataStoreError } from './app-data-store-error';
 import { parseAppData, validateAppData } from './app-data-validation';
@@ -135,6 +135,22 @@ describe('app-data-validation', () => {
     expect(appData.modes[0].actions.enter).toEqual([buildOpenAppModeAction()]);
   });
 
+  it('accepts valid persisted open-url actions', () => {
+    const appData = validateAppData({
+      schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
+      modes: [
+        buildPersistedMode({
+          actions: {
+            enter: [buildOpenUrlModeAction()],
+            exit: []
+          }
+        })
+      ]
+    });
+
+    expect(appData.modes[0].actions.enter).toEqual([buildOpenUrlModeAction()]);
+  });
+
   it('hydrates missing actions to empty action lists', () => {
     const appData = validateAppData({
       schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
@@ -211,5 +227,49 @@ describe('app-data-validation', () => {
         ]
       })
     ).toThrow('modes[0].actions.enter[0].repeatPolicy must be a supported repeat policy.');
+  });
+
+  it('rejects unsupported open-url protocols', () => {
+    expect(() =>
+      validateAppData({
+        schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
+        modes: [
+          {
+            ...buildPersistedMode(),
+            actions: {
+              enter: [
+                {
+                  ...buildOpenUrlModeAction(),
+                  url: 'file:///Users/kevin/focus.html'
+                }
+              ],
+              exit: []
+            }
+          }
+        ]
+      })
+    ).toThrow('modes[0].actions.enter[0].url must be a valid http or https URL.');
+  });
+
+  it('rejects implausible open-url hosts', () => {
+    expect(() =>
+      validateAppData({
+        schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
+        modes: [
+          {
+            ...buildPersistedMode(),
+            actions: {
+              enter: [
+                {
+                  ...buildOpenUrlModeAction(),
+                  url: 'spotify'
+                }
+              ],
+              exit: []
+            }
+          }
+        ]
+      })
+    ).toThrow('modes[0].actions.enter[0].url must be a valid http or https URL.');
   });
 });

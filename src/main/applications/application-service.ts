@@ -10,7 +10,7 @@ const execFileAsync = promisify(execFile);
 
 type ApplicationDialog = Pick<typeof dialog, 'showOpenDialog'>;
 type ApplicationServiceApp = Pick<App, 'getFileIcon'>;
-type ApplicationShell = Pick<typeof shell, 'openPath'>;
+type ApplicationShell = Pick<typeof shell, 'openExternal' | 'openPath'>;
 
 export type ApplicationRunningCheckInput = {
   appName: string;
@@ -95,6 +95,10 @@ export class ApplicationService {
     if (errorMessage !== '') {
       throw new Error(errorMessage);
     }
+  };
+
+  readonly openUrl = async (url: string) => {
+    await this.applicationShell.openExternal(url);
   };
 
   readonly isApplicationRunning = async ({ appName, appPath }: ApplicationRunningCheckInput) => {

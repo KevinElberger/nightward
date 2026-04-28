@@ -12,6 +12,10 @@ export function findMatchingOpenAppAction(
         return false;
       }
 
+      if (action.type !== 'open-app') {
+        return false;
+      }
+
       return isMatchingOpenAppSelection(action, appPath, bundleId);
     }) ?? null
   );
@@ -24,6 +28,10 @@ export function getApplicationNameFromPath(appPath: string) {
 }
 
 function isMatchingOpenAppSelection(action: ModeAction, appPath: string, bundleId: string) {
+  if (action.type !== 'open-app') {
+    return false;
+  }
+
   const normalizedBundleId = normalizeComparableValue(bundleId);
   const actionBundleId = normalizeComparableValue(action.bundleId ?? '');
 

@@ -16,11 +16,21 @@ export type OpenAppModeAction = {
   type: 'open-app';
 };
 
-export type ModeAction = OpenAppModeAction;
+export type OpenUrlModeAction = {
+  enabled: boolean;
+  id: string;
+  label?: string;
+  repeatPolicy: ModeActionRepeatPolicy;
+  type: 'open-url';
+  url: string;
+};
+
+export type ModeAction = OpenAppModeAction | OpenUrlModeAction;
 
 export type OpenAppModeActionInput = Omit<OpenAppModeAction, 'id'>;
+export type OpenUrlModeActionInput = Omit<OpenUrlModeAction, 'id'>;
 
-export type ModeActionInput = OpenAppModeActionInput;
+export type ModeActionInput = OpenAppModeActionInput | OpenUrlModeActionInput;
 
 export type ModeActionSet = {
   enter: ModeAction[];

@@ -4,6 +4,7 @@ import type {
   ModeActionPhase,
   ModeActionRepeatPolicy
 } from '../../shared/modes';
+import { normalizeOpenUrl } from '../../shared/open-url';
 import { getRequiredString, isRecord, type JsonRecord } from './json-record';
 
 type CreateError = (message: string) => Error;
@@ -31,26 +32,16 @@ export const parseModeActionInput = (
 
   const type = getRequiredModeActionString(value, 'type', path, createError);
 
-  if (type !== 'open-app') {
-    throw createError(`${path}.type must be a supported action type.`);
+  switch (type) {
+    case 'open-app':
+      return parseOpenAppModeActionInput(value, path, createError);
+
+    case 'open-url':
+      return parseOpenUrlModeActionInput(value, path, createError);
+
+    default:
+      throw createError(`${path}.type must be a supported action type.`);
   }
-
-  const bundleId = getOptionalModeActionString(value, 'bundleId', path, createError);
-
-  return {
-    appName: getRequiredModeActionString(value, 'appName', path, createError),
-    appPath: getRequiredModeActionString(value, 'appPath', path, createError),
-    ...(bundleId === undefined ? {} : { bundleId }),
-    enabled: getRequiredModeActionBoolean(value, 'enabled', path, createError),
-    onlyOpenIfNotRunning: getRequiredModeActionBoolean(
-      value,
-      'onlyOpenIfNotRunning',
-      path,
-      createError
-    ),
-    repeatPolicy: parseModeActionRepeatPolicy(value.repeatPolicy, path, createError),
-    type
-  };
 };
 
 export const parseModeAction = (
@@ -78,6 +69,50 @@ const parseModeActionRepeatPolicy = (
   }
 
   throw createError(`${path}.repeatPolicy must be a supported repeat policy.`);
+};
+
+const parseOpenAppModeActionInput = (
+  value: JsonRecord,
+  path: string,
+  createError: CreateError
+): ModeActionInput => {
+  const bundleId = getOptionalModeActionString(value, 'bundleId', path, createError);
+
+  return {
+    appName: getRequiredModeActionString(value, 'appName', path, createError),
+    appPath: getRequiredModeActionString(value, 'appPath', path, createError),
+    ...(bundleId === undefined ? {} : { bundleId }),
+    enabled: getRequiredModeActionBoolean(value, 'enabled', path, createError),
+    onlyOpenIfNotRunning: getRequiredModeActionBoolean(
+      value,
+      'onlyOpenIfNotRunning',
+      path,
+      createError
+    ),
+    repeatPolicy: parseModeActionRepeatPolicy(value.repeatPolicy, path, createError),
+    type: 'open-app'
+  };
+};
+
+const parseOpenUrlModeActionInput = (
+  value: JsonRecord,
+  path: string,
+  createError: CreateError
+): ModeActionInput => {
+  const url = normalizeOpenUrl(getRequiredModeActionString(value, 'url', path, createError));
+  const label = getOptionalModeActionString(value, 'label', path, createError);
+
+  if (url === null) {
+    throw createError(`${path}.url must be a valid http or https URL.`);
+  }
+
+  return {
+    enabled: getRequiredModeActionBoolean(value, 'enabled', path, createError),
+    ...(label === undefined ? {} : { label }),
+    repeatPolicy: parseModeActionRepeatPolicy(value.repeatPolicy, path, createError),
+    type: 'open-url',
+    url
+  };
 };
 
 const getRequiredModeActionString = (

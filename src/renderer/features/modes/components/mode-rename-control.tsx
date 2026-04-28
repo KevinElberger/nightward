@@ -62,7 +62,7 @@ const modeRenameVariants = {
     formClassName: 'flex min-w-0 items-center gap-2',
     getInputAriaLabel: () => 'Mode name',
     inputClassName:
-      'h-9 w-[min(34rem,72vw)] max-w-full min-w-0 rounded-[4px] border border-white/[0.085] bg-white/[0.035] px-2 text-2xl font-semibold tracking-normal text-foreground outline-none transition-[border-color,box-shadow] focus:border-primary/45 focus:ring-[3px] focus:ring-primary/16',
+      'h-9 w-[min(34rem,72vw)] max-w-full min-w-0 rounded-[4px] border border-white/[0.085] bg-white/[0.035] px-2 text-2xl font-semibold tracking-normal text-foreground outline-none transition-[border-color,box-shadow] focus:border-ring focus:ring-[3px] focus:ring-ring/45',
     triggerButtonClassName: titleActionButtonClassName,
     triggerButtonSize: 'icon-xs'
   },
@@ -75,7 +75,7 @@ const modeRenameVariants = {
       'app-no-drag col-span-2 grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3',
     getInputAriaLabel: (name) => `Mode name for ${name}`,
     inputClassName:
-      'h-8 rounded-[4px] border-white/[0.085] bg-white/[0.035] px-2 text-sm font-medium text-foreground shadow-none focus-visible:border-primary/45 focus-visible:ring-primary/16',
+      'h-8 rounded-[4px] border-white/[0.085] bg-white/[0.035] px-2 text-sm font-medium text-foreground shadow-none focus-visible:border-ring focus-visible:ring-ring/45',
     triggerButtonClassName:
       'size-8 rounded-[4px] border border-white/[0.065] bg-white/[0.03] text-white/58 hover:bg-white/[0.05] hover:text-foreground disabled:opacity-35',
     triggerButtonSize: 'icon-sm'
