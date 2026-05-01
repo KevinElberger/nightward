@@ -146,6 +146,44 @@ describe('ModeDetailPage', () => {
     expect(screen.getByText('Also opens when mode starts')).not.toBeNull();
   });
 
+  it('surfaces warning when the same URL is configured in both phases', () => {
+    renderModeDetailPage(
+      buildSavedMode({
+        actions: buildModeActionSet({
+          enter: [buildOpenUrlModeAction({ id: 'start-action' })],
+          exit: [buildOpenUrlModeAction({ id: 'end-action' })]
+        })
+      })
+    );
+
+    expect(screen.getByText('Also opens when mode ends')).not.toBeNull();
+    expect(screen.getByText('Also opens when mode starts')).not.toBeNull();
+  });
+
+  it('does not surface same-app lifecycle warnings for different bundle IDs', () => {
+    renderModeDetailPage(
+      buildSavedMode({
+        actions: buildModeActionSet({
+          enter: [
+            buildOpenAppModeAction({
+              bundleId: 'com.example.first',
+              id: 'start-action'
+            })
+          ],
+          exit: [
+            buildOpenAppModeAction({
+              bundleId: 'com.example.second',
+              id: 'end-action'
+            })
+          ]
+        })
+      })
+    );
+
+    expect(screen.queryByText('Also opens when mode ends')).toBeNull();
+    expect(screen.queryByText('Also opens when mode starts')).toBeNull();
+  });
+
   it('creates a start action from the composer overlay', async () => {
     const createdMode = buildSavedMode();
     const createModeAction = vi.fn().mockResolvedValue(createdMode);

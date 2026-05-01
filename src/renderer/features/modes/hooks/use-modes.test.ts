@@ -457,6 +457,15 @@ describe('useModesState', () => {
           modeId: 'mode-1',
           modeName: 'Focus',
           phase: 'enter'
+        },
+        {
+          actionId: 'action-2',
+          actionType: 'open-url',
+          appName: null,
+          message: 'Could not open URL.',
+          modeId: 'mode-1',
+          modeName: 'Focus',
+          phase: 'enter'
         }
       ])
     );
@@ -472,6 +481,9 @@ describe('useModesState', () => {
 
     expect(sonnerMock.error).toHaveBeenCalledWith("Couldn't open Discord.", {
       description: 'Could not open app.'
+    });
+    expect(sonnerMock.error).toHaveBeenCalledWith("Couldn't open URL.", {
+      description: 'Could not open URL.'
     });
   });
 });

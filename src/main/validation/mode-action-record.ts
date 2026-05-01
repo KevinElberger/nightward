@@ -8,6 +8,11 @@ import { normalizeOpenUrl } from '../../shared/open-url';
 import { getRequiredString, isRecord, type JsonRecord } from './json-record';
 
 type CreateError = (message: string) => Error;
+type ModeActionInputParser = (
+  value: JsonRecord,
+  path: string,
+  createError: CreateError
+) => ModeActionInput;
 
 export const parseModeActionPhase = (
   value: unknown,
@@ -32,16 +37,11 @@ export const parseModeActionInput = (
 
   const type = getRequiredModeActionString(value, 'type', path, createError);
 
-  switch (type) {
-    case 'open-app':
-      return parseOpenAppModeActionInput(value, path, createError);
-
-    case 'open-url':
-      return parseOpenUrlModeActionInput(value, path, createError);
-
-    default:
-      throw createError(`${path}.type must be a supported action type.`);
+  if (!isModeActionType(type)) {
+    throw createError(`${path}.type must be a supported action type.`);
   }
+
+  return modeActionInputParsers[type](value, path, createError);
 };
 
 export const parseModeAction = (
@@ -114,6 +114,15 @@ const parseOpenUrlModeActionInput = (
     url
   };
 };
+
+const modeActionInputParsers = {
+  'open-app': parseOpenAppModeActionInput,
+  'open-url': parseOpenUrlModeActionInput
+} satisfies Record<ModeAction['type'], ModeActionInputParser>;
+
+function isModeActionType(type: string): type is ModeAction['type'] {
+  return type in modeActionInputParsers;
+}
 
 const getRequiredModeActionString = (
   record: JsonRecord,

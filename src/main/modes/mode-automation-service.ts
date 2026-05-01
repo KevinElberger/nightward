@@ -3,7 +3,7 @@ import {
   type ModeActionFailure,
   type ModeAutomationResult
 } from '../../shared/mode-automation';
-import type { ModeActionPhase, SavedMode } from '@shared/modes';
+import type { ModeAction, ModeActionPhase, SavedMode } from '@shared/modes';
 import type { ModeService } from './mode-service';
 import type { ModeActionRunner } from './mode-action-runner';
 
@@ -67,7 +67,7 @@ export class ModeAutomationService {
       return {
         actionId: action.id,
         actionType: action.type,
-        appName: action.type === 'open-app' ? action.appName : null,
+        appName: getFailureAppName(action),
         message,
         modeId: mode.id,
         modeName: mode.name,
@@ -88,5 +88,15 @@ export class ModeAutomationService {
 
   private getModeById(modeId: string) {
     return this.modeService.getSavedModes().find((mode) => mode.id === modeId) ?? null;
+  }
+}
+
+function getFailureAppName(action: ModeAction) {
+  switch (action.type) {
+    case 'open-app':
+      return action.appName;
+
+    case 'open-url':
+      return null;
   }
 }
