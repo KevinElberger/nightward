@@ -1,4 +1,4 @@
-import type { ModeAction, OpenAppModeAction, OpenUrlModeAction } from '@shared/modes';
+import type { ModeAction } from '@shared/modes';
 import type { ApplicationRunningCheckInput } from '../applications/application-service';
 
 export type ModeActionRunFailure = {
@@ -77,34 +77,11 @@ export class ModeActionRunner {
   private async runEnabledAction(action: ModeAction) {
     switch (action.type) {
       case 'open-app':
-        return this.runOpenAppAction(action);
+        return runOpenAppAction(action, this.applicationService);
 
       case 'open-url':
-        return this.runOpenUrlAction(action);
+        return runOpenUrlAction(action, this.applicationService);
     }
-  }
-
-  private async runOpenAppAction(action: OpenAppModeAction) {
-    if (action.onlyOpenIfNotRunning) {
-      const isRunning = await this.applicationService.isApplicationRunning({
-        appName: action.appName,
-        appPath: action.appPath
-      });
-
-      if (isRunning) {
-        return false;
-      }
-    }
-
-    await this.applicationService.openApplication(action.appPath);
-
-    return true;
-  }
-
-  private async runOpenUrlAction(action: OpenUrlModeAction) {
-    await this.applicationService.openUrl(action.url);
-
-    return true;
   }
 
   private shouldAttemptAction(action: ModeAction) {
@@ -137,3 +114,32 @@ function getLocalDateKey() {
 
 const getErrorMessage = (error: unknown) =>
   error instanceof Error ? error.message : 'Unknown action failure.';
+
+const runOpenAppAction = async (
+  action: Extract<ModeAction, { type: 'open-app' }>,
+  applicationService: ApplicationActionService
+) => {
+  if (action.onlyOpenIfNotRunning) {
+    const isRunning = await applicationService.isApplicationRunning({
+      appName: action.appName,
+      appPath: action.appPath
+    });
+
+    if (isRunning) {
+      return false;
+    }
+  }
+
+  await applicationService.openApplication(action.appPath);
+
+  return true;
+};
+
+const runOpenUrlAction = async (
+  action: Extract<ModeAction, { type: 'open-url' }>,
+  applicationService: ApplicationActionService
+) => {
+  await applicationService.openUrl(action.url);
+
+  return true;
+};

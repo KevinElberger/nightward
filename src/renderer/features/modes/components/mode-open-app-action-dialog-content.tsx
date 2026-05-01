@@ -5,7 +5,6 @@ import type {
   OpenAppModeActionInput
 } from '@shared/modes';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { getModeActionTypeDefinition } from '../mode-action-registry';
 import { useModeActionMutations } from '../hooks/use-mode-action-mutations';
 import { ModeOpenAppActionEditor } from './mode-open-app-action-editor';
 
@@ -17,6 +16,7 @@ type ModeOpenAppActionDialogContentProps = {
   onBack?: () => void;
   onClose: () => void;
   phase: ModeActionPhase;
+  title: string;
 };
 
 export function ModeOpenAppActionDialogContent({
@@ -26,7 +26,8 @@ export function ModeOpenAppActionDialogContent({
   modeId,
   onBack,
   onClose,
-  phase
+  phase,
+  title
 }: ModeOpenAppActionDialogContentProps) {
   const { deleteAction, isDeletingAction, isSavingAction, saveAction } =
     useModeActionMutations(modeId);
@@ -58,7 +59,7 @@ export function ModeOpenAppActionDialogContent({
   return (
     <>
       <DialogHeader className="sr-only">
-        <DialogTitle>{getModeActionTypeDefinition('open-app').label}</DialogTitle>
+        <DialogTitle>{title}</DialogTitle>
         <DialogDescription>Configure what should happen when this action runs.</DialogDescription>
       </DialogHeader>
       <ModeOpenAppActionEditor

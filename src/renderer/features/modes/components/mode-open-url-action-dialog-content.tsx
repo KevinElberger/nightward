@@ -1,6 +1,5 @@
 import type { ModeActionPhase, OpenUrlModeAction, OpenUrlModeActionInput } from '@shared/modes';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { getModeActionTypeDefinition } from '../mode-action-registry';
 import { useModeActionMutations } from '../hooks/use-mode-action-mutations';
 import { ModeOpenUrlActionEditor } from './mode-open-url-action-editor';
 
@@ -11,6 +10,7 @@ type ModeOpenUrlActionDialogContentProps = {
   onBack?: () => void;
   onClose: () => void;
   phase: ModeActionPhase;
+  title: string;
 };
 
 export function ModeOpenUrlActionDialogContent({
@@ -19,7 +19,8 @@ export function ModeOpenUrlActionDialogContent({
   modeId,
   onBack,
   onClose,
-  phase
+  phase,
+  title
 }: ModeOpenUrlActionDialogContentProps) {
   const { deleteAction, isDeletingAction, isSavingAction, saveAction } =
     useModeActionMutations(modeId);
@@ -51,7 +52,7 @@ export function ModeOpenUrlActionDialogContent({
   return (
     <>
       <DialogHeader className="sr-only">
-        <DialogTitle>{getModeActionTypeDefinition('open-url').label}</DialogTitle>
+        <DialogTitle>{title}</DialogTitle>
         <DialogDescription>Configure what should happen when this action runs.</DialogDescription>
       </DialogHeader>
       <ModeOpenUrlActionEditor

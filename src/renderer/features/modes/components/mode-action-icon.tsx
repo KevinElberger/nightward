@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import type { ModeAction } from '@shared/modes';
+import { getModeActionTypeDefinition } from '../mode-action-registry';
 
 type ModeActionIconProps = {
   action: ModeAction;
@@ -11,7 +12,8 @@ const appIconCache = new Map<string, string | null>();
 const appIconRequests = new Map<string, Promise<string | null>>();
 
 export function ModeActionIcon({ action, FallbackIcon }: ModeActionIconProps) {
-  const appIconDataUrl = useAppIconDataUrl(action.type === 'open-app' ? action.appPath : null);
+  const iconSourcePath = getModeActionTypeDefinition(action.type).getIconSourcePath(action);
+  const appIconDataUrl = useAppIconDataUrl(iconSourcePath);
   const [failedIconDataUrl, setFailedIconDataUrl] = useState<string | null>(null);
 
   if (appIconDataUrl !== null && appIconDataUrl !== failedIconDataUrl) {

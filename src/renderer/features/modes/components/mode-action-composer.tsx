@@ -5,10 +5,8 @@ import {
   useModeActionDialog,
   type VisibleModeActionDialogState
 } from './mode-action-dialog-context';
-import { type ModeActionType } from '../mode-action-registry';
+import { getModeActionTypeDefinition, type ModeActionType } from '../mode-action-registry';
 import { ModeActionTypePickerDialogContent } from './mode-action-type-picker-dialog-content';
-import { ModeOpenAppActionDialogContent } from './mode-open-app-action-dialog-content';
-import { ModeOpenUrlActionDialogContent } from './mode-open-url-action-dialog-content';
 import { UnsupportedModeActionDialogContent } from './unsupported-mode-action-dialog-content';
 
 export function ModeActionComposer() {
@@ -69,64 +67,30 @@ function renderModeActionDialogContent({
       );
 
     case 'create':
-      if (state.actionType === 'open-app') {
-        return (
-          <ModeOpenAppActionDialogContent
-            action={null}
-            actions={actions}
-            modeId={modeId}
-            onBack={() => {
-              showTypePicker(state.phase);
-            }}
-            onClose={closeDialog}
-            phase={state.phase}
-          />
-        );
-      }
-
-      if (state.actionType === 'open-url') {
-        return (
-          <ModeOpenUrlActionDialogContent
-            action={null}
-            modeId={modeId}
-            onBack={() => {
-              showTypePicker(state.phase);
-            }}
-            onClose={closeDialog}
-            phase={state.phase}
-          />
-        );
-      }
-
-      return <UnsupportedModeActionDialogContent onClose={closeDialog} />;
+      return getModeActionTypeDefinition(state.actionType).renderDialogContent({
+        action: null,
+        actions,
+        modeId,
+        onBack: () => {
+          showTypePicker(state.phase);
+        },
+        onClose: closeDialog,
+        phase: state.phase
+      });
 
     case 'edit':
-      if (action?.type === 'open-app') {
-        return (
-          <ModeOpenAppActionDialogContent
-            action={action}
-            actionId={state.actionId}
-            actions={actions}
-            modeId={modeId}
-            onClose={closeDialog}
-            phase={state.phase}
-          />
-        );
+      if (action === null) {
+        return <UnsupportedModeActionDialogContent onClose={closeDialog} />;
       }
 
-      if (action?.type === 'open-url') {
-        return (
-          <ModeOpenUrlActionDialogContent
-            action={action}
-            actionId={state.actionId}
-            modeId={modeId}
-            onClose={closeDialog}
-            phase={state.phase}
-          />
-        );
-      }
-
-      return <UnsupportedModeActionDialogContent onClose={closeDialog} />;
+      return getModeActionTypeDefinition(action.type).renderDialogContent({
+        action,
+        actionId: state.actionId,
+        actions,
+        modeId,
+        onClose: closeDialog,
+        phase: state.phase
+      });
 
     default:
       return <UnsupportedModeActionDialogContent onClose={closeDialog} />;

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import type { ModeActionFailure, ModeAutomationResult } from '@shared/mode-automation';
 import type { ModeActionInput, ModeActionPhase, ModeState, SavedMode } from '@shared/modes';
+import { getModeActionFailureToastTitle } from '../mode-action-copy';
 
 type RunModeMutation = <Result>(
   mutation: () => Promise<Result>,
@@ -50,18 +51,6 @@ const showModeActionFailureToast = (failure: ModeActionFailure) => {
   toast.error(getModeActionFailureToastTitle(failure), {
     description: failure.message
   });
-};
-
-const getModeActionFailureToastTitle = (failure: ModeActionFailure) => {
-  if (failure.actionType === 'open-app') {
-    return `Couldn't open ${failure.appName ?? 'app'}.`;
-  }
-
-  if (failure.actionType === 'open-url') {
-    return "Couldn't open URL.";
-  }
-
-  return 'Mode action failed.';
 };
 
 export const useModesState = (): ModesState => {
