@@ -151,6 +151,30 @@ describe('app-data-validation', () => {
     expect(appData.modes[0].actions.enter).toEqual([buildOpenUrlModeAction()]);
   });
 
+  it('accepts valid persisted Spotify URI actions', () => {
+    const spotifyAction = buildOpenUrlModeAction({
+      url: 'Spotify:Playlist:37i9dQZF1DXcBWIGoYBM5M'
+    });
+
+    const appData = validateAppData({
+      schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
+      modes: [
+        buildPersistedMode({
+          actions: {
+            enter: [spotifyAction],
+            exit: []
+          }
+        })
+      ]
+    });
+
+    expect(appData.modes[0].actions.enter).toEqual([
+      buildOpenUrlModeAction({
+        url: 'spotify:playlist:37i9dQZF1DXcBWIGoYBM5M'
+      })
+    ]);
+  });
+
   it('hydrates missing actions to empty action lists', () => {
     const appData = validateAppData({
       schemaVersion: CURRENT_APP_DATA_SCHEMA_VERSION,
@@ -248,7 +272,7 @@ describe('app-data-validation', () => {
           }
         ]
       })
-    ).toThrow('modes[0].actions.enter[0].url must be a valid http or https URL.');
+    ).toThrow('modes[0].actions.enter[0].url must be a valid http/https URL or Spotify link.');
   });
 
   it('rejects implausible open-url hosts', () => {
@@ -270,6 +294,6 @@ describe('app-data-validation', () => {
           }
         ]
       })
-    ).toThrow('modes[0].actions.enter[0].url must be a valid http or https URL.');
+    ).toThrow('modes[0].actions.enter[0].url must be a valid http/https URL or Spotify link.');
   });
 });

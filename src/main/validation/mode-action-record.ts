@@ -103,7 +103,7 @@ const parseOpenUrlModeActionInput = (
   const label = getOptionalModeActionString(value, 'label', path, createError);
 
   if (url === null) {
-    throw createError(`${path}.url must be a valid http or https URL.`);
+    throw createError(`${path}.url must be a valid http/https URL or Spotify link.`);
   }
 
   return {

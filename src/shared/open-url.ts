@@ -1,12 +1,27 @@
 const URL_WITH_SCHEME_PATTERN = /^[a-z][a-z\d+.-]*:\/\//i;
 const IPV4_HOSTNAME_PATTERN = /^(?:\d{1,3}\.){3}\d{1,3}$/;
 const DOMAIN_LABEL_PATTERN = /^[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?$/i;
+const SPOTIFY_URI_PATTERN = /^spotify:([a-z]+):([a-z\d]{22})$/i;
+const SPOTIFY_RESOURCE_LABELS = new Map([
+  ['album', 'album'],
+  ['artist', 'artist'],
+  ['episode', 'episode'],
+  ['playlist', 'playlist'],
+  ['show', 'show'],
+  ['track', 'track']
+]);
 
 export function normalizeOpenUrl(value: string) {
   const trimmedValue = value.trim();
 
   if (trimmedValue === '') {
     return null;
+  }
+
+  const spotifyUri = normalizeSpotifyUri(trimmedValue);
+
+  if (spotifyUri !== null) {
+    return spotifyUri;
   }
 
   const urlValue = URL_WITH_SCHEME_PATTERN.test(trimmedValue)
@@ -78,6 +93,11 @@ function isDomainHostname(hostname: string) {
 
 export function getOpenUrlDisplayName(value: string) {
   const normalizedUrl = normalizeOpenUrl(value) ?? value;
+  const spotifyDisplayName = getSpotifyUriDisplayName(normalizedUrl);
+
+  if (spotifyDisplayName !== null) {
+    return spotifyDisplayName;
+  }
 
   try {
     const url = new URL(normalizedUrl);
@@ -87,4 +107,45 @@ export function getOpenUrlDisplayName(value: string) {
   } catch {
     return value;
   }
+}
+
+function normalizeSpotifyUri(value: string) {
+  const spotifyUri = parseSpotifyUri(value);
+
+  if (spotifyUri === null) {
+    return null;
+  }
+
+  return `spotify:${spotifyUri.resourceType}:${spotifyUri.id}`;
+}
+
+function getSpotifyUriDisplayName(value: string) {
+  const spotifyUri = parseSpotifyUri(value);
+
+  if (spotifyUri === null) {
+    return null;
+  }
+
+  return `Spotify ${SPOTIFY_RESOURCE_LABELS.get(spotifyUri.resourceType) ?? 'link'}`;
+}
+
+function parseSpotifyUri(value: string) {
+  const match = SPOTIFY_URI_PATTERN.exec(value);
+
+  if (match === null) {
+    return null;
+  }
+
+  // Spotify URIs identify app-native resources:
+  // "spotify:playlist:37i9dQZF1DXcBWIGoYBM5M" -> resource "playlist".
+  const resourceType = match[1].toLowerCase();
+
+  if (!SPOTIFY_RESOURCE_LABELS.has(resourceType)) {
+    return null;
+  }
+
+  return {
+    id: match[2],
+    resourceType
+  };
 }

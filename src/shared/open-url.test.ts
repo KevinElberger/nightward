@@ -15,6 +15,15 @@ describe('open-url utilities', () => {
     );
   });
 
+  it('accepts Spotify resource URIs', () => {
+    expect(normalizeOpenUrl(' spotify:playlist:37i9dQZF1DXcBWIGoYBM5M ')).toBe(
+      'spotify:playlist:37i9dQZF1DXcBWIGoYBM5M'
+    );
+    expect(normalizeOpenUrl('Spotify:Track:6rqhFgbbKwnb9MLmUQDhG6')).toBe(
+      'spotify:track:6rqhFgbbKwnb9MLmUQDhG6'
+    );
+  });
+
   it('accepts localhost and IP hosts', () => {
     expect(normalizeOpenUrl('localhost:5173')).toBe('https://localhost:5173/');
     expect(normalizeOpenUrl('127.0.0.1:5173')).toBe('https://127.0.0.1:5173/');
@@ -22,6 +31,8 @@ describe('open-url utilities', () => {
 
   it('rejects unsupported protocols and implausible hosts', () => {
     expect(normalizeOpenUrl('spotify')).toBeNull();
+    expect(normalizeOpenUrl('spotify:playlist:focus')).toBeNull();
+    expect(normalizeOpenUrl('spotify:local:artist:album:title:180')).toBeNull();
     expect(normalizeOpenUrl('https://spotify')).toBeNull();
     expect(normalizeOpenUrl('file:///Users/kevin/focus.html')).toBeNull();
     expect(normalizeOpenUrl('https://example')).toBeNull();
@@ -32,6 +43,9 @@ describe('open-url utilities', () => {
   it('gets a compact display name from valid URLs', () => {
     expect(getOpenUrlDisplayName('https://www.youtube.com/playlist?list=focus')).toBe(
       'youtube.com'
+    );
+    expect(getOpenUrlDisplayName('spotify:playlist:37i9dQZF1DXcBWIGoYBM5M')).toBe(
+      'Spotify playlist'
     );
   });
 });
