@@ -259,6 +259,30 @@ describe('ModeDetailPage', () => {
     );
   });
 
+  it('creates a Spotify URI action from the composer overlay', async () => {
+    const createdMode = buildSavedMode();
+    const createModeAction = vi.fn().mockResolvedValue(createdMode);
+    renderModeDetailPage(buildSavedMode(), { createModeAction });
+
+    fireEvent.click(screen.getByRole('button', { name: /add your first start action/i }));
+    fireEvent.click(screen.getByRole('button', { name: /open url/i }));
+    fireEvent.change(screen.getByLabelText('URL'), {
+      target: { value: 'Spotify:Playlist:37i9dQZF1DXcBWIGoYBM5M' }
+    });
+    fireEvent.click(screen.getByRole('button', { name: /create action/i }));
+
+    await waitFor(() =>
+      expect(createModeAction).toHaveBeenCalledWith(
+        'mode-1',
+        'enter',
+        buildOpenUrlModeActionInput({
+          label: undefined,
+          url: 'spotify:playlist:37i9dQZF1DXcBWIGoYBM5M'
+        })
+      )
+    );
+  });
+
   it('blocks saving an invalid open URL action', async () => {
     const createModeAction = vi.fn();
     renderModeDetailPage(buildSavedMode(), { createModeAction });
@@ -271,11 +295,11 @@ describe('ModeDetailPage', () => {
       target: { value: 'spotify' }
     });
 
-    expect(screen.queryByText('Enter a valid http or https URL.')).toBeNull();
+    expect(screen.queryByText('Enter a valid http/https URL or Spotify link.')).toBeNull();
 
     fireEvent.blur(urlInput);
 
-    expect(screen.getByText('Enter a valid http or https URL.')).not.toBeNull();
+    expect(screen.getByText('Enter a valid http/https URL or Spotify link.')).not.toBeNull();
     expect(screen.getByRole<HTMLButtonElement>('button', { name: /create action/i }).disabled).toBe(
       true
     );

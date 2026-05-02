@@ -84,7 +84,7 @@ const modeActionTypeDefinitions = {
       type: 'open-url',
       url: ''
     }),
-    description: 'Open a web link.',
+    description: 'Open a web or Spotify link.',
     getIconSourcePath: () => null,
     getSummaryTokens: (action) => {
       const tokens = [getRepeatPolicyLabel(action.repeatPolicy)];

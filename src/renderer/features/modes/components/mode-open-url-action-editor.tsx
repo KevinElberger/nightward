@@ -151,7 +151,7 @@ export function ModeOpenUrlActionEditor({
         <div className="min-h-0 overflow-y-auto bg-surface-panel-muted p-4">
           <SettingsPanel>
             <RowField
-              description="Paste a web link for Nightward to open."
+              description="Paste a web link or Spotify URI for Nightward to open."
               htmlFor="mode-open-url-url"
               isRequired
               label="URL"
@@ -303,5 +303,5 @@ function getOpenUrlValidationError(value: string) {
     return null;
   }
 
-  return 'Enter a valid http or https URL.';
+  return 'Enter a valid http/https URL or Spotify link.';
 }
