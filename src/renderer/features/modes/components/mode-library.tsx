@@ -60,27 +60,19 @@ export function ModeLibrary() {
   };
 
   return (
-    <section>
-      {modes.length > 0 ? (
-        <ModeLibraryToolbar
-          isCreating={isCreating}
-          modeCount={modes.length}
-          onCreateMode={() => {
-            void handleCreateMode();
-          }}
-          onSearchQueryChange={setSearchQuery}
-          searchQuery={searchQuery}
-        />
-      ) : (
-        <div className="mb-5">
-          <h2 className="font-heading text-[1.7rem] font-semibold leading-tight text-foreground">
-            Modes
-          </h2>
-          <p className="mt-1 text-sm leading-6 text-white/46">0 modes</p>
-        </div>
-      )}
+    <section className="space-y-8">
+      <ModeLibraryToolbar
+        isCreating={isCreating}
+        modeCount={modes.length}
+        onCreateMode={() => {
+          void handleCreateMode();
+        }}
+        onSearchQueryChange={setSearchQuery}
+        searchQuery={searchQuery}
+        showSearch={modes.length > 0}
+      />
 
-      <div className="overflow-hidden rounded-[8px] border border-surface-border bg-surface-panel shadow-[0_18px_54px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.045)]">
+      <div className="overflow-hidden rounded-[8px] border border-surface-border bg-white/[0.014] shadow-[0_18px_54px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.03)]">
         {isLoading ? (
           <ModeLibrarySkeleton />
         ) : error !== null ? (
@@ -100,7 +92,7 @@ export function ModeLibrary() {
             }}
           />
         ) : (
-          <div className="divide-y divide-surface-border-subtle">
+          <div>
             {filteredModes.map((mode) => {
               const isActive = mode.id === activeModeId;
               const isSelected = mode.id === selectedModeId;

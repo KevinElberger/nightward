@@ -72,7 +72,7 @@ const modeRenameVariants = {
       'size-8 rounded-[6px] border border-surface-border bg-surface-control text-white/58 hover:border-surface-border-strong hover:bg-surface-hover hover:text-foreground disabled:opacity-35',
     buttonSize: 'icon-sm',
     formClassName:
-      'app-no-drag col-span-2 grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3',
+      'app-no-drag col-span-full grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3',
     getInputAriaLabel: (name) => `Mode name for ${name}`,
     inputClassName:
       'h-8 rounded-[6px] border-surface-border bg-surface-field px-2 text-sm font-medium text-foreground shadow-none focus-visible:border-ring focus-visible:ring-ring/35',

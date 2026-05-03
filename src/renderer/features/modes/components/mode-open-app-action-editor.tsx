@@ -198,7 +198,7 @@ export function ModeOpenAppActionEditor({
           void handleSave();
         }}
       >
-        <div className="border-b border-surface-border bg-surface-panel-muted px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+        <div className="border-b border-surface-border px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
               {onBack ? (
@@ -206,7 +206,7 @@ export function ModeOpenAppActionEditor({
                   type="button"
                   variant="ghost"
                   size="icon-xs"
-                  className="rounded-[6px] border border-surface-border bg-surface-control text-white/58 hover:border-surface-border-strong hover:bg-surface-hover hover:text-foreground"
+                  className="rounded-[6px] border border-surface-border bg-white/[0.035] text-white/58 hover:border-surface-border-strong hover:bg-white/[0.06] hover:text-foreground"
                   aria-label="Choose another action type"
                   onClick={onBack}
                 >
@@ -218,7 +218,7 @@ export function ModeOpenAppActionEditor({
               type="button"
               variant="ghost"
               size="icon-xs"
-              className="rounded-[6px] border border-surface-border bg-surface-control text-white/56 hover:border-surface-border-strong hover:bg-surface-hover hover:text-foreground"
+              className="rounded-[6px] border border-surface-border bg-white/[0.035] text-white/56 hover:border-surface-border-strong hover:bg-white/[0.06] hover:text-foreground"
               aria-label="Close action composer"
               onClick={onClose}
             >
@@ -231,10 +231,10 @@ export function ModeOpenAppActionEditor({
           <p className="mt-1.5 max-w-xl text-sm leading-6 text-white/46">{description}</p>
         </div>
 
-        <div className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] bg-surface-panel-muted sm:grid-cols-[11rem_minmax(0,1fr)] sm:grid-rows-1">
+        <div className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] sm:grid-cols-[11rem_minmax(0,1fr)] sm:grid-rows-1">
           <nav
             aria-label="Open app settings"
-            className="border-b border-surface-border bg-surface-panel-muted p-3 sm:border-r sm:border-b-0"
+            className="border-b border-surface-border bg-white/[0.012] p-3 sm:border-r sm:border-b-0"
           >
             <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-1">
               <SectionButton
@@ -256,7 +256,7 @@ export function ModeOpenAppActionEditor({
             </div>
           </nav>
 
-          <div className="min-h-0 overflow-y-auto p-4">
+          <div className="min-h-0 overflow-y-auto p-5">
             {activeSection === 'application' ? (
               <SettingsPanel>
                 <OpenAppApplicationRow
@@ -310,7 +310,7 @@ export function ModeOpenAppActionEditor({
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-surface-border bg-surface-panel-muted px-4 py-3 shadow-[0_-1px_0_rgba(255,255,255,0.025)] sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 border-t border-surface-border px-5 py-3 shadow-[0_-1px_0_rgba(255,255,255,0.025)] sm:flex-row sm:items-center sm:justify-between">
           <div>
             {onDeleteAction ? (
               <Button
@@ -334,7 +334,7 @@ export function ModeOpenAppActionEditor({
               type="button"
               variant="ghost"
               size="sm"
-              className="rounded-[6px] border border-surface-border bg-surface-control px-3 text-white/62 hover:border-surface-border-strong hover:bg-surface-hover hover:text-foreground"
+              className="rounded-[6px] border border-surface-border bg-white/[0.035] px-3 text-white/62 hover:border-surface-border-strong hover:bg-white/[0.06] hover:text-foreground"
               disabled={isSavingAction || isDeletingAction}
               onClick={onClose}
             >
