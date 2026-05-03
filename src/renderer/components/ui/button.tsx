@@ -6,19 +6,20 @@ import { Slot } from 'radix-ui';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-[background-color,border-color,color,box-shadow,opacity,transform] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/35 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        default:
+          'border border-white/[0.13] bg-primary text-primary-foreground shadow-[0_10px_24px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.32)] hover:bg-white',
         destructive:
-          'bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:ring-destructive/25 dark:focus-visible:ring-destructive/35',
+          'border border-destructive/35 bg-destructive text-destructive-foreground shadow-[0_10px_24px_rgba(0,0,0,0.24)] hover:bg-destructive/90 focus-visible:ring-destructive/25 dark:focus-visible:ring-destructive/35',
         outline:
-          'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-surface-border dark:bg-surface-field dark:hover:bg-surface-hover',
+          'border border-surface-border bg-surface-field text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] hover:border-surface-border-strong hover:bg-surface-hover hover:text-foreground',
         secondary:
-          'bg-secondary text-secondary-foreground hover:bg-secondary/80 dark:hover:bg-surface-hover',
+          'border border-surface-border bg-secondary text-secondary-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.035)] hover:border-surface-border-strong hover:bg-surface-hover',
         ghost:
-          'hover:bg-accent hover:text-accent-foreground dark:hover:bg-surface-hover dark:hover:text-foreground',
+          'text-white/62 hover:bg-accent hover:text-accent-foreground dark:hover:bg-surface-hover dark:hover:text-foreground',
         link: 'text-primary underline-offset-4 hover:underline'
       },
       size: {

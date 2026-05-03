@@ -8,22 +8,22 @@ type ModeLibraryEmptyStateProps = {
 
 export function ModeLibraryEmptyState({ isCreating, onCreateMode }: ModeLibraryEmptyStateProps) {
   return (
-    <div className="flex min-h-44 items-center justify-center px-6 py-8 text-center">
+    <div className="flex min-h-56 items-center justify-center px-6 py-10 text-center">
       <div className="max-w-sm">
-        <span className="mx-auto flex size-10 items-center justify-center rounded-[4px] border border-white/[0.07] bg-white/[0.055] text-white/50">
+        <span className="mx-auto flex size-11 items-center justify-center rounded-[7px] border border-white/[0.08] bg-white/[0.055] text-white/56 shadow-[inset_0_1px_0_rgba(255,255,255,0.045)]">
           <SlidersHorizontal className="size-4" aria-hidden="true" />
         </span>
         <h4 className="mt-4 text-base font-semibold tracking-normal text-foreground">
           No modes yet
         </h4>
-        <p className="mt-2 text-sm leading-6 text-white/42">
+        <p className="mt-2 text-sm leading-6 text-white/46">
           Modes tell Nightward how your Mac should behave for a specific kind of work.
         </p>
         <Button
           type="button"
           size="xs"
           disabled={isCreating}
-          className="mt-5 h-8 rounded-[4px] bg-primary px-2.5 text-primary-foreground hover:bg-primary/90"
+          className="mt-5 h-8 rounded-[6px] px-2.5"
           onClick={onCreateMode}
         >
           <Plus className="size-3.5" aria-hidden="true" />

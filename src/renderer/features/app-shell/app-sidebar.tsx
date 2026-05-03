@@ -15,25 +15,25 @@ export function AppSidebar() {
   const activeMode = modes.find((mode) => mode.id === activeModeId) ?? null;
 
   return (
-    <aside className="relative flex h-screen min-h-0 flex-col overflow-hidden border-r border-white/[0.06] bg-[#050506]/95 text-sidebar-foreground shadow-[inset_-1px_0_0_rgba(255,255,255,0.025),inset_0_1px_0_rgba(255,255,255,0.045)] backdrop-blur-xl">
+    <aside className="relative flex h-screen min-h-0 flex-col overflow-hidden border-r border-surface-border bg-sidebar text-sidebar-foreground shadow-[inset_-1px_0_0_rgba(255,255,255,0.035),inset_0_1px_0_rgba(255,255,255,0.05)]">
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/12"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/[0.14]"
         aria-hidden="true"
       />
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(255,255,255,0.045),rgba(255,255,255,0))]"
+        className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-white/[0.012]"
         aria-hidden="true"
       />
       <div
-        className="pointer-events-none absolute -left-20 top-0 h-56 w-48 rotate-12 bg-[linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,0.035),rgba(255,255,255,0))] blur-sm"
+        className="pointer-events-none absolute inset-y-0 right-0 w-px bg-white/[0.075]"
         aria-hidden="true"
       />
 
       <SidebarBrand />
       <SidebarCurrentMode activeMode={activeMode} />
 
-      <ScrollArea className="relative mt-3 min-h-0 flex-1 px-3 pb-3">
-        <nav className="space-y-px">
+      <ScrollArea className="relative mt-4 min-h-0 flex-1 px-3.5 pb-3">
+        <nav className="space-y-1">
           <SidebarNavItem
             icon={<SlidersHorizontal className="size-3.5" aria-hidden="true" />}
             isSelected={selectedModeId === null}
@@ -45,6 +45,7 @@ export function AppSidebar() {
         </nav>
 
         <SidebarModeList
+          activeModeId={activeModeId}
           error={error}
           isLoading={isLoading}
           modes={modes}
@@ -56,10 +57,12 @@ export function AppSidebar() {
           title="Automation"
           items={[
             {
+              disabled: true,
               icon: <Bolt className="size-3.5" aria-hidden="true" />,
               label: 'Actions'
             },
             {
+              disabled: true,
               icon: <Workflow className="size-3.5" aria-hidden="true" />,
               label: 'Triggers'
             }
@@ -70,6 +73,7 @@ export function AppSidebar() {
           title="System"
           items={[
             {
+              disabled: true,
               icon: <Settings2 className="size-3.5" aria-hidden="true" />,
               label: 'Settings'
             }

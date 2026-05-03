@@ -19,7 +19,7 @@ export function UnsupportedModeActionDialogContent({
           type="button"
           variant="ghost"
           size="sm"
-          className="rounded-[4px] border border-surface-border bg-surface-control px-3 text-white/58 hover:bg-surface-hover hover:text-foreground"
+          className="rounded-[6px] border border-surface-border bg-surface-control px-3 text-white/62 hover:border-surface-border-strong hover:bg-surface-hover hover:text-foreground"
           onClick={onClose}
         >
           Close

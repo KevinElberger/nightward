@@ -1,5 +1,6 @@
 import { useState, type MouseEvent } from 'react';
 import { Copy, MoreHorizontal, Pencil, Pin, Trash2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +26,7 @@ type ModeRowOverflowMenuProps = {
   onRename?: () => void;
   onSetPinned?: (isPinned: boolean) => Promise<unknown>;
   showRenameOption?: boolean;
+  triggerClassName?: string;
 };
 
 export function ModeRowOverflowMenu({
@@ -33,7 +35,8 @@ export function ModeRowOverflowMenu({
   onDeleteMode,
   onRename,
   onSetPinned,
-  showRenameOption = true
+  showRenameOption = true,
+  triggerClassName
 }: ModeRowOverflowMenuProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -63,14 +66,17 @@ export function ModeRowOverflowMenu({
       <DropdownMenu>
         <DropdownMenuTrigger
           type="button"
-          className="inline-flex size-8 items-center justify-center rounded-[4px] text-white/38 outline-none transition-colors hover:bg-white/[0.05] hover:text-foreground focus-visible:bg-white/[0.05] focus-visible:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/35 group-hover/row:text-white/58 group-focus-within/row:text-white/58 data-[state=open]:bg-white/[0.05] data-[state=open]:text-foreground"
+          className={cn(
+            'inline-flex size-8 items-center justify-center rounded-[6px] text-white/40 outline-none transition-colors hover:bg-white/[0.06] hover:text-foreground focus-visible:bg-white/[0.06] focus-visible:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/35 group-hover/row:text-white/60 group-focus-within/row:text-white/60 data-[state=open]:bg-white/[0.065] data-[state=open]:text-foreground',
+            triggerClassName
+          )}
           aria-label={`Open actions for ${modeName}`}
         >
           <MoreHorizontal className="size-4" aria-hidden="true" />
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
-          className="min-w-40 rounded-[6px] border-white/[0.08] bg-[#09090a]/95 text-white/80 shadow-[0_14px_42px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+          className="min-w-44 rounded-[8px] border-surface-border-strong bg-popover/95 p-1 text-white/80 shadow-[0_18px_54px_rgba(0,0,0,0.56),inset_0_1px_0_rgba(255,255,255,0.045)] backdrop-blur-xl"
         >
           {showRenameOption ? (
             <DropdownMenuItem
@@ -96,7 +102,7 @@ export function ModeRowOverflowMenu({
             <Pin className="size-3.5" aria-hidden="true" />
             {isPinned ? 'Remove from sidebar' : 'Pin to sidebar'}
           </DropdownMenuItem>
-          <DropdownMenuSeparator className="bg-white/[0.07]" />
+          <DropdownMenuSeparator className="my-1 bg-white/[0.07]" />
           <DropdownMenuItem
             disabled={onDeleteMode === undefined}
             variant="destructive"
@@ -119,7 +125,7 @@ export function ModeRowOverflowMenu({
         }}
       >
         <AlertDialogContent
-          className="rounded-[8px] border-white/[0.085] bg-[#09090a] text-foreground shadow-[0_18px_54px_rgba(0,0,0,0.55)]"
+          className="rounded-[8px] border-surface-border-strong bg-card text-foreground"
           size="default"
         >
           <AlertDialogHeader>

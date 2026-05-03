@@ -38,8 +38,10 @@ export function ModeLibraryRow({
   return (
     <div
       className={cn(
-        'group/row relative grid min-h-[3.75rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 transition-colors',
-        isSelected ? 'bg-surface-active' : 'bg-surface-card hover:bg-surface-hover'
+        'group/row relative grid min-h-16 grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 transition-[background-color,box-shadow]',
+        isSelected
+          ? 'bg-white/[0.065] shadow-[inset_3px_0_0_rgba(255,255,255,0.32)]'
+          : 'bg-surface-panel hover:bg-surface-hover'
       )}
     >
       <ModeRenameControl
@@ -52,7 +54,7 @@ export function ModeLibraryRow({
             className={cn(
               'flex size-7 shrink-0 items-center justify-center rounded-[4px] border border-surface-border-subtle bg-surface-field',
               isActive
-                ? 'border-status-active/20 bg-status-active/8 text-status-active'
+                ? 'border-status-active/25 bg-status-active/10 text-status-active shadow-[0_0_18px_rgba(69,212,131,0.14)]'
                 : 'text-status-neutral/50'
             )}
           >
@@ -74,9 +76,9 @@ export function ModeLibraryRow({
             <div className="pointer-events-none relative z-10 flex min-w-0 items-center gap-3">
               <span
                 className={cn(
-                  'flex size-7 shrink-0 items-center justify-center rounded-[4px] border border-surface-border-subtle bg-surface-field',
+                  'flex size-8 shrink-0 items-center justify-center rounded-[6px] border border-surface-border-subtle bg-surface-field shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]',
                   isActive
-                    ? 'border-status-active/20 bg-status-active/8 text-status-active'
+                    ? 'border-status-active/25 bg-status-active/10 text-status-active shadow-[0_0_18px_rgba(69,212,131,0.14),inset_0_1px_0_rgba(255,255,255,0.035)]'
                     : 'text-status-neutral/50'
                 )}
               >
@@ -88,7 +90,7 @@ export function ModeLibraryRow({
                 </span>
                 <span
                   className={cn(
-                    'mt-0.5 block text-xs',
+                    'mt-0.5 block text-xs font-medium',
                     isActive ? 'text-status-active/80' : 'text-status-neutral/50'
                   )}
                 >
@@ -102,7 +104,7 @@ export function ModeLibraryRow({
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-8 rounded-[4px] px-2.5 text-white/48 hover:bg-surface-hover hover:text-foreground disabled:opacity-35"
+                className="h-8 rounded-[6px] px-2.5 text-white/50 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-35"
                 onClick={() => {
                   void (isActive ? onDeactivateMode() : onActivateMode(mode.id));
                 }}

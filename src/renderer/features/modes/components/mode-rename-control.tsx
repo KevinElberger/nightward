@@ -52,32 +52,32 @@ type ModeRenameFormProps = {
 };
 
 const titleActionButtonClassName =
-  'rounded-[4px] border border-white/[0.095] bg-white/[0.065] text-white/68 shadow-[inset_0_1px_0_rgba(255,255,255,0.055)] transition-[background-color,border-color,color,opacity] hover:border-white/[0.14] hover:bg-white/[0.105] hover:text-white/90 focus-visible:ring-ring/35 disabled:opacity-35';
+  'rounded-[6px] border border-transparent bg-transparent text-white/42 transition-[background-color,border-color,color,opacity] hover:border-surface-border hover:bg-surface-control hover:text-white/82 focus-visible:ring-ring/35 disabled:opacity-30';
 
 const modeRenameVariants = {
   title: {
-    actionsClassName: 'flex items-center gap-2',
+    actionsClassName: 'flex -translate-y-0.5 items-center gap-1.5 self-center',
     buttonClassName: titleActionButtonClassName,
     buttonSize: 'icon-xs',
-    formClassName: 'flex min-w-0 items-center gap-2',
+    formClassName: 'flex h-[3.1rem] min-w-0 items-center gap-2.5',
     getInputAriaLabel: () => 'Mode name',
     inputClassName:
-      'h-9 w-[min(34rem,72vw)] max-w-full min-w-0 rounded-[4px] border border-white/[0.085] bg-white/[0.035] px-2 text-2xl font-semibold tracking-normal text-foreground outline-none transition-[border-color,box-shadow] focus:border-ring focus:ring-[3px] focus:ring-ring/45',
+      'h-[3.1rem] w-[min(42rem,72vw)] max-w-full min-w-[10rem] rounded-none border-x-0 border-t-0 border-b border-white/[0.2] bg-transparent px-0 py-0 font-heading text-[2.45rem] font-semibold leading-[1.05] tracking-normal text-foreground shadow-none outline-none transition-[border-color,color] hover:border-white/30 focus:border-white/38 focus:ring-0 focus-visible:border-white/38 focus-visible:ring-0 disabled:bg-transparent disabled:opacity-60 dark:border-white/[0.2] dark:bg-transparent dark:hover:border-white/30 dark:focus:border-white/38 dark:focus-visible:border-white/38 md:text-[2.45rem]',
     triggerButtonClassName: titleActionButtonClassName,
     triggerButtonSize: 'icon-xs'
   },
   row: {
     actionsClassName: 'flex items-center gap-1.5',
     buttonClassName:
-      'size-8 rounded-[4px] border border-white/[0.065] bg-white/[0.03] text-white/58 hover:bg-white/[0.05] hover:text-foreground disabled:opacity-35',
+      'size-8 rounded-[6px] border border-surface-border bg-surface-control text-white/58 hover:border-surface-border-strong hover:bg-surface-hover hover:text-foreground disabled:opacity-35',
     buttonSize: 'icon-sm',
     formClassName:
       'app-no-drag col-span-2 grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3',
     getInputAriaLabel: (name) => `Mode name for ${name}`,
     inputClassName:
-      'h-8 rounded-[4px] border-white/[0.085] bg-white/[0.035] px-2 text-sm font-medium text-foreground shadow-none focus-visible:border-ring focus-visible:ring-ring/45',
+      'h-8 rounded-[6px] border-surface-border bg-surface-field px-2 text-sm font-medium text-foreground shadow-none focus-visible:border-ring focus-visible:ring-ring/35',
     triggerButtonClassName:
-      'size-8 rounded-[4px] border border-white/[0.065] bg-white/[0.03] text-white/58 hover:bg-white/[0.05] hover:text-foreground disabled:opacity-35',
+      'size-8 rounded-[6px] border border-surface-border bg-surface-control text-white/58 hover:border-surface-border-strong hover:bg-surface-hover hover:text-foreground disabled:opacity-35',
     triggerButtonSize: 'icon-sm'
   }
 } satisfies Record<ModeRenameControlVariant, ModeRenameVariantConfig>;

@@ -12,15 +12,15 @@ export function ModeDetailTitle({ modeId, name, onRenameMode }: ModeDetailTitleP
   return (
     <ModeRenameControl modeId={modeId} name={name} onRenameMode={onRenameMode} variant="title">
       {({ startRenaming, triggerButtonClassName, triggerButtonSize }) => (
-        <div className="flex min-w-0 items-center gap-2">
-          <h2 className="truncate text-2xl font-semibold tracking-normal text-foreground">
+        <div className="flex h-[3.1rem] min-w-0 flex-1 items-center gap-2.5">
+          <h2 className="min-w-0 truncate border-b border-transparent font-heading text-[2.45rem] font-semibold leading-[1.05] tracking-normal text-foreground">
             {name}
           </h2>
           <Button
             type="button"
             variant="ghost"
             size={triggerButtonSize}
-            className={triggerButtonClassName}
+            className={`${triggerButtonClassName} -translate-y-0.5`}
             aria-label="Rename mode"
             title="Rename mode"
             onClick={startRenaming}
