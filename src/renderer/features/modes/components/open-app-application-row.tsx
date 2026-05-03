@@ -38,7 +38,7 @@ export function OpenAppApplicationRow({
       <div className="min-w-0 space-y-2">
         <div className="flex max-w-full items-center justify-end gap-3">
           <span className="flex min-w-0 max-w-[16rem] items-center justify-end gap-2">
-            <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-[4px] text-white/42">
+            <span className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-[7px] border border-surface-border-subtle bg-surface-control text-white/48 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
               {appIconDataUrl !== null ? (
                 <img
                   src={appIconDataUrl}
@@ -59,7 +59,7 @@ export function OpenAppApplicationRow({
             type="button"
             variant="ghost"
             size="sm"
-            className="rounded-[4px] border border-surface-border bg-surface-control px-3 text-white/58 hover:bg-surface-hover hover:text-foreground"
+            className="rounded-[6px] border border-surface-border bg-surface-control px-3 text-white/62 hover:border-surface-border-strong hover:bg-surface-hover hover:text-foreground"
             disabled={isDisabled || isSelectingApplication}
             onClick={onSelectApplication}
           >

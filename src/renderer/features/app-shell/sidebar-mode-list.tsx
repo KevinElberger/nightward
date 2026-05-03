@@ -6,6 +6,7 @@ import { SidebarNavItem } from './sidebar-nav-item';
 import { SidebarSkeleton } from './sidebar-skeleton';
 
 type SidebarModeListProps = {
+  activeModeId: string | null;
   error: string | null;
   isLoading: boolean;
   modes: SavedMode[];
@@ -16,6 +17,7 @@ type SidebarModeListProps = {
 const PINNED_MODE_LIMIT = 5;
 
 export function SidebarModeList({
+  activeModeId,
   error,
   isLoading,
   modes,
@@ -34,13 +36,11 @@ export function SidebarModeList({
 
   return (
     <>
-      <div className="relative mt-3 flex items-center justify-between px-1 py-2">
-        <p className="text-[0.64rem] font-medium uppercase tracking-[0.12em] text-white/36">
-          Pinned
-        </p>
+      <div className="relative mt-4 flex items-center justify-between px-1.5 py-2">
+        <p className="text-[0.68rem] font-medium uppercase tracking-normal text-white/38">Pinned</p>
         <Badge
           variant="secondary"
-          className="h-5 rounded-[3px] border border-white/[0.05] bg-white/[0.035] px-1.5 font-mono text-[0.61rem] text-white/45"
+          className="h-5 rounded-[5px] border border-white/[0.06] bg-white/[0.04] px-1.5 font-mono text-[0.61rem] text-white/48 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]"
         >
           {pinnedModes.length}
         </Badge>
@@ -57,10 +57,11 @@ export function SidebarModeList({
           icon={<Pin className="size-3 text-white/48" aria-hidden="true" />}
         />
       ) : (
-        <nav className="space-y-px">
+        <nav className="space-y-1">
           {pinnedModes.map((mode) => (
             <SidebarNavItem
               key={mode.id}
+              isActive={mode.id === activeModeId}
               isSelected={mode.id === selectedModeId}
               label={mode.name}
               onClick={() => {

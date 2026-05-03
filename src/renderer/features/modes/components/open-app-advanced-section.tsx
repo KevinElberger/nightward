@@ -22,7 +22,7 @@ export function OpenAppAdvancedSection({
         <Input
           id="mode-open-app-bundle-id"
           value={bundleId}
-          className="h-9 rounded-[4px] border-surface-border bg-surface-field text-sm text-foreground shadow-none placeholder:text-white/24 focus-visible:border-ring focus-visible:ring-ring/55"
+          className="h-9 rounded-[6px] border-surface-border bg-surface-field text-sm text-foreground shadow-none placeholder:text-white/24 focus-visible:border-ring focus-visible:ring-ring/35"
           disabled={disabled}
           placeholder="com.spotify.client"
           onChange={(event) => {

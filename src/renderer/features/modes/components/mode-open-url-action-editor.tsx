@@ -117,7 +117,7 @@ export function ModeOpenUrlActionEditor({
           void handleSave();
         }}
       >
-        <div className="border-b border-surface-border bg-surface-panel-muted px-5 py-4">
+        <div className="border-b border-surface-border bg-surface-panel-muted px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
               {onBack ? (
@@ -125,7 +125,7 @@ export function ModeOpenUrlActionEditor({
                   type="button"
                   variant="ghost"
                   size="icon-xs"
-                  className="rounded-[4px] border border-surface-border bg-surface-control text-white/58 hover:bg-surface-hover hover:text-foreground"
+                  className="rounded-[6px] border border-surface-border bg-surface-control text-white/58 hover:border-surface-border-strong hover:bg-surface-hover hover:text-foreground"
                   aria-label="Choose another action type"
                   onClick={onBack}
                 >
@@ -137,7 +137,7 @@ export function ModeOpenUrlActionEditor({
               type="button"
               variant="ghost"
               size="icon-xs"
-              className="rounded-[4px] border border-surface-border bg-surface-control text-white/56 hover:bg-surface-hover hover:text-foreground"
+              className="rounded-[6px] border border-surface-border bg-surface-control text-white/56 hover:border-surface-border-strong hover:bg-surface-hover hover:text-foreground"
               aria-label="Close action composer"
               onClick={onClose}
             >
@@ -145,7 +145,7 @@ export function ModeOpenUrlActionEditor({
             </Button>
           </div>
           <h3 className="mt-3 text-xl font-semibold tracking-normal text-foreground">Open a URL</h3>
-          <p className="mt-1.5 max-w-xl text-sm leading-6 text-white/42">{description}</p>
+          <p className="mt-1.5 max-w-xl text-sm leading-6 text-white/46">{description}</p>
         </div>
 
         <div className="min-h-0 overflow-y-auto bg-surface-panel-muted p-4">
@@ -172,7 +172,7 @@ export function ModeOpenUrlActionEditor({
                     placeholder="https://open.spotify.com/playlist/..."
                     aria-invalid={urlValidationError !== null}
                     disabled={isActionLocked}
-                    className="h-9 rounded-[4px] border-surface-border bg-surface-field pl-9 text-sm text-foreground shadow-none placeholder:text-white/24 focus-visible:border-ring focus-visible:ring-ring/55"
+                    className="h-9 rounded-[6px] border-surface-border bg-surface-field pl-9 text-sm text-foreground shadow-none placeholder:text-white/24 focus-visible:border-ring focus-visible:ring-ring/35"
                     onBlur={handleUrlBlur}
                     onChange={(event) => {
                       setUrl(event.currentTarget.value);
@@ -203,7 +203,7 @@ export function ModeOpenUrlActionEditor({
                   value={label}
                   placeholder="Focus playlist"
                   disabled={isActionLocked}
-                  className="h-9 rounded-[4px] border-surface-border bg-surface-field pl-9 text-sm text-foreground shadow-none placeholder:text-white/24 focus-visible:border-ring focus-visible:ring-ring/55"
+                  className="h-9 rounded-[6px] border-surface-border bg-surface-field pl-9 text-sm text-foreground shadow-none placeholder:text-white/24 focus-visible:border-ring focus-visible:ring-ring/35"
                   onChange={(event) => {
                     setLabel(event.currentTarget.value);
                   }}
@@ -228,14 +228,14 @@ export function ModeOpenUrlActionEditor({
           </SettingsPanel>
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-surface-border bg-surface-panel-muted px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 border-t border-surface-border bg-surface-panel-muted px-4 py-3 shadow-[0_-1px_0_rgba(255,255,255,0.025)] sm:flex-row sm:items-center sm:justify-between">
           <div>
             {onDeleteAction ? (
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="justify-start rounded-[4px] px-2.5 text-destructive/80 hover:bg-destructive/10 hover:text-destructive focus-visible:ring-destructive/25 disabled:opacity-35 dark:hover:bg-destructive/10 dark:hover:text-destructive"
+                className="justify-start rounded-[6px] px-2.5 text-destructive/80 hover:bg-destructive/10 hover:text-destructive focus-visible:ring-destructive/25 disabled:opacity-35 dark:hover:bg-destructive/10 dark:hover:text-destructive"
                 disabled={isDeletingAction || isSavingAction}
                 onClick={() => {
                   setIsDeleteDialogOpen(true);
@@ -252,7 +252,7 @@ export function ModeOpenUrlActionEditor({
               type="button"
               variant="ghost"
               size="sm"
-              className="rounded-[4px] border border-surface-border bg-surface-control px-3 text-white/58 hover:bg-surface-hover hover:text-foreground"
+              className="rounded-[6px] border border-surface-border bg-surface-control px-3 text-white/62 hover:border-surface-border-strong hover:bg-surface-hover hover:text-foreground"
               disabled={isSavingAction || isDeletingAction}
               onClick={onClose}
             >
@@ -262,7 +262,7 @@ export function ModeOpenUrlActionEditor({
               type="submit"
               variant="default"
               size="sm"
-              className="rounded-[4px] px-3 disabled:opacity-35"
+              className="rounded-[6px] px-3 disabled:opacity-35"
               disabled={!canSaveAction}
             >
               {isSavingAction ? 'Saving...' : isEditing ? 'Save action' : 'Create action'}
@@ -272,7 +272,7 @@ export function ModeOpenUrlActionEditor({
       </form>
 
       <AlertDialogContent
-        className="rounded-[8px] border-white/[0.085] bg-[#09090a] text-foreground shadow-[0_18px_54px_rgba(0,0,0,0.55)]"
+        className="rounded-[8px] border-surface-border-strong bg-card text-foreground"
         size="sm"
       >
         <AlertDialogHeader>

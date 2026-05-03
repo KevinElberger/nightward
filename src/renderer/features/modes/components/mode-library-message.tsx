@@ -7,7 +7,7 @@ export function ModeLibraryMessage({ description, title }: ModeLibraryMessagePro
   return (
     <div className="px-4 py-5">
       <p className="text-sm font-medium text-white/78">{title}</p>
-      <p className="mt-1 text-xs leading-5 text-white/42">{description}</p>
+      <p className="mt-1 text-xs leading-5 text-white/46">{description}</p>
     </div>
   );
 }

@@ -62,8 +62,8 @@ describe('ModeDetailPage', () => {
 
     expect(screen.getByRole('heading', { name: /when mode starts/i })).not.toBeNull();
     expect(screen.getByRole('heading', { name: /when mode ends/i })).not.toBeNull();
-    expect(screen.getByText('Start this mode with momentum')).not.toBeNull();
-    expect(screen.getByText('End this mode with intention')).not.toBeNull();
+    expect(screen.getByText('No start actions yet')).not.toBeNull();
+    expect(screen.getByText('No end actions yet')).not.toBeNull();
     expect(screen.getAllByText('0 actions')).toHaveLength(2);
     expect(screen.getByText('Manual activation')).not.toBeNull();
   });

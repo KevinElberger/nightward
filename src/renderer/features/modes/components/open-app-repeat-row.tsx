@@ -17,7 +17,7 @@ export function OpenAppRepeatRow({
       description="Decide whether this runs every time or only once each day."
       label="Repeat"
     >
-      <div className="inline-flex rounded-[4px] border border-surface-border bg-surface-control p-1">
+      <div className="inline-flex rounded-[7px] border border-surface-border bg-surface-control p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
         <RepeatPolicyButton
           isActive={repeatPolicy === 'every-activation'}
           label="Every activation"
@@ -53,9 +53,9 @@ function RepeatPolicyButton({
   return (
     <button
       type="button"
-      className={`rounded-[3px] px-3 py-1.5 text-sm transition-[background-color,color] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/35 ${
+      className={`rounded-[5px] px-3 py-1.5 text-sm transition-[background-color,color,box-shadow] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/35 ${
         isActive
-          ? 'bg-surface-active text-foreground'
+          ? 'bg-white/[0.095] text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.055)]'
           : 'text-white/56 hover:bg-surface-hover hover:text-foreground'
       }`}
       disabled={disabled}

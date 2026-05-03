@@ -1,4 +1,4 @@
-import { Plus, Sparkles, Sunrise, Sunset, Workflow, type LucideIcon } from 'lucide-react';
+import { Plus, Sparkles, Workflow, type LucideIcon } from 'lucide-react';
 import type { ModeAction, ModeActionPhase } from '@shared/modes';
 import { Button } from '@/components/ui/button';
 import { getModeActionTypeDefinition } from '../mode-action-registry';
@@ -15,10 +15,8 @@ type ModeActionPhaseSectionProps = {
 
 type ModeActionPhaseSectionCopy = {
   EmptyIcon: LucideIcon;
-  HeaderIcon: LucideIcon;
   emptyActionLabel: string;
   emptyDescription: string;
-  emptyExamples: string;
   emptyHeadline: string;
   oppositePhaseNotice: string;
 };
@@ -26,20 +24,16 @@ type ModeActionPhaseSectionCopy = {
 const modeActionPhaseSectionCopy = {
   enter: {
     EmptyIcon: Sparkles,
-    HeaderIcon: Sunrise,
     emptyActionLabel: 'Add your first start action',
     emptyDescription: 'Add an action that runs the moment this mode starts.',
-    emptyExamples: 'Open your writing app, start focus music, or launch a timer.',
-    emptyHeadline: 'Start this mode with momentum',
+    emptyHeadline: 'No start actions yet',
     oppositePhaseNotice: 'Also opens when mode ends'
   },
   exit: {
     EmptyIcon: Workflow,
-    HeaderIcon: Sunset,
     emptyActionLabel: 'Add your first end action',
     emptyDescription: 'Add an action that runs when this mode winds down.',
-    emptyExamples: 'Bring chat back, open notes, or start a wrap-up playlist.',
-    emptyHeadline: 'End this mode with intention',
+    emptyHeadline: 'No end actions yet',
     oppositePhaseNotice: 'Also opens when mode starts'
   }
 } satisfies Record<ModeActionPhase, ModeActionPhaseSectionCopy>;
@@ -53,65 +47,62 @@ export function ModeActionPhaseSection({
 }: ModeActionPhaseSectionProps) {
   const { editAction, openActionTypePicker } = useModeActionDialog();
   const copy = modeActionPhaseSectionCopy[phase];
-  const { EmptyIcon, HeaderIcon } = copy;
+  const { EmptyIcon } = copy;
   const actionCountLabel = getActionCountLabel(actions.length);
 
   return (
-    <section className="overflow-hidden rounded-[6px] border border-surface-border bg-surface-panel shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
-      <div className="flex items-center justify-between gap-3 border-b border-surface-border-subtle bg-surface-panel-muted px-4 py-3">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-[4px] border border-surface-border-subtle bg-surface-control text-primary">
-            <HeaderIcon className="size-4" aria-hidden="true" />
-          </span>
-          <h3 className="truncate text-sm font-semibold tracking-normal text-foreground">
+    <section className="space-y-3.5">
+      <div className="flex items-center justify-between gap-4 px-1">
+        <div className="flex min-w-0 flex-wrap items-baseline gap-2">
+          <h3 className="min-w-0 truncate text-[0.98rem] font-semibold tracking-normal text-foreground">
             {title}
           </h3>
+          <span className="shrink-0 rounded-[5px] bg-white/[0.055] px-1.5 py-0.5 text-xs font-medium text-white/40">
+            {actionCountLabel}
+          </span>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <span className="text-xs font-medium text-white/34">{actionCountLabel}</span>
-          {actions.length > 0 ? (
-            <Button
-              type="button"
-              variant="ghost"
-              size="xs"
-              className="h-7 rounded-[4px] px-2 text-white/48 hover:bg-surface-hover hover:text-foreground"
-              onClick={() => {
-                openActionTypePicker(phase);
-              }}
-            >
-              <Plus className="size-3.5" aria-hidden="true" />
-              {addLabel}
-            </Button>
-          ) : null}
-        </div>
+
+        {actions.length > 0 ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="xs"
+            className="h-7 rounded-[5px] px-2 text-white/50 hover:bg-white/[0.055] hover:text-foreground"
+            onClick={() => {
+              openActionTypePicker(phase);
+            }}
+          >
+            <Plus className="size-3.5" aria-hidden="true" />
+            {addLabel}
+          </Button>
+        ) : null}
       </div>
 
       {actions.length === 0 ? (
-        <div className="px-4 py-8">
-          <div className="mx-auto flex max-w-md flex-col items-center text-center">
-            <span className="flex size-10 items-center justify-center rounded-[5px] border border-primary/14 bg-primary/7 text-primary/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
-              <EmptyIcon className="size-4" aria-hidden="true" />
-            </span>
-            <div className="mt-3 text-sm font-semibold text-foreground">{copy.emptyHeadline}</div>
-            <p className="mt-1 max-w-xs text-xs leading-5 text-white/38">{copy.emptyDescription}</p>
-            <p className="mt-1 max-w-xs text-xs leading-5 text-white/30">{copy.emptyExamples}</p>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="mt-4 rounded-[4px] border border-surface-border bg-surface-control px-3 text-white/58 hover:bg-surface-hover hover:text-foreground"
-              aria-label={copy.emptyActionLabel}
-              onClick={() => {
-                openActionTypePicker(phase);
-              }}
-            >
-              <Plus className="size-3.5" aria-hidden="true" />
-              {addLabel}
-            </Button>
-          </div>
+        <div className="rounded-[8px] border border-dashed border-surface-border bg-white/[0.016] px-6 py-7 text-center">
+          <span className="mx-auto flex size-9 items-center justify-center rounded-[7px] border border-surface-border-subtle bg-surface-control text-white/58 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
+            <EmptyIcon className="size-4" aria-hidden="true" />
+          </span>
+          <div className="mt-3 text-sm font-semibold text-foreground">{copy.emptyHeadline}</div>
+          <p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-white/44">
+            {copy.emptyDescription}
+          </p>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="mt-4 rounded-[6px] border border-surface-border bg-surface-control px-3 text-white/62 hover:border-surface-border-strong hover:bg-surface-hover hover:text-foreground"
+            aria-label={copy.emptyActionLabel}
+            onClick={() => {
+              openActionTypePicker(phase);
+            }}
+          >
+            <Plus className="size-3.5" aria-hidden="true" />
+            {addLabel}
+          </Button>
         </div>
       ) : (
-        <div className="space-y-2 p-3">
+        <div className="space-y-2.5">
           {actions.map((action) => {
             const lifecycleNotice = getLifecycleNotice(action, otherPhaseActions, copy);
 

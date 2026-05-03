@@ -71,9 +71,16 @@ export function ModeLibrary() {
           onSearchQueryChange={setSearchQuery}
           searchQuery={searchQuery}
         />
-      ) : null}
+      ) : (
+        <div className="mb-5">
+          <h2 className="font-heading text-[1.7rem] font-semibold leading-tight text-foreground">
+            Modes
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-white/46">0 modes</p>
+        </div>
+      )}
 
-      <div className="overflow-hidden rounded-[6px] border border-surface-border-subtle bg-surface-panel-muted shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]">
+      <div className="overflow-hidden rounded-[8px] border border-surface-border bg-surface-panel shadow-[0_18px_54px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.045)]">
         {isLoading ? (
           <ModeLibrarySkeleton />
         ) : error !== null ? (
