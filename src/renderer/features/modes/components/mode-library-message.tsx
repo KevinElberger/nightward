@@ -5,9 +5,11 @@ type ModeLibraryMessageProps = {
 
 export function ModeLibraryMessage({ description, title }: ModeLibraryMessageProps) {
   return (
-    <div className="px-4 py-5">
-      <p className="text-sm font-medium text-white/78">{title}</p>
-      <p className="mt-1 text-xs leading-5 text-white/46">{description}</p>
+    <div className="flex min-h-56 items-center justify-center px-6 py-10 text-center">
+      <div className="max-w-sm">
+        <p className="text-sm font-semibold text-white/82">{title}</p>
+        <p className="mt-2 text-xs leading-5 text-white/46">{description}</p>
+      </div>
     </div>
   );
 }

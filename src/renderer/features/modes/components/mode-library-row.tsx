@@ -1,4 +1,4 @@
-import { Check, Circle, Play, Power } from 'lucide-react';
+import { Play, Power, Workflow } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { SavedMode } from '../../../../shared/modes';
 import { cn } from '@/lib/utils';
@@ -28,20 +28,21 @@ export function ModeLibraryRow({
   onSelectMode,
   onSetPinned
 }: ModeLibraryRowProps) {
-  const statusIcon = isActive ? (
-    <Check className="size-3.5" aria-hidden="true" />
-  ) : (
-    <Circle className="size-3" aria-hidden="true" />
-  );
-  const statusLabel = isActive ? 'Active' : 'Ready';
+  const actionCount = mode.actions.enter.length + mode.actions.exit.length;
+  const metadataItems = [
+    { className: '', label: 'Manual trigger' },
+    { className: '', label: getActionCountLabel(actionCount) },
+    ...(isActive ? [{ className: 'text-status-active/78', label: 'Active now' }] : []),
+    ...(mode.pinnedAt === null ? [] : [{ className: '', label: 'Pinned' }])
+  ];
 
   return (
     <div
       className={cn(
-        'group/row relative grid min-h-16 grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 transition-[background-color,box-shadow]',
+        'group/row relative grid min-h-[4.75rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 border-t border-surface-border-subtle px-5 transition-[background-color,box-shadow] first:border-t-0',
         isSelected
-          ? 'bg-white/[0.065] shadow-[inset_3px_0_0_rgba(255,255,255,0.32)]'
-          : 'bg-surface-panel hover:bg-surface-hover'
+          ? 'bg-white/[0.045] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.045)]'
+          : 'hover:bg-white/[0.028]'
       )}
     >
       <ModeRenameControl
@@ -49,18 +50,7 @@ export function ModeLibraryRow({
         name={mode.name}
         onRenameMode={onRenameMode}
         variant="row"
-        leadingContent={
-          <span
-            className={cn(
-              'flex size-7 shrink-0 items-center justify-center rounded-[4px] border border-surface-border-subtle bg-surface-field',
-              isActive
-                ? 'border-status-active/25 bg-status-active/10 text-status-active shadow-[0_0_18px_rgba(69,212,131,0.14)]'
-                : 'text-status-neutral/50'
-            )}
-          >
-            {statusIcon}
-          </span>
-        }
+        leadingContent={<ModeLibraryRowMark isActive={isActive} />}
       >
         {({ startRenaming }) => (
           <>
@@ -73,38 +63,38 @@ export function ModeLibraryRow({
               }}
             />
 
-            <div className="pointer-events-none relative z-10 flex min-w-0 items-center gap-3">
-              <span
-                className={cn(
-                  'flex size-8 shrink-0 items-center justify-center rounded-[6px] border border-surface-border-subtle bg-surface-field shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]',
-                  isActive
-                    ? 'border-status-active/25 bg-status-active/10 text-status-active shadow-[0_0_18px_rgba(69,212,131,0.14),inset_0_1px_0_rgba(255,255,255,0.035)]'
-                    : 'text-status-neutral/50'
-                )}
-              >
-                {statusIcon}
-              </span>
-              <span className="min-w-0">
-                <span className="block truncate text-sm font-medium text-foreground">
+            <div className="pointer-events-none relative z-10 flex min-w-0 items-center gap-3.5">
+              <ModeLibraryRowMark isActive={isActive} />
+              <div className="min-w-0">
+                <span className="block truncate text-[0.95rem] font-semibold leading-5 text-foreground">
                   {mode.name}
                 </span>
-                <span
-                  className={cn(
-                    'mt-0.5 block text-xs font-medium',
-                    isActive ? 'text-status-active/80' : 'text-status-neutral/50'
-                  )}
-                >
-                  {statusLabel}
-                </span>
-              </span>
+                <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-white/42">
+                  {metadataItems.map((item, index) => (
+                    <span key={item.label} className="inline-flex items-center gap-2">
+                      {index > 0 ? (
+                        <span className="text-white/18" aria-hidden="true">
+                          /
+                        </span>
+                      ) : null}
+                      <span className={item.className}>{item.label}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            <div className="app-no-drag relative z-20 flex items-center gap-1.5">
+            <div className="app-no-drag relative z-20 flex items-center justify-end gap-1.5">
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-8 rounded-[6px] px-2.5 text-white/50 hover:bg-white/[0.06] hover:text-foreground disabled:opacity-35"
+                className={cn(
+                  'h-8 rounded-[6px] border px-2.5 disabled:opacity-35',
+                  isActive
+                    ? 'border-surface-border bg-surface-control text-white/62 hover:border-surface-border-strong hover:bg-surface-hover hover:text-foreground'
+                    : 'border-surface-border bg-white/[0.04] text-white/70 hover:border-surface-border-strong hover:bg-white/[0.065] hover:text-foreground'
+                )}
                 onClick={() => {
                   void (isActive ? onDeactivateMode() : onActivateMode(mode.id));
                 }}
@@ -122,6 +112,7 @@ export function ModeLibraryRow({
                 onDeleteMode={() => onDeleteMode(mode.id)}
                 onRename={startRenaming}
                 onSetPinned={(isPinned) => onSetPinned(mode.id, isPinned)}
+                triggerClassName="border border-transparent bg-transparent text-white/36 hover:border-surface-border hover:bg-surface-control hover:text-foreground"
               />
             </div>
           </>
@@ -129,4 +120,29 @@ export function ModeLibraryRow({
       </ModeRenameControl>
     </div>
   );
+}
+
+type ModeLibraryRowMarkProps = {
+  isActive: boolean;
+};
+
+function ModeLibraryRowMark({ isActive }: ModeLibraryRowMarkProps) {
+  return (
+    <span
+      className={cn(
+        'relative flex size-8 shrink-0 items-center justify-center rounded-[6px] border border-surface-border-subtle bg-white/[0.03] text-white/42 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]',
+        isActive ? 'border-white/[0.11] text-white/72' : ''
+      )}
+      aria-hidden="true"
+    >
+      <Workflow className="size-3.5" />
+      {isActive ? (
+        <span className="absolute -bottom-0.5 -right-0.5 size-2 rounded-full border border-background bg-status-active" />
+      ) : null}
+    </span>
+  );
+}
+
+function getActionCountLabel(actionCount: number) {
+  return `${actionCount} ${actionCount === 1 ? 'action' : 'actions'}`;
 }

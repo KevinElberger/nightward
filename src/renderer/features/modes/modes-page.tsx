@@ -13,12 +13,12 @@ export function ModesPage() {
 
       <div
         className={`relative h-full overflow-y-auto ${
-          isModeDetailSelected ? 'pb-0 pl-0 pr-0 pt-[52px]' : 'px-7 pb-8 pt-[5.25rem]'
+          isModeDetailSelected ? 'pb-0 pl-0 pr-0 pt-[52px]' : 'px-8 pb-8 pt-[5.5rem]'
         }`}
       >
         <div
           className={`mx-auto flex w-full flex-col gap-6 ${
-            isModeDetailSelected ? 'max-w-none' : 'max-w-6xl'
+            isModeDetailSelected ? 'max-w-none' : 'max-w-[76rem]'
           }`}
         >
           {isModeDetailSelected ? <ModeDetailPage /> : <ModeLibrary />}

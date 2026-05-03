@@ -117,7 +117,7 @@ export function ModeOpenUrlActionEditor({
           void handleSave();
         }}
       >
-        <div className="border-b border-surface-border bg-surface-panel-muted px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+        <div className="border-b border-surface-border px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.025)]">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
               {onBack ? (
@@ -125,7 +125,7 @@ export function ModeOpenUrlActionEditor({
                   type="button"
                   variant="ghost"
                   size="icon-xs"
-                  className="rounded-[6px] border border-surface-border bg-surface-control text-white/58 hover:border-surface-border-strong hover:bg-surface-hover hover:text-foreground"
+                  className="rounded-[6px] border border-surface-border bg-white/[0.035] text-white/58 hover:border-surface-border-strong hover:bg-white/[0.06] hover:text-foreground"
                   aria-label="Choose another action type"
                   onClick={onBack}
                 >
@@ -137,7 +137,7 @@ export function ModeOpenUrlActionEditor({
               type="button"
               variant="ghost"
               size="icon-xs"
-              className="rounded-[6px] border border-surface-border bg-surface-control text-white/56 hover:border-surface-border-strong hover:bg-surface-hover hover:text-foreground"
+              className="rounded-[6px] border border-surface-border bg-white/[0.035] text-white/56 hover:border-surface-border-strong hover:bg-white/[0.06] hover:text-foreground"
               aria-label="Close action composer"
               onClick={onClose}
             >
@@ -148,7 +148,7 @@ export function ModeOpenUrlActionEditor({
           <p className="mt-1.5 max-w-xl text-sm leading-6 text-white/46">{description}</p>
         </div>
 
-        <div className="min-h-0 overflow-y-auto bg-surface-panel-muted p-4">
+        <div className="min-h-0 overflow-y-auto p-5">
           <SettingsPanel>
             <RowField
               description="Paste a web link or Spotify URI for Nightward to open."
@@ -228,7 +228,7 @@ export function ModeOpenUrlActionEditor({
           </SettingsPanel>
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-surface-border bg-surface-panel-muted px-4 py-3 shadow-[0_-1px_0_rgba(255,255,255,0.025)] sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 border-t border-surface-border px-5 py-3 shadow-[0_-1px_0_rgba(255,255,255,0.025)] sm:flex-row sm:items-center sm:justify-between">
           <div>
             {onDeleteAction ? (
               <Button
@@ -252,7 +252,7 @@ export function ModeOpenUrlActionEditor({
               type="button"
               variant="ghost"
               size="sm"
-              className="rounded-[6px] border border-surface-border bg-surface-control px-3 text-white/62 hover:border-surface-border-strong hover:bg-surface-hover hover:text-foreground"
+              className="rounded-[6px] border border-surface-border bg-white/[0.035] px-3 text-white/62 hover:border-surface-border-strong hover:bg-white/[0.06] hover:text-foreground"
               disabled={isSavingAction || isDeletingAction}
               onClick={onClose}
             >

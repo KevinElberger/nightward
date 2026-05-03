@@ -11,9 +11,9 @@ export function ModeLibrarySearchEmptyState({
   query
 }: ModeLibrarySearchEmptyStateProps) {
   return (
-    <div className="flex min-h-56 items-center justify-center px-6 py-10 text-center">
+    <div className="flex min-h-72 items-center justify-center px-6 py-12 text-center">
       <div className="max-w-sm">
-        <span className="mx-auto flex size-11 items-center justify-center rounded-[7px] border border-white/[0.08] bg-white/[0.055] text-white/56 shadow-[inset_0_1px_0_rgba(255,255,255,0.045)]">
+        <span className="mx-auto flex size-11 items-center justify-center rounded-[7px] border border-surface-border bg-white/[0.04] text-white/56 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
           <Search className="size-4" aria-hidden="true" />
         </span>
         <h4 className="mt-4 text-base font-semibold tracking-normal text-foreground">
